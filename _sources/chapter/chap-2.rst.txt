@@ -1,0 +1,1316 @@
+
+.. _chap_2:
+
+生命周期
+========
+
+
+构建一个实际可用的人工智能模型包括四个主要阶段，如
+:numref:`fig_生命周期`
+所示。首先，进行数据收集，准备所需的训练数据。接着，进行模型训练，让模型从数据中自动学习。然后，通过测试和改进，评估和优化模型性能。最后，将训练好的模型部署到实际环境中供用户使用。
+
+.. _fig_生命周期:
+
+.. figure:: images/2_生命周期.png
+   :width: 900px
+
+   人工智能模型开发生命周期
+
+
+
+.. _sec_data_collection:
+
+数据收集
+--------
+
+
+就像建造高楼需要坚实的基石，优质的数据是培养强大人工智能模型的关键。通过数据，人工智能学会了图像识别、语言理解甚至未来预测。选择和处理高质量数据是塑造卓越人工智能的关键。在本节中，我们将通过五个经典数据集，介绍数据的收集和处理方法。
+
+图像数据
+~~~~~~~~
+
+.. _fig_ImageNet_Logo:
+
+.. figure:: images/2.1.1_Imagenet.jpeg
+   :width: 810px
+
+   ImageNet数据集
+
+
+
+**ImageNet** :cite:`deng2009imagenet`
+是一个庞大的计算机视觉数据集，包含超过一千万张图片和高质量人工标注，广泛用于目标识别和图像分类等任务（见
+:numref:`fig_ImageNet_Logo`
+）。构建ImageNet的第一步是从互联网上收集大量候选图像，这些图像的初步准确率约为10%。为了增加图像数量，ImageNet使用多个关键词搜索相关图像，例如搜索“whippet”（一种犬类）时，不仅包括“whippet
+dog”和“whippet
+greyhound”，还翻译关键词为中文、西班牙文、荷兰文和意大利文，从而扩展搜索范围。最终，为每种含义收集了超过一万张候选图片。
+
+获取候选图片后，需对其进行清洗。ImageNet利用AMT平台 :cite:`4562953`
+发布人工标注任务，邀请大量AMT用户参与数据清洗。标注的目的是排除与目标含义不符的图像。例如，若“whippet”图片中不包含该犬类，则该图像被排除。ImageNet采用投票方式，将每张图片分配给多个人进行判断，只有在获得多数正面反馈时，该图片才被纳入数据集。
+
+.. _fig_Cityscapes:
+
+.. figure:: images/2.1.1_Cologne.png
+   :width: 810px
+
+   Cityscapes数据集中对德国科隆市的高质量密集像素级标注
+
+
+
+**Cityscapes** :cite:`Cordts_2016_CVPR`
+是一个大规模的城市场景图像数据集，专门用于语义分割和目标检测。该数据集包含50个城市的复杂街景图像，为城市环境中的自动驾驶研究提供支持。通过在车辆上安装摄像头录制视频，Cityscapes共获取了数十万帧图像。其中，5000张来自27个城市的图像经过了精细的像素级标注（见
+:numref:`fig_Cityscapes`
+），此外，来自23个城市的20000张图像进行了粗略标注。标注内容包括30类对象（如行人、车辆）的多边形框和语义标签。精细标注的图像还包含对象的深度排序信息。数据集中还附带了车辆航位、外部温度和GPS轨迹等信息。
+
+在图像处理过程中，Cityscapes进行了Debayer操作和内外部校准
+:cite:`10.1117/12.545396`
+。Debayer操作通过对邻近像素的颜色信息进行插值，填补单通道彩色图像中的缺失颜色信息，从而生成完整的彩色图像。
+
+文本数据
+~~~~~~~~
+
+**Common Crawl**\  [1]_
+是一个开源网络抓取项目，提供了大量的网页数据，规模达到拍字节（Petabyte，PB）级，对当前人工智能发展至关重要。例如，在GPT-3的训练数据中，Common
+Crawl占据了60% :cite:`brown2020language`
+。该项目利用网页爬虫技术定期从互联网获取原始网页数据（WARC）、元数据（WAT）以及文本提取（WET）。
+
+尽管Common
+Crawl数据集规模巨大，但数据较为杂乱，需进行清洗和预处理。GPT-3的预处理分为三个步骤：首先，训练分类器区分高质量和低质量文本，过滤掉低质量数据；其次，采用模糊去重技术删除重复部分，提升模型质量并防止过拟合；最后，加入其他高质量文本数据（如维基百科）以进一步提升数据集质量。
+
+.. _fig_Alpaca:
+
+.. figure:: images/2.1.2_Alpaca.png
+   :width: 450px
+
+   Alpaca训练集的收集过程
+
+
+
+**Alpaca训练集** Alpaca :cite:`taori2023alpaca`
+是一个对话语言模型，通过对LLaMA 7B :cite:`touvron2023llama`
+模型进行监督微调得到。其训练数据源于OpenAI的text-davinci-003模型生成的指令跟随式数据。构建训练集时，研究者首先手动创建了一个包含175条“指令-输出”对的种子任务集，每条对包含一个指令和相应的输出（见
+:numref:`fig_Alpaca`
+）。例如，指令“列出一些新年计划”对应的输出为“减肥、多锻炼、健康饮食”。随后，研究者使用text-davinci-003模型基于该种子任务集生成了52000条“指令-输出”对，构成了Alpaca的训练集。
+
+然而，一些学者发现Alpaca的训练集中存在缺陷，如生成数据中出现幻觉、输出为空或不合法、指令不清晰、不合理，甚至包含生成图片的指令。为解决这些问题，Alpaca-cleaned项目 [2]_
+对训练集进行了清理，得到了更干净、质量更高的数据集。
+
+多模态数据
+~~~~~~~~~~
+
+**LAION** :cite:`schuhmann2022laion`
+是一个大规模的多模态图文数据集，包含约58.5亿个“图像-文本”对。该数据集的构建基于前文提到的Common
+Crawl数据集。具体而言，LAION利用Common Crawl的元数据文件，通过解析HTML
+IMG标签，查找带有alt-text的图像，并将这些图像与对应的alt-text配对，形成图文对。alt-text是指图像无法显示时提供的替代文本。接着，LAION使用CLD3
+:cite:`cld3`
+进行文本语言检测，并对图文对进行分类，以区分文本语言为英语、其他语言或未知语言。
+
+LAION的数据预处理分为两个步骤。首先，对Common
+Crawl的元数据进行筛选，剔除图像过小、替代文本过短，以及可能是恶意、大型或冗余的图像，以确保数据集的质量。其次，使用ViT-B/32
+CLIP :cite:`radford2021learning`
+模型计算图像和文本的余弦相似度，删除相似度过低的图文对，以保留具有较强语义关联的图文对。经过这些处理，数据集中保留了约58.5亿个样本，删除了约90%的原始图文对。
+:numref:`fig_LAION` 展示了一个LAION数据集的例子。
+
+.. _fig_LAION:
+
+.. figure:: images/2.1.3_LAION（横）.png
+   :width: 450px
+
+   LAION-5B数据集中的一个英文图文对样例
+
+
+
+**Conceptual Captions** 谷歌公司的Conceptual Captions 3M（简称CC3M）
+:cite:`sharma2018conceptual`
+是一个包含330万个“图像-文本”对的多模态数据集。著名开源多模态大模型LLaVA
+:cite:`liu2024visual`
+即是在经过过滤的CC3M子集CC-595K上进行预训练的。CC3M首先通过在互联网上搜索图像及其关联的alt-text文本，构建候选“图像-文本”对。接着，通过自动化流程对这些候选对进行提取、过滤和转换，以确保文本的干净程度、信息量、流畅性和可学习性。该流程包括以下四个步骤：
+
+1. **图像过滤**\ ：
+   这一步对图像进行初步筛选，仅保留长宽均大于400像素且长宽比不超过2的JPEG图像，并剔除包含不良内容的图像，删除约65%的候选图像。
+2. **文本过滤**\ ： 在这一步，CC3M利用Google Cloud Natural Language
+   API分析alt-text内容，剔除结构不良、重复词汇多、首字母未大写或大写词汇过多、包含不常见词汇、极端评价、不良信息以及包含固定前缀或后缀的文本数据，最终留下约3%的文本。
+3. **图文过滤**\ ：
+   除了对图像和文本单独过滤外，还检查图文对的匹配度。利用Google Cloud
+   Vision
+   API对每张图像分配5到20个标签，判断文本内容是否与这些标签匹配，这一步筛选掉了60%的数据。
+4. **文本转换**\ ：
+   在前三个步骤中，已过滤掉99%的候选数据。最后，通过Google Knowledge
+   Graph Search API和Google Cloud Natural Language
+   API将难以学习的专有名词转换为更通用的超义词，例如，将“ Harrison
+   Ford”替换为“演员”。然后，按解析后的实体（如“演员”）聚类，仅保留类内样本数量超过100的“图像-文本”对，确保数据集的代表性。
+
+:numref:`fig_CC`
+展示了一个经过CC3M筛选的“图像-文本”对示例：左侧是筛选后的图像，右上角的alt-text为原始图片描述，右下角的Conceptual
+Captions文本为处理后的文本。
+
+.. _fig_CC:
+
+.. figure:: images/2.1.3_CC.png
+   :width: 810px
+
+   CC3M数据集中的样本示例
+
+
+
+**LLaVA微调训练集**
+多模态大模型LLaVA使用CC-595K数据集进行预训练。预训练后，LLaVA在其他大模型生成的数据上进行了微调。具体而言，LLaVA首先利用ChatGPT或GPT-4在COCO数据集
+:cite:`10.1007/978-3-319-10602-1_48`
+的基础上生成了指令跟随数据集LLaVA-Instruct-158K :cite:`liu2024visual`
+。为保持指令和回答的多样性与深入推理，LLaVA将每张图片描述为两段文字：一段描述图片中的场景，另一段描述物体的概念和边界框位置。这些描述作为提示词输入ChatGPT或GPT-4中。例如，
+:numref:`fig_LLaVA-Instruct-158K`
+中的图片场景描述为：“一群人站在一辆黑色SUV外面，带着各种行李，试图将所有行李装进车辆中。”
+对物体的描述为：“人：[0.681, 0.242, 0.774, 0.694]，背包：[0.384, 0.696,
+0.485, 0.914]，行李箱：…” 。
+
+.. _fig_LLaVA-Instruct-158K:
+
+.. figure:: images/2.1.3_LLaVA-Instruct-158K.png
+   :width: 720px
+
+   LLaVA-Instruct-158K数据集图片示例
+
+
+
+LLaVA设计了三种输出模式：
+
+1. **对话类型**\ ：大语言模型提出问题并回答，涵盖物体类型、数量、行为、位置和相对位置等。例如：“提问：图片中的汽车是什么类型的？回答：图片中有一辆黑色SUV。”
+2. **详细描述类型**\ ：对图片进行详细描述。例如：“图片显示的是一个地下停车场，一辆黑色SUV停在那里，场景中有三个人正在将行李装进SUV中……”。
+3. **复杂推理类型**\ ：类似对话类型的问答，但要求更深入的推理。例如：“提问：这些人面临什么困难？回答：他们在将各种行李装进SUV中面临挑战……”。
+
+LLaVA仅手工设计了少量示例，其他输出由大语言模型自动生成。最终，LLaVA收集了约158,000个“图像-文本”指令跟随数据样本，包括58,000个对话、23,000个详细描述和77,000个复杂推理样例。
+
+.. _sec_model training and ft:
+
+模型训练与微调
+--------------
+
+
+在人工智能模型的生命周期中，模型训练和微调是构建高效智能系统的核心环节。人工智能模型不仅需要坚实的数据基础，还需经过精心的训练和微调才能稳定发挥作用。经过细致训练和调整的模型才能在特定任务中实现最佳性能。本节将详细探讨如何通过科学的训练方法和巧妙的微调技术，将人工智能模型打造为应对各种复杂问题的强大工具。
+
+标准训练
+~~~~~~~~
+
+模型训练旨在通过特定算法在大量数据上优化模型，使其具备完成特定任务的能力。在这一过程中，模型参数会被调整，以学习复杂的表征并提高泛化能力。
+
+以\ **有监督学习**\ 为例，假设模型将从样本空间
+:math:`{\mathcal{X}}`\ 中获取所有可能的样本。我们希望训练一个模型\ :math:`f`\ （如线性模型或神经网络），将样本\ :math:`{\boldsymbol{x}}`\ 准确映射到其真实标签\ :math:`y`\ 。这一过程被称为\ **期望风险最小化**\ ，目标是：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \sim p({\boldsymbol{x}}, y)}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y)\right]
+
+其中,
+:math:`p({\boldsymbol{x}}, y)`\ 是数据的真实分布，\ :math:`\theta`\ 是模型\ :math:`f`\ 的参数，\ :math:`{\mathcal{L}}(\cdot, \cdot)`
+是损失函数，例如平方损失：
+
+.. math:: {\mathcal{L}}(f({\boldsymbol{x}}), y) = \frac{1}{2}(f({\boldsymbol{x}}) - y)^2
+
+由于真实数据分布通常未知，我们使用\ **经验风险最小化**\ ，在数据集
+:math:`D` 上进行优化：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \in D}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y)\right]
+
+当数据集
+:math:`D`\ 趋近于样本空间\ :math:`{\mathcal{X}}`\ 时，经验风险最小化的结果接近于期望风险最小化。然而，实际数据集\ :math:`D`
+可能仅为样本空间的一个小子集，存在过拟合风险。为此，我们在最小化经验风险时加入正则化项，即\ **结构风险最小化**\ ：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \in D}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y) + \lambda J(f)\right]
+
+其中
+:math:`J(f)`\ 表示模型复杂度，通常使用模型参数的\ :math:`L_2`\ 范数表示，\ :math:`\lambda`
+是正则化系数，用于平衡损失项和正则化项。
+
+选择优化算法时，我们通常使用\ **梯度下降法**\ 。由于目标函数可能不是凸的，我们利用梯度信息迭代地寻找极小值点：
+
+.. math:: \theta := \theta - \alpha \frac{\partial \mathbb{E}_{({\boldsymbol{x}}, y) \in D}[{\mathcal{L}}(f({\boldsymbol{x}}), y)]}{\partial \theta}
+
+其中 :math:`\alpha` 是步长，决定了每步更新的幅度。
+
+每次遍历所有训练样本称为一个\ *周期*\ 或\ *轮次*\ （epoch）。经过若干周期后，模型的经验风险会收敛到一个极小值，但可能是局部最小值或鞍点。为解决这些问题，\ **随机梯度下降**\ （SGD）和\ **小批量梯度下降**\ （Mini-batch
+Gradient Descent）等方法应运而生。SGD
+在每次迭代中仅使用一个样本，而小批量梯度下降则使用数据集中的一个小子集。此外，还提出了多种改进算法，如
+AdaGrad、RMSProp、Adam 和 AdamW，以提高模型的收敛速度并避免局部最优解。
+
+对于\ **无监督学习**\ 任务，数据中不包含标签信息
+:math:`y`\ 。这些任务要求算法在无标注的数据上自主学习数据的内在知识，包括特征降维、异常检测、概率密度估计、聚类和表征学习等。无监督学习过程如下：
+
+.. math:: \begin{aligned}\text{学习}: & \quad {\mathcal{A}}(D) \rightarrow f \\\text{使用}: & \quad f(X) \rightarrow r\end{aligned}
+
+其中，
+:math:`{\mathcal{A}}`\ 是学习算法，\ :math:`D`\ 是数据集，\ :math:`f`\ 是学习得到的模型，\ :math:`X`\ 是输入数据，\ :math:`r`
+是分析结果。
+
+接下来，我们将介绍经典的图像模型和文本模型结构及其训练方法。
+
+.. _fig_CNN:
+
+.. figure:: images/2.2.1_CNN.png
+   :width: 499px
+
+   卷积神经网络结构示意图
+
+
+
+图像模型
+^^^^^^^^
+
+图像模型通过分析图片中的像素信息来识别、分类和理解图像内容，是计算机视觉任务的核心模型。
+
+**卷积神经网络**\ （Convolutional Neural Network,
+CNN）是一种经典的图像模型，如 :numref:`fig_CNN`
+所示。卷积神经网络使用\ *卷积层*\ 提取图像特征，帮助模型识别图像中的模式和结构。通过\ *池化层*\ 对特征图进行下采样，减少数据量同时保留关键信息，从而提高模型的计算效率和鲁棒性。
+
+在\ *卷积层*\ 中，使用一个小型矩阵作为卷积核，通过滑动计算生成特征图。
+:numref:`fig_卷积` 展示了一个卷积操作的步骤。计算公式为：
+
+.. math:: 0×(-1) + 3×0 + 3×1 + 3×(-1) + 5×0 + 2×1 + 6×(-1) + 8×0 + 8×1 = 4
+
+其他图像部分经过相同的卷积操作后，即可得到整张图像的卷积输出。
+
+.. _fig_卷积:
+
+.. figure:: images/2.2.1_卷积示意图.png
+   :width: 720px
+
+   卷积操作示意图
+
+
+
+*池化层*\ 如 :numref:`fig_池化`
+所示。经典的池化操作有两种：最大池化和平均池化。最大池化在每个池化窗口中选择最大值作为输出，而平均池化计算窗口内元素的平均值作为输出。
+
+.. _fig_池化:
+
+.. _sec_2.2.1.2:
+
+.. figure:: images/2.2.1_池化示意图.png
+   :width: 523px
+
+   池化操作示意图
+
+
+
+在卷积神经网络的训练过程中，可训练的参数包括卷积核的权重和偏置，以及全连接层的权重和偏置。这些参数通过\ **反向传播**\ （backpropagation）算法进行学习。每一轮的参数更新过程如下：
+
+1. 对训练数据进行前向传播，计算第 :math:`l` 层的输出：
+
+   .. math:: \begin{array}{l}{\boldsymbol{Z}}^{[l]} = {\boldsymbol{W}}^{[l]} * {\boldsymbol{A}}^{[l-1]} + {\boldsymbol{B}}^{[l]}, \\{\boldsymbol{A}}^{[l]} = \sigma({\boldsymbol{Z}}^{[l]})\end{array}
+
+   其中，\ :math:`{\boldsymbol{W}}^{[l]}`\ 是第\ :math:`l`\ 层的权重（卷积核），\ :math:`{\boldsymbol{A}}^{[l-1]}`\ 是上一层的激活输出，\ :math:`{\boldsymbol{B}}^{[l]}`\ 是偏置，\ :math:`\sigma(\cdot)`
+   是激活函数。
+2. 使用模型的最终输出
+   :math:`\hat{{\boldsymbol{y}}}`\ 与实际标签\ :math:`{\boldsymbol{y}}`\ 计算损失\ :math:`{\mathcal{L}}(\hat{{\boldsymbol{y}}}, {\boldsymbol{y}})`\ 。
+3. 通过反向传播算法计算损失对每个参数的梯度
+   :math:`\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}^{[l]}}`\ 和\ :math:`\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{B}}^{[l]}}`\ 。
+4. 更新参数：
+
+   .. math:: \begin{array}{l}{\boldsymbol{W}}^{[l]} := {\boldsymbol{W}}^{[l]} - \alpha \frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}^{[l]}}, \\{\boldsymbol{B}}^{[l]} := {\boldsymbol{B}}^{[l]} - \alpha \frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{B}}^{[l]}}\end{array}
+
+   其中，\ :math:`\alpha` 是学习率。
+
+文本模型
+^^^^^^^^
+
+
+文本模型专注于处理和理解文本数据，通过学习文本中的语义和结构，使计算机能够更好地理解和应用自然语言。常见的应用任务包括文本分类、情感分析和命名实体识别。
+
+**循环神经网络**\ （Recurrent Neural Network,
+RNN）是经典的文本模型之一。RNN具有记忆能力，能够捕捉文本中的上下文关系，在语言建模、机器翻译和文本生成等任务中表现优异。
+
+:numref:`fig_RNN` 展示了简单循环神经网络 :cite:`elman1990finding`
+沿时间维度展开的示意图。这里，\ :math:`{\boldsymbol{x}}_1, {\boldsymbol{x}}_2, {\boldsymbol{x}}_3`\ 是输入序列，\ :math:`\hat{{\boldsymbol{y}}}_1, \hat{{\boldsymbol{y}}}_2, \hat{{\boldsymbol{y}}}_3`\ 是输出序列，\ :math:`{\boldsymbol{h}}_t`\ 是时刻\ :math:`t`\ 的隐状态，它依赖于前一时刻的隐状态\ :math:`{\boldsymbol{h}}_{t-1}`\ 和当前输入\ :math:`{\boldsymbol{x}}_t`\ 。隐状态的计算公式为：
+
+.. math:: {\boldsymbol{h}}_t = \sigma({\boldsymbol{z}}_t) = \sigma({\boldsymbol{U}} {\boldsymbol{x}}_t + {\boldsymbol{W}} {\boldsymbol{h}}_{t-1})
+
+其中，\ :math:`{\boldsymbol{U}}`\ 和\ :math:`{\boldsymbol{W}}`\ 是权重矩阵，\ :math:`\sigma(\cdot)`
+是非线性激活函数。循环神经网络的输出计算公式为：
+
+.. math:: \hat{{\boldsymbol{y}}}_t = {\boldsymbol{V}} {\boldsymbol{h}}_t
+
+其中，\ :math:`{\boldsymbol{V}}` 是权重矩阵。
+
+.. _fig_RNN:
+
+.. figure:: images/2.2.1_RNN网络结构.png
+   :width: 540px
+
+   简单循环神经网络结构示意图
+
+
+
+与卷积神经网络类似，循环神经网络也可以通过梯度下降进行训练。假设模型的输入序列为
+:math:`{\boldsymbol{x}}_{1: T}`\ ，输出序列为\ :math:`\hat{{\boldsymbol{y}}}_{1: T}`\ 。对于时刻\ :math:`t`\ 的输出\ :math:`\hat{{\boldsymbol{y}}}_t`\ 和对应的监督信息\ :math:`{\boldsymbol{y}}_t`\ ，定义时刻\ :math:`t`\ 的损失函数为\ :math:`{\mathcal{L}}_t(\hat{{\boldsymbol{y}}}_t, {\boldsymbol{y}}_t) = {\mathcal{L}}_t({\boldsymbol{V}} {\boldsymbol{h}}_t, {\boldsymbol{y}}_t)`\ ，整个序列的损失函数为\ :math:`{\mathcal{L}} = \sum_{t=1}^T {\mathcal{L}}_t`\ 。该损失函数关于参数的梯度包括\ :math:`\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{U}}}`\ 、\ :math:`\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}}`\ 和\ :math:`\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{V}}}`\ 。
+
+循环神经网络的梯度计算主要有两种算法：\ **实时循环学习算法**\ （Real
+Time Recurrent Learning, RTRL） :cite:`williams2013gradient` 和
+**随时间反向传播算法**\ （Backpropagation Through Time, BPTT）
+:cite:`williams1990efficient` 。
+
+**实时循环学习算法**\ 的核心思想是在前向计算过程中即时计算隐状态对参数的偏导数，并通过链式法则实时更新损失函数对参数的梯度。假设第
+:math:`t+1`\ 时刻的隐状态为\ :math:`{\boldsymbol{h}}_{t+1} = \sigma({\boldsymbol{U}} {\boldsymbol{x}}_{t+1} + {\boldsymbol{W}} {\boldsymbol{h}}_t)`\ 。以参数矩阵\ :math:`{\boldsymbol{W}}`\ 中的一个参数\ :math:`w_{i, j}`\ 为例，第\ :math:`t+1`\ 时刻的损失函数\ :math:`{\mathcal{L}}_{t+1}`\ 对\ :math:`w_{i, j}`
+的偏导数计算如下：
+
+.. math:: \begin{aligned}\frac{\partial {\mathcal{L}}_{t+1}}{\partial w_{i, j}} & = \frac{\partial {\mathcal{L}}_{t+1}}{\partial {\boldsymbol{h}}_{t+1}} \frac{\partial {\boldsymbol{h}}_{t+1}}{\partial w_{i, j}}                                                                           \\& = \frac{\partial {\mathcal{L}}_{t+1}}{\partial {\boldsymbol{h}}_{t+1}} ({\boldsymbol{I}}_i([{\boldsymbol{h}}_t]_j) + \frac{\partial {\boldsymbol{h}}_t}{\partial w_{i, j}} {\boldsymbol{W}}^{\top}) \frac{\partial {\boldsymbol{h}}_{t+1}}{\partial {\boldsymbol{z}}_{t+1}}\end{aligned}
+
+其中，\ :math:`{\boldsymbol{I}}_i(x)`\ 是除第\ :math:`i`\ 行外其余值为 0
+的行向量。实时循环学习算法从初始时刻开始，计算隐状态\ :math:`{\boldsymbol{h}}`
+时也计算隐状态对参数的偏导数，从而按照时间顺序计算损失函数对参数的偏导数。
+
+**随时间反向传播算法**\ 通过在时间上展开循环神经网络，将其视为一个前馈神经网络，然后利用反向传播算法计算各个时刻参数的梯度。以参数矩阵
+:math:`{\boldsymbol{W}}`\ 中的一个参数\ :math:`w_{i, j}` 为例：
+
+.. math:: \begin{aligned}\frac{\partial {\mathcal{L}}_t}{\partial w_{i, j}} & = \sum_{k=1}^t \frac{\partial {\boldsymbol{z}}_k}{\partial w_{i, j}} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k} \\& = \sum_{k=1}^t {\boldsymbol{I}}_i([{\boldsymbol{h}}_{k-1}]_j) \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k}\end{aligned}
+
+其中，
+
+.. math:: \begin{aligned}\frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k} & = \frac{\partial {\boldsymbol{h}}_k}{\partial {\boldsymbol{z}}_k} \frac{\partial {\boldsymbol{z}}_{k+1}}{\partial {\boldsymbol{h}}_k} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_{k+1}} \\& = \operatorname{diag}(\sigma^{\prime}({\boldsymbol{z}}_k)) {\boldsymbol{W}}^{\top} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_{k+1}}\end{aligned}
+
+将
+:math:`\frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k}`\ 记作\ :math:`\delta_{t, k}`\ ，即为\ *误差项*\ ，则有：
+
+.. math:: \delta_{t, k} = \operatorname{diag}(\sigma^{\prime}({\boldsymbol{z}}_k)) {\boldsymbol{W}}^{\top} \delta_{t, k+1}
+
+因此：
+
+.. math:: \frac{\partial {\mathcal{L}}_t}{\partial w_{i, j}} = \sum_{k=1}^t [\delta_{t, k}]_i [{\boldsymbol{h}}_{k-1}]_j
+
+随时间反向传播算法将问题转化为标准的前馈神经网络以简化计算，但需要保存中间时刻的梯度，导致较大的存储开销。
+
+.. _fig_Transformer:
+
+.. figure:: images/2.2.1_Transformer示意图.png
+   :width: 335px
+
+   Transformer结构示意图
+
+
+
+除了经典的循环神经网络，\ **Transformer** :cite:`vaswani2017attention`
+是一种开创性的文本模型结构，并已被扩展到视觉领域（如ViT
+:cite:`dosovitskiy2020image` ），成为现代大模型（如GPT-4
+:cite:`achiam2023gpt`
+）的基础。Transformer摒弃了循环神经网络中的循环机制，改用\ *自注意力机制*\ 来学习输入和输出之间的依赖关系，并支持更大程度的并行化。
+
+如 :numref:`fig_Transformer` 所示，Transformer
+由编码器和解码器两部分组成。文本数据首先通过编码器进行编码，然后通过解码器进行解码并输出。经典的Transformer架构包含六个编码器和六个解码器。每个编码器包括一个\ *多头注意力层*\ 和一个前馈神经网络层，接收上一个编码器的输出作为输入；每个解码器包含两个多头注意力层和一个前馈神经网络层，接收上一个解码器的输出和整个编码器的输出作为输入。
+
+在将文本数据输入模型之前，需要进行以下预处理：
+
+-  **词元化**\ ：将文本分割成词元。例如，文本“The cat sat on the
+   mat”词元化后变为
+   [“The”，“cat”，“sat”，“on”，“the”，“mat”，“.”]。词元化并不总是一一对应，常用词组如“do
+   not”可能被视为一个词元，而复杂词汇如“Antidisestablishmentarianism”可能被拆分为多个词元
+   [“Anti”，“dis”，“establish”，“ment”，“arian”，“ism”]。
+-  **词向量映射**\ ：将每个词元映射到词向量空间。类似于地理坐标系，词向量空间中的距离反映了词元的语义相似度。由于语言的复杂性，词向量的维度通常很大，例如基础Transformer模型的词向量维度为512。
+-  **位置编码**\ ：除了词义外，词元在上下文中的位置也很重要。Transformer通过位置编码来考虑词元的位置。位置编码使用正弦和余弦函数计算：
+
+   .. math:: \begin{aligned}PE_{(\operatorname{pos}, 2i)}   & = \sin (\operatorname{pos} / 10000^{2i/d_{model}}), \\PE_{(\operatorname{pos}, 2i+1)} & = \cos (\operatorname{pos} / 10000^{2i/d_{model}})\end{aligned}
+
+   其中，\ :math:`\operatorname{pos}`\ 表示词元的位置；\ :math:`2i`\ 和\ :math:`2i+1`\ 表示位置向量中的元素；\ :math:`10000`\ 是经验值；\ :math:`d_{model}`
+   是位置向量的维度，与词向量维度相等。
+
+计算出词元的词向量和位置向量后，将它们相加，形成输入矩阵。这是Transformer模型的输入。Transformer的核心是\ **自注意力机制**\ 。自注意力机制使用三个向量：\ *查询向量*
+:math:`{\boldsymbol{Q}}`\ 、\ *键向量*\ :math:`{\boldsymbol{K}}`\ 和
+*值向量*\ :math:`{\boldsymbol{V}}`\ ，这三者均由输入乘以对应的权重矩阵\ :math:`{\boldsymbol{W}}_{\boldsymbol{Q}}`\ 、\ :math:`{\boldsymbol{W}}_{\boldsymbol{K}}`\ 和\ :math:`{\boldsymbol{W}}_{\boldsymbol{V}}`
+得到。这些权重矩阵是可学习的。自注意力的输出计算如下：
+
+.. math:: \operatorname{Attention}({\boldsymbol{Q}}, {\boldsymbol{K}}, {\boldsymbol{V}}) = \operatorname{softmax} \left( \frac{{\boldsymbol{Q}} {\boldsymbol{K}}^{\top}}{\sqrt{d_k}} \right) {\boldsymbol{V}}
+
+其中，\ :math:`d_k`\ 是\ :math:`{\boldsymbol{K}}`
+向量的维度。自注意力机制将上下文信息添加到原输入矩阵中。
+
+**多头注意力**\ 是使用多组不同权重矩阵计算的
+:math:`{\boldsymbol{Q}}`\ 、\ :math:`{\boldsymbol{K}}`\ 和\ :math:`{\boldsymbol{V}}`\ 向量，分别得到它们的输出矩阵后拼接，再通过一个线性层加权求和，得到最终的多头注意力层输出。解码器的第一个多头注意力层使用掩码操作，在预测第\ :math:`i`\ 个词时，遮住\ :math:`i+1`
+之后的词信息。自注意力层之后还有一个全连接前馈神经网络层：
+
+.. math:: \operatorname{FFN}({\boldsymbol{x}}) = \max(0, {\boldsymbol{x}} {\boldsymbol{W}}_1 + {\boldsymbol{b}}_1) {\boldsymbol{W}}_2 + {\boldsymbol{b}}_2
+
+其中，\ :math:`{\boldsymbol{W}}_1`\ 、\ :math:`{\boldsymbol{b}}_1`\ 、\ :math:`{\boldsymbol{W}}_2`\ 和\ :math:`{\boldsymbol{b}}_2`
+为可学习的参数。Transformer使用梯度下降优化，并采用AdamW优化器进行参数更新。
+
+.. _sec_2.2.2:
+
+大规模预训练
+~~~~~~~~~~~~
+
+
+近年来，随着计算能力和数据量的显著提升，大规模预训练已经成为推动视觉、语言以及多模态大模型快速发展的关键技术。通过大规模预训练，模型能够学习到丰富的特征表示，从而在下游任务中展现出强大的泛化能力。下面将详细介绍服务于视觉大模型、大语言模型以及多模态大模型的大规模预训练方法。
+
+视觉大模型预训练
+^^^^^^^^^^^^^^^^
+
+.. _fig_2.2.2.1-ViT:
+
+.. figure:: images/2.2.2.1-ViT.png
+   :width: 810px
+
+   ViT结构示意图
+
+
+
+视觉大模型的预训练在图像和视频处理任务中发挥了重要作用。以下是对主流视觉大模型——视觉Transformer（ViT）的基本结构的简要介绍，以及两种常用的视觉大模型预训练方法。
+
+**视觉Transformer（ViT）** :cite:`dosovitskiy2020image`
+模型借鉴了文本Transformer架构，是Transformer在视觉领域的重要扩展。ViT的核心思想是将图像分割为多个图像块（patch），将这些小块视为序列中的元素，并使用Transformer中的自注意力机制处理这些小块，实现对图像的全局感知。与传统卷积神经网络相比，ViT在捕捉图像中的长距离依赖关系方面具有更好的泛化能力和灵活性。
+
+ViT的结构如 :numref:`fig_2.2.2.1-ViT` 所示，有三个主要特点：
+
+-  **图像块切分**\ ：ViT将图像分割为多个大小为16x16的正方形图像块，每个图像块通过全连接层映射为固定维度的向量序列，所有图像块的向量序列组成了Transformer的输入。
+-  **类别词元**\ ：借鉴自然语言处理中的[CLS]
+   token，ViT引入了一个特殊的类别词元，并将其添加到输入序列的开头。这个类别词元的表示用于最终的分类任务。
+-  **位置编码**\ ：由于Transformer架构本身无法捕捉序列中的位置信息，ViT为每个图像块添加位置编码。位置编码值加到经过全连接层处理的词元序列中，以帮助模型理解图像块的空间顺序。
+
+ViT的出现具有重要意义，它不仅推动了计算机视觉领域的进步，还为多模态融合提供了新的视角。通过使用相同的Transformer结构和不同模态的分词器（Tokenizer），我们可以将图像、文本、音频等多种数据类型融合，构建更强大、更灵活的多模态大模型。这标志着我们首次有望通过一个统一的强大模型完成所有模态的学习，迈出了通用人工智能的重要一步。
+
+ViT模型的预训练通常包括两个阶段：
+
+-  **大规模预训练**\ ：在大规模图像数据集（如JFT-300M、ImageNet-21K等）上进行预训练，以学习通用视觉特征。
+-  **微调阶段**\ ：在特定的下游任务（如图像分类、目标检测、语义分割等）上进行微调，以适应具体的应用场景。
+
+在预训练阶段，许多视觉大模型通过自监督学习算法在无标注图像数据集上进行训练。以下是两种代表性的自监督学习算法：
+
+-  **SimCLR**\ ：基于对比学习的算法。
+-  **MAE**\ ：基于图像重建的算法。
+
+.. _fig_2.2.2.1-SimCLR:
+
+.. figure:: images/2.2.2.1-SimCLR.png
+   :width: 400px
+
+   SimCLR算法示意图
+
+
+
+**SimCLR** :cite:`chen2020simple`
+是一种经典的自监督对比学习算法，广泛用于视觉表征学习。如
+:numref:`fig_2.2.2.1-SimCLR`
+所示，SimCLR的核心思想是通过最大化同一图像不同视图之间的相似性，同时最小化不同图像之间的相似性来学习特征表示。SimCLR通过组合多种数据增强技术、引入非线性投影头、使用更大的批量以及更多的训练步数，显著提升了模型的表征学习能力。
+
+具体来说，SimCLR首先通过随机裁剪、颜色失真和高斯模糊等数据增强技术将图像\ :math:`{\boldsymbol{x}}`\ 转换为不同的视图\ :math:`\hat{{\boldsymbol{x}}}_i`\ 和\ :math:`\hat{{\boldsymbol{x}}}_j`\ ，形成\ *正样本对*\ 。与其他图像形成的对则构成\ *负样本对*\ 。SimCLR使用一个深度学习编码器（如ResNet）提取不同视图图像的表征向量，并通过一个基于多层感知机（MLP）的投影头将这些向量映射到对比损失空间，最终在该空间中定义对比损失函数。对比损失函数通过余弦相似度（或欧氏距离）定义样本对之间的表征距离，指导模型在拉近正样本间距离的同时拉远负样本间的距离。
+
+在损失函数方面，SimCLR使用带有归一化温度缩放的交叉熵损失。对于正样本对
+:math:`({\boldsymbol{z}}_i, {\boldsymbol{z}}_j)`\ ，其损失定义为：
+
+.. math:: \mathcal{L}({\boldsymbol{z}}_i, {\boldsymbol{z}}_j) = -\log \frac{e^{sim({\boldsymbol{z}}_i, {\boldsymbol{z}}_j) / \tau}}{\sum_{k=1}^{2N} [k \neq i] e^{sim({\boldsymbol{z}}_i, {\boldsymbol{z}}_k) / \tau}}
+
+其中，\ :math:`sim({\boldsymbol{u}}, {\boldsymbol{v}}) = \frac{{\boldsymbol{u}}^T {\boldsymbol{v}}}{\|{\boldsymbol{u}}\| \|{\boldsymbol{v}}\|}`\ 表示向量\ :math:`{\boldsymbol{u}}`\ 和\ :math:`{\boldsymbol{v}}`\ 的相似度（例如余弦相似度），\ :math:`\tau`\ 是温度参数，用于调整损失函数的平滑程度。此损失函数鼓励模型将增强视图的表示\ :math:`({\boldsymbol{z}}_i, {\boldsymbol{z}}_j)`\ 在特征空间中拉近，同时将其与同批次中的其他样本\ :math:`({\boldsymbol{z}}_k)_{k \neq i}`
+推远。
+
+.. _fig_2.2.2.1-mae:
+
+.. figure:: images/2.2.2.1-mae.png
+   :width: 707px
+
+   MAE训练示意图
+
+
+
+**MAE**\ ：与 SimCLR 不同，MAE（Masked Autoencoder ）
+:cite:`he2022masked`
+是一种基于重构学习的自监督学习算法，证明了对比学习并非唯一的自监督学习范式。图像重构（经典的无监督学习任务）也可以让模型在没有人工标注的情况下学习有用的特征。MAE
+的主要创新点在于其非对称的“编码器-解码器”架构，以及在高掩码率下进行表征学习的能力。
+
+如 :numref:`fig_2.2.2.1-mae` 所示，MAE
+首先将图像分割成固定大小的图像块（如 16x16 像素块），并随机遮挡其中的
+75%。这种高比例的随机掩码策略有效去除冗余信息，使任务更具挑战性，并迫使模型学习全局特征。
+
+MAE 采用了非对称的编码器-解码器架构，其中\ *编码器*\ 基于 ViT
+结构，但只处理未被遮挡的像素块。编码器通过线性投影和位置嵌入将未遮挡的图像块转换为特征向量，并通过一系列
+Transformer
+块进行处理。由于只处理一小部分图像块，编码器的计算量和内存需求显著降低。
+
+*解码器*\ 输入的数据包括编码后的可见图像块和被遮挡图像块的掩码令牌。每个掩码令牌是一个共享的、可学习的向量，表示需要预测的被遮挡图像块。解码器通过添加位置嵌入并应用一系列
+Transformer
+块，对这些数据进行处理，从而重构原始图像。解码器的输出是一个像素值向量，表示每个图像块。最后一层是线性投影，其输出通道数与图像块中的像素值数量相同。MAE
+的损失函数为均方误差（MSE）损失，仅在被遮挡的图像块上计算。
+
+大语言模型预训练
+^^^^^^^^^^^^^^^^
+
+.. _fig_2.2.2.2_ELMo:
+
+.. figure:: images/2.2.2.2节ELMo示意图.png
+   :width: 653px
+
+   ELMo方法示意图 :cite:`2023自然语言处理导论`
+
+
+
+在计算机视觉领域，通常使用如 ImageNet
+等大规模数据集对模型进行预训练，以便从海量图像中学习各种视觉特征，从而提高下游任务的泛化能力。受到这种做法的启发，自然语言处理领域也开始采用类似的范式，并逐渐成为主流。以
+ELMo :cite:`peters-etal-2018-deep`
+为代表的词向量模型首次探索了语言模型的预训练；随后，基于 Transformer
+架构的 GPT :cite:`radford2018improving` 和 BERT
+:cite:`devlin2018bert`
+预训练模型取得了显著成功，开启了自然语言处理领域的“预训练-微调”新时代。本节将介绍这三种预训练模型。
+
+**ELMo模型** :cite:`peters-etal-2018-deep`
+是一种深度上下文词向量表示方法，通过双向语言模型（biLM）学习词语表示，并结合
+biLM 不同层的输出，以捕捉更丰富的语义和语法信息。ELMo的结构如
+:numref:`fig_2.2.2.2_ELMo`
+所示，包括三个主要部分：输入层、隐藏层和输出层。
+
+**输入层**
+使用字符级卷积神经网络对词语进行编码，从而有效处理词表外的词语。每个词被视为字符序列，每个字符经过卷积神经网络转换为向量，得到词的字符向量表示。随后，池化层对卷积输出进行池化，生成每个词的词级表示。此外，ELMo使用高速公路网络（highway
+network）进一步转换卷积神经网络的输出，以避免梯度消失或爆炸。ELMo的两个独立编码器分别进行前向和后向语言模型建模，在预训练时，利用前向和反向长短期记忆网络（LSTM）输出预测下一个词。
+
+**隐藏层**
+由多层LSTM组成，用于学习词语的上下文相关表示。不同层的LSTM捕获不同粒度的语言信息，低层捕捉语法信息，高层捕捉语义信息。
+
+在下游任务中，ELMo根据任务要求对 biLM
+不同层的输出进行线性组合，得到最终的词向量表示。线性组合的权重由任务决定，并在训练过程中学习得到。
+
+ELMo通过结合 biLM
+不同层的输出，能够捕捉丰富的上下文信息，包括语法和语义。其词向量表示可以有效应用于各种自然语言处理任务，显著提高性能，并在训练数据较少的情况下也能取得良好效果。这种模型为自然语言处理任务提供了一种强大且灵活的词向量表示方法，显著提升了任务性能。
+
+.. _fig_2.2.2.2_GPT:
+
+.. figure:: images/2.2.2.2节GPT示意图.png
+   :width: 855px
+
+   GPT示意图（左图：模型结构；右图：各下游任务训练示意图）
+
+
+
+**GPT模型**\ ：OpenAI的GPT模型 :cite:`radford2018improving`
+探索了使用Transformer结构进行生成式预训练的路径。与传统的Transformer编码器-解码器结构不同，GPT只使用了解码器部分，如
+:numref:`fig_2.2.2.2_GPT`
+所示。解码器由多层堆叠而成，每层包括以下子层：
+
+-  **掩码自注意力层**\ ：自注意力机制捕捉输入序列中的长距离依赖关系。掩码确保模型在预测某个词时只能访问该词之前的信息，符合语言模型的特性。
+-  **位置编码**\ ：为了解决自注意力机制缺乏顺序概念的问题，位置编码用于表示词语在句子中的顺序。
+-  **全连接层**\ ：进一步提取自注意力层输出的特征。
+-  **层归一化**\ ：加速模型训练并提高稳定性。
+-  **词嵌入层**\ ：将输入词语转换为对应的向量表示。
+
+GPT的预训练过程是使用Transformer解码器对大规模文本进行语言建模。在BookCorpus数据集（包含约11,000本未出版书籍的文本，涵盖多种类型）上进行训练，目标是最大化在给定上下文的情况下预测下一个词的概率：
+
+.. math:: \mathcal{L}^{PT}({\boldsymbol{w}})=-\sum_{i=1}^{n} \operatorname{log} P({\boldsymbol{w}}_i | {\boldsymbol{w}}_0...{\boldsymbol{w}}_{i-1};\theta)
+
+其中，\ :math:`\theta`\ 表示模型参数。简单来说，GPT的预训练通过将大量文本数据输入到Transformer解码器中，让模型学习如何根据上下文预测下一个单词。实验表明，这一过程使模型学到了丰富的语言知识，包括语法、语义和常识。预训练完成后，GPT会根据具体任务进行微调，例如在文本分类任务中，通常会在解码器的最后一层添加一个分类器。
+
+.. _fig_2.2.2.2_BERT:
+
+.. figure:: images/2.2.2.2节BERT示意图.png
+   :width: 855px
+
+   BERT模型示意图
+
+
+
+**BERT模型** :cite:`devlin2018bert`
+是另一个具有代表性的预训练大语言模型。与仅使用单向语言模型（从左到右或从右到左）的方法不同，BERT采用掩码语言模型进行深度双向表示的预训练。这使得BERT在所有层都能同时考虑左右上下文，从而获得更丰富的语义表示。如
+:numref:`fig_2.2.2.2_BERT`
+所示，BERT由多层Transformer编码器组成，主要分为输入层、编码层和输出层。在预训练过程中，BERT的最后包含两个输出层：MLM（掩码语言建模）和NSP（下一句预测），分别对应两种预训练任务。
+
+BERT的预训练使用了BooksCorpus和英文维基百科这两个大型文本语料库。语料库中的单词通过WordPiece分词算法拆分成更小的语义单元，以提高模型对未登录词（不在词汇库中的词或短语）的处理能力。每个训练样本由两个句子组成，这两个句子通过特殊的[SEP]标记符分隔。句子对的开头添加一个特殊的[CLS]标记符，用于表示整个句子对的语义。为了区分句子对中的两个句子，BERT为每个句子分配一个唯一的段嵌入，同时为每个词分配一个位置嵌入以表示词序信息。
+
+BERT的预训练包括两个任务：MLM和NSP。MLM任务随机掩盖句子对中15%的词，并用[MASK]标记替换这些词，模型需要根据上下文预测被掩盖的词。NSP任务要求模型判断第二个句子是否为第一个句子的下一个句子。在损失函数方面，MLM任务使用交叉熵损失，NSP任务使用二元交叉熵损失。最终训练目标是最大化MLM和NSP任务的联合概率。预训练完成后，BERT可以用于各种下游自然语言处理任务，如文本分类、问答、序列标注等。
+
+多模态大模型预训练
+^^^^^^^^^^^^^^^^^^
+
+多模态预训练通常利用多种模态的数据（如图像、文本、语音、视频等）进行联合学习。当前主流的多模态大模型主要是视觉语言模型，这些模型的预训练通常基于大量的“图像-文本”数据对，通过特定的优化目标来使模型理解并对齐图像和文本信息。以下介绍三种经典视觉语言模型的预训练方法：CLIP、Stable
+Diffusion 和 LLaVA。
+
+.. _fig_2.2.2.3_CLIP:
+
+.. figure:: images/2.2.2.3_CLIP示意图.png
+   :width: 810px
+
+   CLIP训练框架示意图
+
+
+
+**CLIP**\ （Contrastive Language–Image Pre-Training）
+:cite:`radford2021learning`  [3]_
+由OpenAI提出，是一种通过对比学习实现“图像-文本”联合训练的多模态预训练框架。与传统的对比学习方法不同，CLIP的训练数据是图像-文本对，即图像和其对应的文本描述。CLIP的核心思想是通过最大化匹配图文对的表征相似性，同时最小化不匹配图文对的表征相似性，从而实现跨模态表征学习。
+
+CLIP不需要预测每张图片对应的文本，而是判断图片与给定文本是否匹配，这大大提高了训练效率。具体而言，CLIP使用从互联网上爬取的4亿个图文对进行预训练，同时训练一个\ *图像编码器*\ 和一个\ *文本编码器*\ ，使两个编码器输出的图像和文本特征在同一特征空间中对齐。
+
+如 :numref:`fig_2.2.2.3_CLIP`
+所示，CLIP主要包括两个部分：一个图像编码器和一个文本编码器。其中，图像编码器可以选择ResNet或ViT，而文本编码器使用Transformer架构。在预训练过程中，假设每批次包含\ :math:`N`\ 个图文对，图像和文本数据首先分别输入图像编码器和文本编码器进行编码。编码后的特征通过线性投影层映射到统一的表征空间，得到图像特征向量\ :math:`[I_1, I_2, \ldots, I_N]`\ 和文本特征向量\ :math:`[T_1, T_2, \ldots, T_N]`\ 。对任意\ :math:`i, j \in \{1,2, \ldots, N\}`\ ，如果\ :math:`i=j`\ ，则\ :math:`T_i`\ 和\ :math:`I_i`\ 是正样本对，否则\ :math:`T_i`\ 和\ :math:`I_j`\ 是负样本对。CLIP将具有对应关系的\ :math:`N`\ 个图文组合视为\ *正样本*\ ，其余\ :math:`N^2-N`\ 个组合视为\ *负样本*\ 。通过内积操作计算所有\ :math:`T_i`\ 和\ :math:`I_j`\ 的余弦相似度，并最大化正样本间的相似度，同时最小化负样本间的相似度，从而训练文本和图像编码器。
+
+CLIP的特别之处在于其强大的零样本迁移能力。它可以在没有特定任务数据集微调的情况下，利用自然语言描述识别新的视觉概念。预训练的CLIP模型在多个下游任务（包括图像分类、图像生成、图像检索等）上表现出色，经过微调后效果更加显著。
+
+.. _fig_2.2.2.3_SD:
+
+.. figure:: images/2.2.2.3_SD示意图.png
+   :width: 720px
+
+   Stable Diffusion模型结构示意图
+
+
+
+**Stable Diffusion** :cite:`rombach2022high`
+是一个先进的文图生成模型，也是\ **隐空间扩散模型**\ （Latent Diffusion
+Model,
+LDM）。其核心思想是在低维隐空间中进行扩散，显著降低计算复杂度，同时保持生成图像的高质量。如
+:numref:`fig_2.2.2.3_SD` 所示，Stable Diffusion主要包括以下三个部分：
+
+-  **自编码器**\ ：由编码器和解码器组成。编码器将输入图像编码为低维隐空间表示，而解码器在扩散过程结束后将这些表示解码回高分辨率图像。
+-  **CLIP文本编码器**\ ：将输入的文本提示（如“骑马的宇航员”）编码为特征向量。Stable
+   Diffusion使用预训练的CLIP文本编码器将文本转化为隐空间中的特征表示，确保文本提示与生成图像的一致性。
+-  **UNet**\ ：在隐空间中迭代去噪，通过多个步骤生成逼真的图像表示。UNet架构包含编码器和解码器部分，使用ResNet块进行下采样和上采样，并通过交叉注意力层引入文本信息。UNet专门用于噪声预测和图像生成，而非传统的图像分割。
+
+具体而言，Stable
+Diffusion的\ *自编码器*\ 是基于“编码器-解码器”架构的图像压缩模型。对于大小为
+:math:`H \times W \times 3`\ 的输入图像，编码器将其转换为大小为\ :math:`h \times w \times c`\ 的隐空间表示，其中\ :math:`f = \frac{H}{h} = \frac{W}{w}`\ 为下采样率，c为特征通道数。在训练自编码器时，除了使用\ :math:`L_1`
+重建损失外，Stable
+Diffusion还引入了感知损失和基于图像块的对抗训练方法，以确保图像重建的局部真实性。同时，训练中采用KL-reg和VQ-reg正则化手段，以防隐空间表示的标准差过大。
+
+Stable
+Diffusion使用预训练的\ *CLIP文本编码器*\ 进行文本特征提取，编码后的文本特征通过交叉注意力机制输入到UNet中。在训练过程中，CLIP文本编码器的参数保持固定。
+
+Stable
+Diffusion的UNet结构包括交叉注意力下采样模块和交叉注意力上采样模块，每个模块包含残差层、自注意力层、前向传播层和交叉注意力层。模型通过预测噪声进行训练，使用均方差损失函数和多阶段训练模式来逐步优化模型。
+
+.. _fig_2.2.2.3_llava:
+
+.. figure:: images/2.2.2.3_llava示意图.png
+   :width: 720px
+
+   LLaVA模型结构示意图
+
+
+
+**LLaVA**\ （Large Language and Vision Assistant）
+:cite:`liu2024visual`
+是一个主流的多模态大模型，旨在通过视觉和语言指令实现多种任务的通用理解，支持文本和图像两种输入。LLaVA的核心创新在于其构建方法：使用GPT-4生成多模态指令遵循数据，并在这些数据上对模型进行微调，以实现通用的视觉与语言理解能力。
+
+LLaVA的结构如 :numref:`fig_2.2.2.3_llava` 所示，主要包括三个部分：
+
+-  **视觉编码器**\ ：使用预训练的CLIP视觉编码器ViT-L/14将输入图像\ :math:`\mathbf{X}_\mathrm{v}`\ 编码为特征向量。
+-  **投影映射层**\ ：将图像编码特征通过线性映射层\ :math:`\mathbf{W}`\ 投射到词向量表征空间。
+-  **大语言模型**\ ：使用Vicuna :cite:`chiang2023vicuna`
+   模型对文本和图像特征进行理解和学习。
+
+对于每张图像
+:math:`\mathbf{X}_\mathrm{v}`\ ，LLaVA生成多轮对话数据\ :math:`(\mathbf{X}_\mathrm{q}^1, \mathbf{X}_A^1, \cdots, \mathbf{X}_\mathrm{q}^T, \mathbf{X}_A^T)`\ ，其中\ :math:`T`\ 是对话轮数。这些数据被组织成序列，所有答案被视为模型的输出响应。第\ :math:`t`\ 轮的指令\ :math:`\mathbf{X}_\text{instruct}^t`
+定义如下：
+
+.. math:: \mathbf{X}_{\text{instruct}}^t = \begin{cases}\text{随机选择} [\mathbf{X}_\mathrm{q}^1, \mathbf{X}_\mathrm{v}] \text{或} [\mathbf{X}_\mathrm{v}, \mathbf{X}_\mathrm{q}^1], & \text{第一轮 } t = 1  \\\mathbf{X}_\mathrm{q}^t,                                                                                                & \text{其余轮次 } t > 1\end{cases}
+
+对于长度为
+:math:`L`\ 的序列，LLaVA通过以下公式计算目标答案\ :math:`\mathbf{X}_A`
+的概率：
+
+.. math:: p(\mathbf{X}_A \mid \mathbf{X}_\mathrm{v}, \mathbf{X}_\text{instruct}) = \prod_{i=1}^{L} p_{\theta}(x_{i} \mid \mathbf{X}_\mathrm{v}, \mathbf{X}_\text{instruct,<i}, \mathbf{X}_\mathrm{a,<i})
+
+其中，\ :math:`\theta`\ 是可训练的模型参数，\ :math:`X_{\text{instruct}, <i}`\ 和\ :math:`X_{a, <i}`\ 分别是在当前预测标记\ :math:`x_i`
+之前的所有回合中的指令和答案标记。
+
+LLaVA的训练分为两个阶段：第一阶段通过特征对齐的预训练来对齐视觉与文本特征；第二阶段通过指令微调来适应各种视觉问答任务。具体而言，在第一阶段，LLaVA从CC3M数据集中筛选出595K个高质量“图像-文本”对，然后将这些数据转换为单轮对话形式的指令遵循数据集进行训练。此阶段中，视觉编码器和大语言模型的权重被冻结，只有线性投影映射层的参数可训练，以对齐视觉特征与语言模型的词向量表征空间。在第二阶段的微调中，视觉编码器参数保持不变，线性映射层和大语言模型参数会更新。LLaVA在此阶段使用两个数据集进行微调：Multimodal
+Chatbot和Science QA :cite:`lu2022learn` 。Multimodal
+Chatbot包含158K条语言-图像指令遵循数据，涵盖对话、细节描述和复杂理解三种生成方式。Science
+QA是第一个大规模的多模态科学问答数据集，形式类似于前者。
+
+下游微调
+~~~~~~~~
+
+在实际模型训练中，可能会遇到数据获取困难和训练资源不足的问题。为解决这些问题，可以使用\ *迁移学习*\ ，即在预训练模型上进行微调，使其适应特定数据集。迁移学习是一种机器学习方法，其目的是将从一个任务（源任务）中获得的知识应用于另一个相关任务（目标任务），从而提升在目标任务上的性能。通过迁移学习，模型在源任务中学到的表征或知识可以迁移到目标任务上，从而获得更好的学习效果。由于预训练模型已经在大量数据上进行过训练，因此微调时只需在少量数据上更新少量权重。接下来，将介绍视觉、语言和多模态模型常用的微调方法。
+
+视觉模型微调
+^^^^^^^^^^^^
+
+.. _fig_VPT:
+
+.. figure:: images/2.2.3_VPT.png
+   :width: 900px
+
+   （左）：将图像切分为图像块并嵌入为向量序列（中）：深度视觉提示词微调；（右）：浅层视觉提示词微调。
+
+
+
+在视觉领域，图像分类是最经典的任务之一，有许多高质量的预训练模型可供使用，如在ImageNet数据集上预训练的ResNet
+:cite:`he2016deep`
+和ViT。针对特定下游任务，可以选择适合的视觉模型结构，下载其ImageNet预训练参数作为初始化，然后进行必要的结构修改和更新。以预训练ResNet为例，微调步骤如下：
+
+1. 加载ImageNet预训练的ResNet模型参数。
+2. 修改输出层以适应下游任务的类别数量。
+3. 冻结ResNet浅层的权重。
+4. 定义损失函数和优化器。
+5. 在下游数据集上微调模型的输出层和其他未冻结的参数。
+
+此外，微调时选择较小的学习率可以防止模型过度拟合。一般来说，微调的参数量越大，过拟合风险越高；如果参数调整不足，可能会导致目标任务的泛化能力变差。因此，合理调整模型和设置参数更新数量是迁移学习中的关键问题。
+
+针对视觉大模型，一种高效的参数微调方法是\ **视觉提示微调**\ （Visual
+Prompt Tuning，VPT） :cite:`jia2022visual`
+。该方法只需微调少量参数即可使预训练ViT快速适应下游任务。具体来说，VPT保持预训练模型的主干结构不变，仅引入少量可训练的\ *视觉提示词*\ （visual
+prompt）参数。以微调ViT模型为例，可训练的提示词参数被插入到Transformer编码器的输入序列中，与最后的线性分类头一起进行微调。这种方法仅需更新少于1%的模型参数，大幅降低了计算和存储成本。
+
+根据视觉提示词插入的位置不同，VPT方法分为\ *深度微调*\ 和\ *浅层微调*\ 。具体步骤如下：
+
+1. 冻结预训练ViT模型的图像嵌入层、类别词元（[CLS]）和所有Transformer编码器层。
+2. 将输入图像分割为\ :math:`m`\ 个图像块\ :math:`I_{j}`\ ，然后将这些图像块嵌入到\ :math:`d`\ 维向量空间中：
+
+   .. math:: {\boldsymbol{e}}_{0}^{j} = \operatorname{Embed}(I_{j}) \quad {\boldsymbol{e}}_{0}^{j} \in \mathbb{R}^{d}, \; j=1,2,\ldots,m
+3. 将ViT模型类别词元的嵌入向量\ :math:`{\boldsymbol{x}}_{0}`\ 、待微调的提示词参数集合\ :math:`{\mathcal{P}}_{0}`\ ，以及图像嵌入向量集合\ :math:`{\mathcal{E}}_{0}`\ 拼接，得到\ :math:`[{\boldsymbol{x}}_{0}, {\mathcal{P}}_{0}, {\mathcal{E}}_{0}]`\ ，并输入到第一层Transformer编码器\ :math:`L_{1}`\ 。
+4. 得到第一层Transformer编码器的输出。对于深度微调，输出为\ :math:`[{\boldsymbol{x}}_{1}, \underline{\phantom{{\boldsymbol{x}}_{1}}}, {\mathcal{E}}_{1}]`\ ，其中空格处拼接新的待微调提示词集合\ :math:`{\mathcal{P}}_{1}`\ ，再输入到第二层Transformer编码器中；对于浅层微调，输出为\ :math:`[{\boldsymbol{x}}_{1}, {\boldsymbol{Z}}_{1}, {\mathcal{E}}_{1}]`\ ，其中\ :math:`{\boldsymbol{Z}}_{1} \in \mathbb{R}^{p \times d}`\ 是第一层Transformer编码器计算得出的特征，不进行微调调整。
+5. 对于有\ :math:`N`\ 个Transformer编码器层的ViT模型，得到的每一层输出为：
+
+   .. math:: \begin{split}\text{深度微调} : [{\boldsymbol{x}}_{i}, \underline{\phantom{{\boldsymbol{x}}_{1}}}, {\mathcal{E}}_{i}] & = L_{i}([{\boldsymbol{x}}_{i-1}, {\mathcal{P}}_{i-1}, {\mathcal{E}}_{i-1}]) \quad i=2,3,\ldots,N \\\text{浅层微调} : [{\boldsymbol{x}}_{i}, {\boldsymbol{Z}}_{i}, {\mathcal{E}}_{i}]                       & = L_{i}([{\boldsymbol{x}}_{i-1}, {\boldsymbol{Z}}_{i-1}, {\mathcal{E}}_{i-1}]) \quad i=2,3,\ldots,N\end{split}
+6. 将第\ :math:`N`\ 个Transformer编码器输出的类别词元嵌入向量\ :math:`{\boldsymbol{x}}_{N}`\ 输入到分类头中，得到最终分类结果：
+
+   .. math:: y = \operatorname{Head}({\boldsymbol{x}}_{N})
+7. 定义损失函数和优化器，根据模型输出和监督信息，对深度微调的\ :math:`{\mathcal{P}}_{i}`\ （\ :math:`i=0,1,\ldots,N`\ ）或浅层微调的\ :math:`{\mathcal{P}}_{0}`\ 以及分类头进行微调。
+
+VPT在多个下游视觉识别任务中表现出色，尤其是在数据量较少的情况下。相比传统微调方法，VPT不仅能有效利用预训练模型的能力，还能显著减少计算资源的需求，使其成为微调大规模预训练视觉模型的有效方法。
+
+.. _fig_LoRA:
+
+.. figure:: images/2.2.3_LORA.png
+   :width: 450px
+
+   LoRA示意图
+
+
+
+语言模型微调
+^^^^^^^^^^^^
+
+随着2022年ChatGPT模型的推出，大语言模型成为关注焦点，并在多个领域中展现了广泛的应用。在将大语言模型应用于特定领域时，微调成为不可或缺的步骤。尽管微调降低了训练成本，但由于大语言模型的庞大参数量，传统微调方法仍然成本高昂。因此，研究者们开始探索更加高效的微调方法，即\ **参数高效微调**\ （Parameter-efficient
+Fine-tuning，PEFT）方法。其中，\ **LoRA**\ （Low-Rank Adaptation）
+:cite:`hu2021lora` 是经典的高效微调方法之一。
+
+LoRA的核心思想是冻结预训练模型的参数，新增低秩层，以实现更少参数的高效微调。LoRA认为，大语言模型的参数中包含大量冗余信息，因此通过添加和训练一个低秩层来实现高效微调，同时保持微调质量。如
+:numref:`fig_LoRA`
+所示，LoRA将预训练模型的权重矩阵视为\ :math:`{\boldsymbol{W}}`\ ，并引入一个与\ :math:`{\boldsymbol{W}}`\ 大小相同的额外权重矩阵\ :math:`\Delta {\boldsymbol{W}}`\ 。\ :math:`\Delta {\boldsymbol{W}}`\ 被表示为两个低秩矩阵\ :math:`{\boldsymbol{B}}`\ 和\ :math:`{\boldsymbol{A}}`\ 的乘积，其中\ :math:`{\boldsymbol{A}}`\ 用于降维，\ :math:`{\boldsymbol{B}}`\ 用于升维。在微调过程中，仅学习\ :math:`{\boldsymbol{A}}`\ 和\ :math:`{\boldsymbol{B}}`\ 的权重参数。
+
+LoRA的微调步骤如下：
+
+1. 冻结预训练模型的权重矩阵\ :math:`{\boldsymbol{W}}`\ 。
+2. 用高斯分布初始化\ :math:`{\boldsymbol{A}}`\ ：\ :math:`{\boldsymbol{A}} \sim \mathcal{N}(0, \Sigma)`\ ；用零矩阵初始化\ :math:`{\boldsymbol{B}}`\ ：\ :math:`{\boldsymbol{B}} = 0`\ 。
+3. 计算\ :math:`\Delta {\boldsymbol{W}} = {\boldsymbol{B}} {\boldsymbol{A}}`\ 。
+4. 将微调数据输入到原权重矩阵\ :math:`{\boldsymbol{W}}`\ 和待调整权重矩阵\ :math:`\Delta {\boldsymbol{W}}`\ 中，计算\ :math:`{\boldsymbol{W}} {\boldsymbol{x}}`\ 与\ :math:`\Delta {\boldsymbol{W}} {\boldsymbol{x}}`\ 的和，得到\ :math:`{\boldsymbol{h}} = {\boldsymbol{W}} {\boldsymbol{x}} + \Delta {\boldsymbol{W}} {\boldsymbol{x}}`\ 。
+5. 根据模型输出和真实标签计算损失。
+6. 通过反向传播更新\ :math:`{\boldsymbol{A}}`\ 和\ :math:`{\boldsymbol{B}}`\ 中的权重参数。
+
+.. _fig_Tip-Adapter:
+
+.. figure:: images/2.2.3_Tip-Adapter示意图.png
+   :width: 801px
+
+   Tip-Adapter微调方法示意图
+
+
+
+多模态模型微调
+^^^^^^^^^^^^^^
+
+与大语言模型类似，多模态模型也需要高效的微调，但由于涉及多个模态，微调时需要兼顾模态对齐，因此可能更为复杂。在某些情况下，多模态模型可以在不进行参数微调的情况下适配下游任务，此时可通过文本信息匹配模型已学习的视觉概念来实现适配。
+
+**Tip-Adapter** :cite:`zhang2022tip`
+是一种创新的多模态大模型微调方法。具体而言，Tip-Adapter是一种针对 CLIP
+模型的微调方法，它充分利用 CLIP
+在图像特征提取上的能力，通过少样本图像分类任务实现了高性能，而无需额外学习参数。
+
+Tip-Adapter的微调过程如 :numref:`fig_Tip-Adapter` 所示。对于一个包含
+:math:`N`\ 个类别的图像数据集，每个类别有\ :math:`K`\ 张图片，类别标签为\ :math:`y_N`\ ，图片为\ :math:`I_{K}`\ 。首先，将这些训练图片输入到预训练
+CLIP 模型的图像编码器中，得到其视觉特征：
+
+.. math:: F_{train} = \text{VisualEncoder}(I_{K})
+
+并将这些图片的类别标签转换为独热编码形式：
+
+.. math:: {\boldsymbol{y}}_{train} = \text{OneHot}(y_N)
+
+接下来，使用视觉特征
+:math:`F_{train}`\ 作为键，独热编码\ :math:`{\boldsymbol{y}}_{train}`\ 作为值，构建一个缓存模型。在推理阶段，待分类图片\ :math:`{\boldsymbol{x}}_{test}`\ 先被输入到
+CLIP
+的图像编码器中，得到\ :math:`L_2`\ 归一化特征\ :math:`{\boldsymbol{z}}_{test}`\ 。然后，将\ :math:`{\boldsymbol{z}}_{test}`\ 作为查询，在缓存模型中进行检索。查询\ :math:`{\boldsymbol{z}}_{test}`\ 和键\ :math:`F_{train}`
+之间的相关性计算为：
+
+.. math:: A = \exp(-\beta(1 - {\boldsymbol{z}}_{test} F_{train}^{\top}))
+
+其中，\ :math:`\beta`\ 是控制尖锐度的超参数，\ :math:`{\boldsymbol{z}}_{test} F_{train}^{\top}`\ 表示\ :math:`{\boldsymbol{z}}_{test}`\ 和\ :math:`F_{train}^{\top}`
+之间的相似度或交叉注意力，指数函数确保相关性为正数。
+
+在缓存模型中，预测结果通过
+:math:`A`\ 和\ :math:`{\boldsymbol{y}}_{train}`\ 相乘得到。同时，CLIP
+模型的预测结果由\ :math:`{\boldsymbol{z}}_{test} {\boldsymbol{W}}_C^{\top}`\ 给出，其中\ :math:`{\boldsymbol{W}}_C`\ 是预训练的文本编码器生成的
+CLIP
+分类器的权重。将这两种预测通过残差连接，并通过超参数\ :math:`\alpha`
+进行加权，得到最终的预测分数：
+
+.. math:: \text{logits} = \alpha A {\boldsymbol{y}}_{train} + {\boldsymbol{z}}_{test} {\boldsymbol{W}}_C^{\top}
+
+简而言之，Tip-Adapter 结合了 CLIP
+提取的测试图片最相关的概念与计算的测试图片与少样本训练图片（及标签）之间的相关性，从而实现少样本分类。其核心思想在于对齐和检索，而非模型微调。
+
+联邦学习
+~~~~~~~~
+
+传统机器学习通常需要将数据集中到一个中心节点进行训练，这存在数据和隐私泄露的风险。为了解决这一问题，联邦学习应运而生。联邦学习的核心理念是通过共享参数（而非数据）实现隐私保护下的多方协作训练。这种方法打破了数据孤岛，使不同机构或设备之间可以在无需共享敏感数据的情况下联合训练一个强大的模型。谷歌在2016年首次将联邦学习应用于智能手机，用于提升手机输入法中的下一单词预测功能，成为联邦学习的成功应用典范。
+
+联邦学习的优化目标是最小化各参与方的平均损失，表示为：
+
+.. math:: \min_{{\boldsymbol{w}}} \frac{1}{N} \sum_{i=1}^{N} \mathbb{E}_{(X,Y)} \mathcal{L}(f_{{\boldsymbol{w}}}(X_i),Y_i)
+
+其中，\ :math:`N`\ 为参与方数量，\ :math:`X_i`\ 和\ :math:`Y_i`\ 分别表示第\ :math:`i`\ 个参与方的本地训练样本集和标签集，\ :math:`\mathcal{L}`\ 为损失函数，这里假设各参与方使用相同的模型\ :math:`f_{{\boldsymbol{w}}}`\  [4]_
+。
+
+联邦学习可以分为三种主要类型：\ **横向联邦学习**\ 、\ **纵向联邦学习**
+和 **迁移联邦学习**\ 。假设数据样本的 ID 空间为
+:math:`I`\ ，样本特征空间为\ :math:`X`\ ，样本标签空间为\ :math:`Y`\ ，则一组训练数据集可以表示为\ :math:`(I, X, Y)`\ 。参与方\ :math:`i`\ 的本地数据集表示为\ :math:`D_i = (I_i, {\boldsymbol{x}}_i, Y_i)`\ 。为了更好地理解这些类型，我们使用表格数据作为示例。
+
+.. _fig_hfl:
+
+.. figure:: images/5.3_hfl.png
+   :width: 720px
+
+   横向联邦学习
+
+
+
+**横向联邦学习**\ （Horizontal Federated Learning,
+HFL）对全局数据进行横向切分，每个客户端拥有其中一部分，如
+:numref:`fig_hfl` 所示。HFL 适用于样本特征重叠较多但样本 ID
+重叠较少的情况。通过合并具有相同特征但不同样本的参与方数据，可以增加训练样本数量。
+
+.. _fig_vfl:
+
+.. figure:: images/5.4_vfl.png
+   :width: 720px
+
+   纵向联邦学习
+
+
+
+**纵向联邦学习**\ （Vertical Federated Learning,
+VFL）对全局数据进行纵向切分，如 :numref:`fig_vfl` 所示。VFL 适用于样本
+ID 重叠较多但样本特征重叠较少的情况。通过合并具有相同样本 ID
+但不同特征的参与方数据，可以增加数据的特征维度，从而提高模型的表现。
+
+.. _fig_tfl:
+
+.. figure:: images/5.5_tfl.png
+   :width: 720px
+
+   迁移联邦学习
+
+
+
+**迁移联邦学习**\ （Transfer Federated Learning,
+TFL）则处理各参与方之间既没有共同的客户（数据样本
+ID），也没有或很少有重叠特征的情况。例如，不同城市的银行和电商之间的业务特征和用户群体几乎没有交集，如
+:numref:`fig_tfl` 所示。
+
+**横向联邦学习** 的代表算法是 **联邦平均**\ （FedAvg）
+:cite:`mcmahan2017communication`
+。这种方法采用“**参与方-服务器**”结构，其中服务器通常由可信的第三方机构或数据量最大的参与方担任。在联邦平均算法中，流程如下：
+
+1. 服务器端初始化全局模型并将其广播给选定的参与方。
+2. 参与方在收到全局模型后，使用本地数据计算模型梯度，并将这些梯度信息发送回服务器。
+3. 服务器聚合所有参与方的梯度，更新全局模型。
+
+该过程重复进行，直到模型收敛。为降低通信成本，FedAvg
+允许参与方在本地数据上进行多次迭代计算，然后再将梯度信息或模型参数发送到服务器进行平均和更新。具体步骤如算法
+:numref:`algorithm_FedAvg` 所示：
+
+.. _algorithm_FedAvg:
+
+.. figure:: images/2.2_FedAvg.png
+   :width: 630px
+
+   联邦平均（FedAvg）
+
+
+
+**纵向联邦学习** 的代表算法是 **安全线性回归**\ （Secure Linear
+Regression, SLR） :cite:`yang2019federated` 。SLR
+是线性回归的联邦化版本，利用同态加密技术来确保参与方之间的信息安全。
+
+假设有两个参与方 A 和 B，其中只有 B 拥有数据标签。A 的数据为
+:math:`\{{\boldsymbol{x}}_i^{\text{A}}\}_{i=1}^{n_{\text{A}}}`\ ，B
+的数据为\ :math:`\{{\boldsymbol{x}}_i^{\text{B}}, y_i\}_{i=1}^{n_{\text{B}}}`\ ，其中\ :math:`{\boldsymbol{x}}_i^{\text{A}}`\ 和\ :math:`{\boldsymbol{x}}_i^{\text{B}}`\ 为数据特征，\ :math:`y_i`\ 为标签。令\ :math:`{\boldsymbol{w}}_{\text{A}}`\ 和\ :math:`{\boldsymbol{w}}_{\text{B}}`
+为 A 和 B 的模型参数，则安全线性回归的优化目标为：
+
+.. math:: \min_{{\boldsymbol{w}}_{\text{A}}, {\boldsymbol{w}}_{\text{B}}} \sum_i \left\|{\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}} + {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}} - y_i\right\|^2 + \frac{\lambda}{2} \left(\left\|{\boldsymbol{w}}_{\text{A}}\right\|^2 + \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2\right)
+
+为简化表示，令
+:math:`{\boldsymbol{u}}_i^{\text{A}} = {\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}}`\ ，\ :math:`{\boldsymbol{u}}_i^{\text{B}} = {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}}`\ 。使用加法同态加密表示加密后的目标函数为：
+
+.. math:: [[\mathcal{L}]] = [[\sum_i \left\|{\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}} + {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}} - y_i\right\|^2 + \frac{\lambda}{2} \left(\left\|{\boldsymbol{w}}_{\text{A}}\right\|^2 + \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2\right)]]
+   :label: eq_HE
+
+利用同态加密的性质，令
+:math:`[[\mathcal{L}_{\text{A}}]] = [[\sum_i \left({\boldsymbol{u}}_i^{\text{A}}\right)^2 + \frac{\lambda}{2} \left\|{\boldsymbol{w}}_{\text{A}}\right\|^2]]`\ ，\ :math:`[[\mathcal{L}_{\text{B}}]] = [[\sum_i \left({\boldsymbol{u}}_i^{\text{B}} - y_i\right)^2 + \frac{\lambda}{2} \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2]]`\ ，\ :math:`[[{\boldsymbol{s}}_{\text{AB}}]] = 2 \sum_i [[{\boldsymbol{u}}_i^{\text{A}} \left({\boldsymbol{u}}_i^{\text{B}} - y_i\right)]]`\ 。则公式
+:eq:`eq_HE` 可以表示为：
+
+.. math:: [[\mathcal{L}]] = [[\mathcal{L}_{\text{A}}]] + [[\mathcal{L}_{\text{B}}]] + [[{\boldsymbol{s}}_{\text{AB}}]]
+
+在使用梯度下降算法优化模型时，A 和 B 的梯度分别为：
+
+.. math:: [[\frac{\partial \mathcal{L}}{\partial {\boldsymbol{w}}_{\text{A}}}]] = 2 \sum_i [[d_i]] {\boldsymbol{x}}_i^{\text{A}} + [[\lambda {\boldsymbol{w}}_{\text{A}}]]
+
+.. math:: [[\frac{\partial \mathcal{L}}{\partial {\boldsymbol{w}}_{\text{B}}}]] = 2 \sum_i [[d_i]] {\boldsymbol{x}}_i^{\text{B}} + [[\lambda {\boldsymbol{w}}_{\text{B}}]]
+
+其中，\ :math:`[[d_i]] = [[{\boldsymbol{u}}_i^{\text{A}}]] + [[{\boldsymbol{u}}_i^{\text{B}} - y_i]]`\ 。为了准确计算梯度，A
+和 B
+需要对方的信息。因此，通常需要一个安全可信的第三方来协助加密和解密，通常选择公信力较高的机构，如政府或学术组织。完整的训练步骤和推理阶段的具体操作分别见
+:numref:`tab_selr_train` 和 :numref:`tab_selr_test` 。
+
+.. _tab_selr_train:
+
+.. figure:: images/2.2_selr_train.png
+   :width: 630px
+
+   安全线性回归算法的训练步骤
+
+
+
+.. _tab_selr_test:
+
+.. figure:: images/2.2_selr_test.png
+   :width: 630px
+
+   安全线性回归算法的训练步骤
+
+
+
+.. _sec_model deployment:
+
+模型评估与部署
+--------------
+
+
+评估与部署是确保人工智能模型在实际应用中稳定高效运行的关键步骤。在评估阶段，我们使用多种指标来衡量模型的准确性、鲁棒性和效率，以确保其能够应对真实世界中的复杂和噪声场景。部署阶段则是将评估通过的模型集成到实际应用环境中，为用户提供服务。本节将探讨如何通过科学的评估方法和有效的部署策略，确保人工智能模型在真实环境中发挥最佳性能。
+
+模型评估
+~~~~~~~~
+
+模型训练完成后，需要对其进行评估。模型评估的主要作用有四个方面：首先，它可以防止过拟合，即模型在训练数据上表现良好但在未见过的数据上表现不佳。其次，评估有助于调整模型的超参数，如学习率和批量大小，以提升性能和泛化能力。第三，评估可以帮助选择表现最佳的模型，以便在多个候选模型中确定最优模型进行部署。最后，通过最终测试评估，我们可以验证模型是否达到预期性能，并判断其是否准备好投入实际应用。
+
+评估指标
+^^^^^^^^
+
+在评估模型之前，我们首先需要明确什么样的模型是好的。这取决于具体的任务和应用场景。例如，在图像分类任务中，一个好的模型应该具有高准确率和强泛化能力；而在文本生成任务中，一个好的模型应生成流畅且语义准确的文本。因此，评估指标需要根据任务特点选择。
+
+此外，使用多种评估方法和指标可以提供更全面的参考。例如，对于图像分类任务，除了准确率，还可以通过混淆矩阵了解模型在不同类别上的表现；对于文本生成任务，除了文本质量，可以使用
+BLEU
+分数评估生成文本与参考文本的相似度。选择合适的评估方法并综合多个角度进行评估，可以更全面地了解模型的能力，从而为模型的优化和改进提供有效指导。
+
+**分类模型**\ ：分类任务常用的评估指标是\ **准确率**\ ，指的是正确分类的测试样本数占总样本数的比例。准确率越高，意味着正确分类的样本数越多，当精度为1（100%）时，意味着所有样本都正确分类。对于一个包含\ :math:`N`\ 个测试样本的数据集，准确率的定义是：
+
+.. math:: \operatorname{acc}=\frac{1}{N} \sum_{i=1}^N \mathbb{1}[\hat{y}_i=y_i]
+
+其中，\ :math:`\hat{y}_i`\ 为模型对第\ :math:`i`\ 个测试样本的预测类别，\ :math:`y_i`\ 是真实类别。虽然准确率能直观地体现模型分类结果的好坏，但其无法应对不均衡数据集或者类别间差异较大的情况。比如，在医学影像识别中，某种罕见疾病的样本极少，假设占总样本数的\ :math:`1 \%`\ ，若模型将所有测试样本都预测为健康，就能获得
+99%的准确率。这个结果看上去很漂亮，但显然这样的模型不是我们想要的。
+
+在面对数据不均衡或类别间差异较大的情况时，可以使用\ **精确率**\ （precision）和\ **召回率**\ （recall）来更全面地评估模型。\ **精确率**\ 是指模型正确预测为某一类别的样本数占所有预测为该类别的样本数的比例；\ **召回率**\ 是指模型正确预测为某一类别的样本数占所有实际为该类别的样本数的比例。计算时，可以通过\ *混淆矩阵*\ 来帮助分析。
+
+以医学影像识别为例，这是一个二分类问题，类别包括健康和疾病。假设有1000张图像，其中10张为疾病样本，模型仅正确识别了1张，其余均预测为健康。则混淆矩阵如下：
+
+.. _fig_混淆矩阵:
+
+.. figure:: images/2.3_混淆矩阵.png
+   :width: 500px
+
+   混淆矩阵举例
+
+
+
+矩阵中的数字表示样本数。例如，第一行第一列的990表示实际为健康且预测为健康的样本数。根据混淆矩阵，计算如下：
+
+-  健康类别的精确率为：
+
+   .. math:: P_{\text{健康}} = \frac{990}{990 + 9} \approx 99\%
+-  健康类别的召回率为：
+
+   .. math:: R_{\text{健康}} = \frac{990}{990 + 0} = 100\%
+-  疾病类别的精确率为：
+
+   .. math:: P_{\text{疾病}} = \frac{1}{1 + 0} = 100\%
+-  疾病类别的召回率为：
+
+   .. math:: R_{\text{疾病}} = \frac{1}{1 + 9} = 10\%
+
+虽然健康类别的精确率和召回率都很高，但疾病类别的召回率非常低，这可能会导致许多患者被误诊为健康，从而错过最佳治疗时机，因此这个模型并不理想。通常，精确率较高时，召回率较低，反之亦然。在选择模型时，需要结合具体任务选择合适的判别标准，或者使用
+:math:`\boldsymbol{F_1}`\ **度量**\ 等综合性指标进行评估。\ :math:`F_1`
+度量为精确率和召回率的调和平均：
+
+.. math:: F_1 = \frac{2P R}{P + R}
+
+其中，\ :math:`P`\ 和\ :math:`R`\ 分别表示精确率和召回率。
+
+**语言模型**\ ：语言任务的多样性导致语言模型的评估指标和数据集也各不相同。例如，大语言模型
+GPT-3 采用了多种评估标准，包括：
+
+-  **困惑度**\ ：衡量模型对语言建模能力的指标。
+-  **LAMBADA**\ ：评估模型对长距离上下文理解能力的数据集。
+-  **TriviaQA**\ ：评估模型知识的数据集。
+-  **BLEU**\ ：评估翻译能力的指标。
+-  **PIQA** 和 **ARC**\ ：评估科学推理性能的数据集。
+-  **CoQA**\ ：评估阅读理解能力的数据集。
+
+以下是对部分评估标准的简要介绍：
+
+**困惑度**
+反映了语言模型对测试文本的预测能力。困惑度越低，模型的预测越准确。对于一个测试文本序列
+:math:`W = w_1, w_2, \ldots, w_N`\ ，模型生成这个序列的概率为\ :math:`P(W) = P(w_1, w_2, \ldots, w_N)`\ 。困惑度计算公式为\ :math:`\sqrt[N]{\frac{1}{P(w_1, w_2, \ldots, w_N)}}`\ ，其中\ :math:`N`
+为序列长度。困惑度越低，表示模型对序列的拟合能力越强。
+
+**LAMBADA** :cite:`paperno2016lambada`
+是评估语言模型理解长距离依赖关系的测试集。LAMBADA
+包含文本段落和目标句子。人类能够根据整个段落猜测目标句子的最后一个单词，但仅凭目标句子难以猜出。LAMBADA
+要求语言模型在给定的上下文中预测目标句子的末尾单词，正确预测的数量越多，说明模型处理长文本和跨句子依赖关系的能力越强。
+
+**BLEU** :cite:`papineni-etal-2002-bleu`
+用于评估翻译质量，其核心思想是比较机器翻译结果与人工翻译结果的相似度。BLEU
+将翻译句子拆分为单词或词组集合，并计算机器译文与人工译文中匹配词组的比例。以
+1-gram 至 4-gram 为例，BLEU
+通过计算这些词组的匹配精度并加权相加，最终得到 BLEU
+分数，同时考虑了机器译文与人工译文长度的差异。
+
+.. _fig_交并比:
+
+.. figure:: images/2.3.1_交并比示意图.png
+   :width: 720px
+
+   交并比示意图
+
+
+
+**目标检测模型**\ ：目标检测任务旨在从图像或视频中检测并定位感兴趣的目标物体。目标检测模型不仅识别图像中的目标类别，还提供其位置、边界框或像素级分割信息。模型输入为图像或视频数据，输出包括目标物体的类别标签和位置信息，通常以边界框的形式表示。评估目标检测模型的能力常用指标包括：
+
+-  **交并比**\ （Intersection over Union，IoU）
+-  **平均交并比**\ （mean IoU，mIoU）
+-  **像素准确率**\ （Pixel Accuracy，PA）
+-  **类别像素准确率**\ （Class Pixel Accuracy，cPA）
+-  **类别平均像素准确率**\ （mean Pixel Accuracy，mPA）
+
+**交并比**\ （IoU）衡量预测边界框与真实边界框的重叠度。假设
+:numref:`fig_交并比` 中的两个矩形分别表示预测边界框
+:math:`A`\ 和真实边界框\ :math:`B`\ ，则交并比为它们交集面积与并集面积的比值：
+
+.. math:: IoU = \frac{A \cap B}{A \cup B}
+
+**平均交并比**\ （mIoU）是所有样本的交并比的平均值：
+
+.. math:: mIoU = \frac{1}{N} \sum_{i=1}^N IoU_i
+
+其中，\ :math:`N`\ 是样本数量，\ :math:`IoU_i`\ 是第\ :math:`i`
+个样本的交并比。
+
+.. _fig_像素准确率:
+
+.. figure:: images/2.3.1_像素准确率举例.png
+   :width: 630px
+
+   像素准确率举例
+
+
+
+**像素准确率**\ （Pixel
+Accuracy，PA）是指预测正确的像素数占总像素数的比例。例如，假设图像大小为
+:math:`5 \times 5`\ ，预测类别有两类：0 代表背景，1
+代表目标物体。预测结果（右）和真实结果（左）如
+:numref:`fig_像素准确率` 所示。在这个例子中，21 个像素分类正确，4
+个像素分类错误，因此像素准确率为：
+
+.. math:: PA = \frac{\text{正确分类像素数}}{\text{总像素数}} = \frac{21}{25} = 84.00\%
+
+**类别像素准确率**\ （Class Pixel
+Accuracy，cPA）是指每个类别的正确分类像素数占预测为该类别的像素数的比例。以该例子为例，预测为背景（类别0）的像素有
+17 个，其中正确分类的有 16 个，因此背景类别的类别像素准确率为：
+
+.. math:: cPA_0 = \frac{\text{正确分类像素数}}{\text{预测为该类别的像素数}} = \frac{16}{17} \approx 94.12\%
+
+对于类别 1，有 8 个像素被预测为该类别，其中 5 个预测正确，因此类别 1
+的类别像素准确率为：
+
+.. math:: cPA_1 = \frac{\text{正确分类像素数}}{\text{预测为该类别的像素数}} = \frac{5}{8} \approx 62.50\%
+
+**类别平均像素准确率**\ （mean Pixel
+Accuracy，mPA）是所有类别像素准确率的平均值：
+
+.. math:: mPA = \frac{1}{K} \sum_{k=1}^K cPA_k
+
+其中，\ :math:`K`\ 是类别数量，\ :math:`cPA_k`\ 是第\ :math:`k`
+类的类别像素准确率。
+
+**图像生成模型**\ ：这类模型主要关注生成图像的真实度、多样性、细节和清晰度等指标。早期研究通常依赖人工评估来衡量生成结果的质量，但随着生成模型的发展，生成高质量图像变得越来越容易，人工评估的挑战也随之增加。因此，现在研究者倾向于使用可量化的指标来自动评估生成质量，常用的指标包括
+*Inception 分数* 和 *FID 分数* 等。
+
+**Inception 分数**\ （Inception Score,
+IS）用于评估模型生成图像的质量和多样性。评估过程首先生成一系列图像，然后将这些图像输入到图像分类模型（如预训练的
+Inception-v3 模型）中。分类模型的输出是一个类别概率向量。Inception
+分数计算公式如下：
+
+.. math:: IS(G) = \exp \left(\mathbb{E}_{{\boldsymbol{x}} \sim p_g} KL(p({\boldsymbol{y}} \mid {\boldsymbol{x}}) \| p({\boldsymbol{y}}))\right)
+
+其中，\ :math:`G`\ 是待评估模型，\ :math:`{\boldsymbol{x}} \sim p_g`\ 表示\ :math:`{\boldsymbol{x}}`\ 是由模型生成的图像，\ :math:`KL(\cdot \| \cdot)`
+是 KL 散度，度量两个概率分布的差异。KL 散度定义如下：
+
+.. math:: KL(p \| q) = \sum_i^N p({\boldsymbol{x}}_i) \log \left(\frac{p({\boldsymbol{x}}_i)}{q({\boldsymbol{x}}_i)}\right)
+
+Inception 分数的计算还可以分解为：
+
+.. math:: \log(IS(G)) = \mathbb{E}_{{\boldsymbol{x}} \sim p_g} KL(p({\boldsymbol{y}} \mid {\boldsymbol{x}}) \| p({\boldsymbol{y}})) = I({\boldsymbol{y}} ; {\boldsymbol{x}}) = H({\boldsymbol{y}}) - H({\boldsymbol{y}} \mid {\boldsymbol{x}})
+
+其中，\ :math:`H(\cdot)`\ 代表熵。图像生成模型生成的图像越多样，分类模型的输出越均衡，\ :math:`H({\boldsymbol{y}})`\ 越大；图像质量越高，分类模型的输出置信度越高，\ :math:`H({\boldsymbol{y}} \mid {\boldsymbol{x}})`
+越小。因此，Inception 分数越高，表示模型生成的图像质量越好。
+
+**FID 分数**\ （Fréchet Inception Distance, FID）是对 Inception
+分数的改进，它综合考虑了生成图像和真实图像的统计特征。在计算 FID
+分数时，生成图像和真实图像都通过分类模型的最后一个池化层提取特征向量。FID
+分数的计算公式为：
+
+.. math:: d^2(({\boldsymbol{m}}, {\boldsymbol{C}}), ({\boldsymbol{m}}_w, {\boldsymbol{C}}_w)) = \|{\boldsymbol{m}} - {\boldsymbol{m}}_w\|_2^2 + Tr({\boldsymbol{C}} + {\boldsymbol{C}}_w - 2({\boldsymbol{C}} {\boldsymbol{C}}_w)^{1/2})
+
+其中，\ :math:`{\boldsymbol{m}}`\ 和\ :math:`{\boldsymbol{m}}_w`\ 分别是生成图像和真实图像特征向量的均值，\ :math:`{\boldsymbol{C}}`\ 和\ :math:`{\boldsymbol{C}}_w`\ 分别是它们的协方差矩阵，\ :math:`Tr(\cdot)`
+是矩阵的迹。该公式的两项分别衡量均值向量和协方差矩阵的相似性。FID
+分数越低，表示生成图像的分布越接近真实图像的分布，模型质量越好。
+
+评估方法
+^^^^^^^^
+
+将模型类比为学生，模型的学习过程就像学生上学：训练相当于刷题，评估则像考试。考试中，老师会给出未曾练习过的新题目，以确保学生真正理解了知识，而非仅仅记住了答案。同样，对于模型的评估，我们需要将数据分为训练集和测试集。训练集用于模型训练，测试集用于评估模型的性能。为了确保评估结果的准确性，我们必须避免使用训练数据进行评估。以下介绍几种测试集的分割方法。
+
+**留出法**
+是一种简单且常用的评估方法。其基本思想是将数据集的一部分“留出来”作为测试集，剩余部分用于训练模型。这种方法可以通过测试集来评估模型在实际环境中的表现。数据集在训练前需随机划分为训练集和测试集，并确保两者不重叠。模型只使用训练集进行训练，训练完成后在测试集上进行评估。通常，测试集占整个数据集的20%到40%以确保评估的可信度。
+
+留出法的优点在于其简单易懂且易于实现，但也存在一些局限性。对于数据集较小或不均衡时，留出法可能引入额外的偏差。例如，如果数据集中正例和反例各500个，测试集中可能出现正例200个、反例100个的偏差，这会影响评估结果。为解决这一问题，可以采用分层采样方法，以保持测试集中各类别的比例与整体数据集一致。此外，由于数据集划分的随机性，模型评估结果可能不够稳定，通常需要多次划分、训练和评估，然后取平均值作为最终结果。
+
+**交叉验证法**
+是一种常用的模型评估方法，它将数据集平均分成\ :math:`k`\ 个不相交的子集。与留出法类似，为避免引入额外偏差，交叉验证法也需要使用分层采样进行数据分割。在交叉验证过程中，首先从\ :math:`k`\ 个子集中选择一个作为测试集，其余\ :math:`k-1`\ 个子集作为训练集。这种分割组合将被用于一次训练和测试。这个过程重复\ :math:`k`\ 次，每次选择不同的子集作为测试集，直至每个子集都被用作测试集。最终，将这\ :math:`k`\ 次测试结果取平均值，得到交叉验证法的最终评估结果。
+:numref:`fig_交叉验证法`
+展示了\ :math:`k=5`\ 时交叉验证法的数据分割和测试过程。
+
+.. _fig_交叉验证法:
+
+.. figure:: images/2.3.2_交叉验证法.png
+   :width: 855px
+
+   交叉验证法
+
+
+
+**自助法**\ （Bootstrapping）是一种用于数据集较小情况下的评估方法。假设数据集中有
+:math:`N`\ 个样本，自助法的步骤是从这些样本中随机选择一个样本，将其添加到训练集中后再放回，然后重复此过程\ :math:`N`\ 次。这种方法生成的训练集包含\ :math:`N`\ 个样本，其中可能有重复的样本，而原数据集中一些样本可能未被选入训练集。一个样本未被选入训练集的概率为\ :math:`(1 - \frac{1}{N})^N`\ ，当\ :math:`N`\ 趋近于无穷大时，该概率接近\ :math:`\frac{1}{e}`\ ，即约
+36.8%。因此，大约 36.8%
+的样本将作为测试样本。实际操作中，通常会进行多次采样并计算平均值作为最终结果。
+
+这种方法可以有效划分测试集，并保持训练样本的数量稳定。然而，由于可能会出现重复的训练样本，可能会改变数据分布，因此在数据集较大时通常不采用自助法。
+
+超参数调整
+^^^^^^^^^^
+
+超参数（hyperparameters）是机器学习算法中需要人为设定和调整的参数。例如，神经网络的学习率、批量大小和隐藏层节点数都是超参数。调整超参数直接影响模型性能和泛化能力，有助于优化训练过程并提高对新数据的表现。为了找到最佳的超参数组合，通常需要在数据集中划分出一个与训练集和测试集不同的验证集。在验证集上进行初步评估，从而调整和优化超参数。
+
+超参数调整实质上是一个优化问题，超参数作为变量需要优化，而优化目标是选定的评估标准。与模型参数的梯度下降法不同，超参数优化不能直接求导，因此需要采用其他优化方法。
+
+**网格搜索**
+方法将超参数取值范围内的所有可能取值离散化，并枚举所有可能的组合，然后逐个验证这些组合以选出最佳的超参数。假设有
+:math:`N`\ 个待调整的超参数，每个超参数有\ :math:`m_1, m_2, \ldots, m_N`\ 个可能的取值，则网格搜索将验证\ :math:`m_1 \cdot m_2 \cdot \ldots \cdot m_N`
+种组合。尽管这种方法简单直接，但计算所有可能组合的过程耗时且效率较低。
+
+**进化算法**
+是一种启发式超参数优化方法，通过模拟生物进化过程来逐步改进优化目标。其步骤包括：
+
+1. 初始化超参数并确定其可能的取值范围，将连续值离散化。
+2. 随机生成若干超参数组合，并评估每个组合下模型的性能。
+3. 选择性能较好的几个组合，舍弃其余组合，模拟生物的优胜劣汰过程。
+4. 从优秀的组合中选择两个，进行交叉生成新的超参数组合。重复此过程，优秀的组合被选择的概率更高。
+5. 随机修改部分超参数值，以期获得更好的评估结果。
+
+与网格搜索相比，进化算法不仅计算部分组合的评价指标，还预测更优解的潜在区域，从而提高搜索效率。
+
+**规模法则**\ ：在大模型时代，当计算资源不足以验证多个超参数组合时，可以借助“规模法则”（scaling
+law）来优化超参数。规模法则描述了大语言模型的泛化能力与模型规模、数据量和计算能力之间的幂律关系。具体而言，随着模型参数、数据集大小和计算量的增加，模型性能会提升。规模法则允许我们在小规模的情况下进行超参数验证和调整，然后将模型、数据和计算规模同时放大
+100 倍甚至 1000
+倍进行最终训练。尽管规模法则的根本原因尚不完全清楚，但它已成为指导大模型超参数优化的关键原则。
+
+模型部署
+~~~~~~~~
+
+在前三个阶段中，我们首先收集数据并将其划分为训练集、验证集和测试集。接着，我们在训练集上训练模型，在验证集上调整模型，并最终在测试集上评估模型，以获得性能评价。当模型达到预期效果后，就可以进行部署。模型部署是将训练好的模型应用到实际生产环境中的过程，包括将模型集成到软件应用程序、移动应用、网站或其他系统中，并确保其稳定、可靠地运行，以解决实际问题并创造价值。
+
+部署环境选择
+^^^^^^^^^^^^
+
+选择合适的部署环境至关重要，因为不同的环境适用于不同的应用场景和需求。目前可选的部署环境包括服务器、云平台、Web服务框架和边缘计算等。
+
+**服务器**\ ：适用于对计算资源要求较高的场景，如大语言模型和多模态大模型。这些服务器通常配置强大的CPU和GPU，能够处理大规模的数据并支持复杂的模型推理。
+
+**云平台**\ ：提供灵活的计算资源租用服务，用户可以按需动态调整资源并按使用量付费。云平台具有高度的可扩展性和灵活性，适用于需求波动较大的场景。常见的云平台包括Amazon
+Web Services（AWS）、Microsoft Azure和Google Cloud Platform（GCP）。
+
+**Web服务框架**\ ：为开发者提供了快速部署和管理机器学习模型的方式，支持将模型集成到Web应用程序中并提供在线服务。常见的Web服务框架有Flask、Django和FastAPI等。
+
+**边缘计算**\ ：将计算资源和数据存储放置在离用户更近的地方，如边缘节点或设备上，降低延迟并提高响应速度。适用于对实时性要求高的场景，如智能手机、物联网设备和自动驾驶汽车。
+
+模型压缩与转换
+^^^^^^^^^^^^^^
+
+选择部署环境后，需要对模型进行压缩和格式转换，以提高推理效率和性能。虽然模型在测试中表现良好，但实际使用时还需考虑不同环境下的性能和响应速度。
+
+**模型压缩**\ ：旨在降低模型体积和计算资源消耗，以提升推理效率和用户体验。常见方法包括量化、剪枝和蒸馏。量化通过减少参数位数来降低存储和计算成本（如将32位浮点数转换为8位整数）；剪枝去除冗余连接以减少模型复杂度；蒸馏利用教师模型训练较小的学生模型，达到减小模型体积和提高推理速度的目的。
+
+**模型格式转换**\ ：训练框架（如TensorFlow、PyTorch）通常关注易用性和效率，而推理阶段则注重优化和加速。模型格式转换将训练好的模型从开发框架转换为推理框架所需的格式。例如，ONNX（Open
+Neural Network
+Exchange）是一种常用的工具，用于将不同框架中的模型转换为通用的中间表示格式，再转换为目标框架格式，以便在不同设备和环境中部署。
+
+在选择部署环境、完成模型压缩和格式转换后，将模型部署到选定环境，并进行必要的安全、性能和压力测试，最终对用户开放使用。
+
+模型推理
+^^^^^^^^
+
+在使用模型进行推理之前，需要对数据进行一系列准备工作，以确保模型在部署环境中能够顺利运行并输出准确结果。这些准备工作包括数据格式转换、预处理和标准化等，以确保数据的一致性和可用性。数据格式转换涉及将数据转换为模型可以接受的格式，例如将图像数据转换为张量格式，或将文本数据编码为适当的格式。数据标准化和清洗类似于数据集采集时的操作。例如，对于图像数据，可能需要将其从一种颜色空间（如RGB）转换到另一种（如灰度或YUV），以满足模型的输入要求。在完成这些准备工作后，数据就可以输入模型进行推理了。
+
+**推理性能评价**\ ：模型部署阶段的性能评价不仅关注准确率等指标，还包括服务效率和用户体验方面的指标，如响应时间、吞吐量、内存占用和CPU/GPU利用率。
+
+**响应时间**\ ：模型从接收输入到输出结果所需的时间。较短的响应时间表示模型能够更快地处理用户请求，提升用户体验。响应时间通常以毫秒为单位，计算公式为：
+
+.. math:: \text{平均响应时间} = \frac{\sum_{i=1}^{n} (T_{\text{结束}, i} - T_{\text{开始}, i})}{n}
+
+其中，\ :math:`T_{\text{开始}, i}`\ 是第\ :math:`i`\ 个请求的开始时间，\ :math:`T_{\text{结束}, i}`\ 是第\ :math:`i`\ 个请求的结束时间，\ :math:`n`
+是总请求数。
+
+**吞吐量**\ ：单位时间内模型能够处理的请求数量。吞吐量通常以每秒请求数（RPS）为单位，计算公式为：
+
+.. math:: \text{吞吐量} = \frac{n}{T}
+
+其中，\ :math:`n`\ 是单位时间内完成的请求数，\ :math:`T`
+是单位时间的长度。高吞吐量意味着模型能够有效应对高并发请求，提高系统整体性能。
+
+**内存占用**\ ：模型在部署环境中所需的内存资源。较低的内存占用可以降低系统成本，提升系统稳定性和可扩展性。
+
+**CPU/GPU 利用率**\ ：模型对 CPU 或 GPU
+资源的使用情况。高效利用硬件资源可以提高系统性能和效率，降低成本。
+
+本章小结
+--------
+
+本章概述了人工智能模型的生命周期，包括数据收集、模型训练和微调，以及最终的评估与部署。
+高质量的数据是构建强大AI模型的基石。章节 :numref:`sec_data_collection`
+分析了多个经典数据集，如ImageNet、Common
+Crawl和LAION，展示了如何收集和处理图像、文本及多模态数据。 接下来，章节
+:numref:`sec_model training and ft`
+详细介绍了几种经典神经网络模型，包括卷积神经网络、循环神经网络、Transformer和ViT，以及它们的预训练和微调方法。视觉模型方面介绍了ViT模型的预训练方法SimCLR和MAE；大语言模型方面介绍了ELMo、GPT和BERT；多模态大模型方面介绍了CLIP、Stable
+Diffusion和LLaVA的预训练方法。本章节还讨论了保护用户隐私的联邦学习训练范式。
+最后，章节 :numref:`sec_model deployment`
+介绍了模型评估与部署的基本方法和流程。通过设计评估指标（如准确率、精确率、召回率、F1分数、\ :math:`IoU`\ 等）、评估方法（如留出法、交叉验证法等），以及超参数调整方法（如网格搜索、尺度定律等），我们可以确保模型在训练阶段达到最佳性能。在模型部署阶段，我们探讨了选择合适的部署环境、模型压缩和格式转换等必要准备，以确保模型在实际应用环境中能够稳定高效运行。
+
+习题
+----
+
+1. 选择一个感兴趣的应用领域（如医疗、交通、媒体等），描述适合的数据类型，并解释这些数据对构建模型的重要性。
+2. 在处理多模态数据时，为什么使用预训练的多模态大模型（如CLIP）比单独训练视觉和语言模型更有效？请给出至少两点理由。
+3. 描述SimCLR和MAE预训练方法的基本思想，并列举至少两点它们的主要区别。
+4. 简述CLIP模型在Stable Diffusion模型中的作用。
+5. 简述大语言模型微调方法LoRA的原理和优点，并解释它是否适合用于视觉模型的微调。
+6. 在模型部署过程中，为什么需要进行模型压缩和格式转换？
+
+.. [1]
+   https://commoncrawl.org/
+
+.. [2]
+   https://github.com/gururise/AlpacaDataCleaned
+
+.. [3]
+   CLIP通常指训练框架/方法，但有时也指OpenAI预训练的模型。
+
+.. [4]
+   为了与已有工作中的符号保持一致，这里使用 :math:`{\boldsymbol{w}}`
+   来表示模型参数。

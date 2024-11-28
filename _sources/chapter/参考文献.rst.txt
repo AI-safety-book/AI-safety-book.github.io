@@ -1,0 +1,6 @@
+
+参考文献
+========
+
+.. bibliography:: ../reference.bib
+   :style: apa

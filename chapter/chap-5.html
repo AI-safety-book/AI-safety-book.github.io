@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    
+    <title>5. 视觉大模型安全 &#8212; 大模型安全 1.0.0 documentation</title>
+
+    <link rel="stylesheet" href="../_static/material-design-lite-1.3.0/material.purple-deep_orange.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/sphinx_materialdesign_theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/fontawesome/all.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/fonts.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/d2l.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/d2l.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6. 大语言模型安全" href="chap-6.html" />
+    <link rel="prev" title="4. 防御算法基础" href="chap-4.html" /> 
+  </head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-drawer"><header class="mdl-layout__header mdl-layout__header--waterfall ">
+    <div class="mdl-layout__header-row">
+        
+        <nav class="mdl-navigation breadcrumb">
+            <a class="mdl-navigation__link is-active"><span class="section-number">5. </span>视觉大模型安全</a>
+        </nav>
+        <div class="mdl-layout-spacer"></div>
+        <nav class="mdl-navigation">
+        
+<form class="form-inline pull-sm-right" action="../search.html" method="get">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+        <label id="quick-search-icon" class="mdl-button mdl-js-button mdl-button--icon"  for="waterfall-exp">
+          <i class="material-icons">search</i>
+        </label>
+        <div class="mdl-textfield__expandable-holder">
+          <input class="mdl-textfield__input" type="text" name="q"  id="waterfall-exp" placeholder="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </div>
+      </div>
+      <div class="mdl-tooltip" data-mdl-for="quick-search-icon">
+      Quick search
+      </div>
+</form>
+        
+<a id="button-show-source"
+    class="mdl-button mdl-js-button mdl-button--icon"
+    href="../_sources/chapter/chap-5.rst.txt" rel="nofollow">
+  <i class="material-icons">code</i>
+</a>
+<div class="mdl-tooltip" data-mdl-for="button-show-source">
+Show Source
+</div>
+        </nav>
+    </div>
+    <div class="mdl-layout__header-row header-links">
+      <div class="mdl-layout-spacer"></div>
+      <nav class="mdl-navigation">
+          
+              <a  class="mdl-navigation__link" href="https://github.com/large-model-safety">
+                  <i class="fab fa-github"></i>
+                  Github
+              </a>
+      </nav>
+    </div>
+</header><header class="mdl-layout__drawer">
+    
+          <!-- Title -->
+      <span class="mdl-layout-title">
+          <a class="title" href="../index.html">
+              <img class="logo" src="../_static/logo_with_text.png" alt="大模型安全"/>
+          </a>
+      </span>
+    
+    
+      <div class="globaltoc">
+        <span class="mdl-layout-title toc">Table Of Contents</span>
+        
+        
+            
+            <nav class="mdl-navigation">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chap-1.html">1. 人工智能安全概述</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-2.html">2. 生命周期</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-3.html">3. 攻击算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-4.html">4. 防御算法基础</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. 视觉大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-6.html">6. 大语言模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-7.html">7. 多模态大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-8.html">8. 总结与展望</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">参考文献</a></li>
+</ul>
+
+            </nav>
+        
+        </div>
+    
+</header>
+        <main class="mdl-layout__content" tabIndex="0">
+
+	<script type="text/javascript" src="../_static/sphinx_materialdesign_theme.js "></script>
+    <header class="mdl-layout__drawer">
+    
+          <!-- Title -->
+      <span class="mdl-layout-title">
+          <a class="title" href="../index.html">
+              <img class="logo" src="../_static/logo_with_text.png" alt="大模型安全"/>
+          </a>
+      </span>
+    
+    
+      <div class="globaltoc">
+        <span class="mdl-layout-title toc">Table Of Contents</span>
+        
+        
+            
+            <nav class="mdl-navigation">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chap-1.html">1. 人工智能安全概述</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-2.html">2. 生命周期</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-3.html">3. 攻击算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-4.html">4. 防御算法基础</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. 视觉大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-6.html">6. 大语言模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-7.html">7. 多模态大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-8.html">8. 总结与展望</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">参考文献</a></li>
+</ul>
+
+            </nav>
+        
+        </div>
+    
+</header>
+
+    <div class="document">
+        <div class="page-content" role="main">
+        
+  <div class="section" id="chap-5">
+<span id="id1"></span><h1><span class="section-number">5. </span>视觉大模型安全<a class="headerlink" href="#chap-5" title="Permalink to this heading">¶</a></h1>
+<p>在视觉领域，卷积神经网络曾经是主导模型，凭借其在图像分类、目标检测和语义分割等任务中的卓越表现，成为计算机视觉领域的核心技术。卷积神经网络通过层级卷积和池化操作逐步提取图像特征，其局部感受野和参数共享机制，使其在处理图像数据时效率高且效果好。然而，随着数据量和计算能力的不断提升，对模型能力和性能的需求也越来越高，这促使研究人员探索新的模型架构。</p>
+<p>近年来，ViT大放异彩，逐渐替代卷积神经网络成为视觉领域的主流模型。ViT借鉴了Transformer架构在自然语言处理领域的成功经验，通过处理非重叠的图像块并应用自注意力机制，捕捉全局特征。与传统的卷积神经网络不同，ViT不再依赖卷积操作，而是利用自注意力机制来捕捉图像中不同区域之间的关系，从而提供更丰富的上下文信息。这使得ViT在大型图像数据集上训练时表现出色，并在许多视觉任务中取得了显著的性能提升。关于ViT的具体介绍可以参考章节
+<a class="reference internal" href="chap-2.html#sec-2-2-2"><span class="std std-numref">2.2.2</span></a> .</p>
+<p>尽管ViT在视觉任务中表现出色，但其安全性问题也引起了广泛关注。与卷积神经网络一样，ViT模型也会受到对抗样本的攻击，发生预测错误。此外，后门攻击、模型抽取、数据抽取等问题在ViT模型中也需要进一步研究和解决。在本章中，我们将深入探讨ViT模型 <a class="footnote-reference brackets" href="#id102" id="id2">1</a>
+的安全性问题，包括对抗攻击、对抗防御、后门攻击、后门防御、模型抽取以及深度伪造。</p>
+<div class="section" id="sec-adv-attack">
+<span id="id3"></span><h2><span class="section-number">5.1. </span>对抗攻击<a class="headerlink" href="#sec-adv-attack" title="Permalink to this heading">¶</a></h2>
+<p>此前的对抗攻击算法主要针对卷积神经网络设计。然而，随着ViT模型逐渐成为主流模型，研究人员开始关注ViT模型对这些攻击的鲁棒性。本节将介绍针对ViT模型的白盒攻击、迁移攻击以及查询攻击。</p>
+<div class="section" id="id4">
+<h3><span class="section-number">5.1.1. </span>白盒攻击<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>传统白盒攻击算法，比如FGSM、PGD、AutoAttack等，基于对抗梯度生成对抗样本，可以直接跨模型类型使用。即这些白盒攻击算法可以直接用来攻击ViT模型。针对ViT模型，当前研究首要关注的问题是<em>“ViT模型是否比传统卷积神经网络更鲁棒”</em>？本小节简单总结介绍当前工作在这方面所取得的理解。</p>
+<p>研究表明，ViT模型在面对不同类型的白盒攻击时，其安全性和鲁棒性表现并不优于卷积神经网络
+<span id="id5">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id268" title="Mahmood, K., Mahmood, R., &amp; Van Dijk, M. (2021). On the robustness of vision transformers to adversarial examples. IEEE International Conference on Computer Vision.">Mahmood <em>et al.</em>, 2021</a>)</span>
+。并且，随着扰动强度的增大，ViT模型的白盒鲁棒性甚至比传统卷积神经网络还要差。另外，基于频率视角下的研究显示，相比于传统卷积神经网络，ViT模型在应对高频扰动时表现出更强的鲁棒性
+<span id="id6">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id271" title="Shao, R., Shi, Z., Yi, J., Chen, P.-Y., &amp; Hsieh, C.-J. (2022). On the adversarial robustness of vision transformers. Transactions on Machine Learning Research.">Shao <em>et al.</em>, 2022</a>)</span>
+。这是因为卷积神经网络更依赖图像中的高频信息进行决策，因而对高频扰动更加敏感。</p>
+<p>考虑到ViT模型将输入图像表示为图像块的序列，这种基于图像块的输入引发了一个疑问：当个别输入图像块受到对抗扰动时，ViT的表现如何？在探讨ViT的对抗鲁棒性时，需要深入分析其在这种情况下的行为表现，并评估其相对于卷积神经网络的优势和不足。研究发现，ViT模型对自然损坏的图像块更具鲁棒性，而对于对抗扰动的图像块更不鲁棒
+<span id="id7">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id269" title="Gu, J., Tresp, V., &amp; Qin, Y. (2022). Are vision transformers robust to patch perturbations? European Conference on Computer Vision.">Gu <em>et al.</em>, 2022</a>)</span>
+。相比于卷积神经网络，ViT模型的自注意力机制极大地影响了ViT模型的鲁棒性。当图像块被自然损坏时，卷积神经网络对于自然损坏的图像块和原始干净图像块的注意力相同，而ViT模型对于自然损坏的图像块的关注少于原始干净图像块，因而对于自然损坏的图像块具有更高的鲁棒性；而当图像块被对抗扰动时，卷积神经网络依然将损坏的图像块视为正常的图像块，对于对抗扰动后的图像块的注意力和原始图像块相似，而对抗扰动的图像块则吸引了ViT模型更多的注意力，导致模型更容易被欺骗。这也使得攻击者可以通过攻击图像块的方式来攻击ViT模型，此攻击方法也被称为<strong>图像块欺骗</strong>（Patch-Fool）
+<span id="id8">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id270" title="Fu, Y., Zhang, S., Wu, S., Wan, C., &amp; Lin, Y. (2022). Patch-fool: are vision transformers always robust against adversarial perturbations? International Conference on Learning Representations.">Fu <em>et al.</em>, 2022</a>)</span> 。</p>
+<p>综上所述，针对ViT模型的白盒对抗鲁棒性，我们已经取得了以下理解：</p>
+<ul class="simple">
+<li><p>在白盒攻击场景下，ViT模型的鲁棒性并不好，随着对抗扰动强度的增大，ViT模型的白盒鲁棒性甚至比传统卷积神经网络还要差。</p></li>
+<li><p>相比卷积神经网络，ViT模型对于高频扰动更加鲁棒。</p></li>
+<li><p>面对图像块级别的扰动，ViT模型对自然损坏的图像块更加鲁棒，而同时也更容易受到对抗图像块的攻击。</p></li>
+</ul>
+<p>下面我们介绍两类主要针对ViT所提出的攻击，即迁移攻击和查询攻击。</p>
+</div>
+<div class="section" id="id9">
+<h3><span class="section-number">5.1.2. </span>迁移攻击<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<p>与白盒攻击相比，迁移攻击更加贴近实际应用场景。迁移攻击不需要知道目标模型的参数细节，只需在一个替代模型上生成对抗样本，并直接应用这些样本来攻击目标模型。这使得迁移攻击在实际场景中可行性和威胁性更高。</p>
+<p>因为ViT的特殊输入模式（图像块）会在一定程度上干扰对抗噪声，所以相比卷积神经网络，ViT模型对于迁移攻击会更鲁棒一些，并且随着模型容量的增加，模型的鲁棒性也逐渐增强。虽然ViT模型针对迁移攻击更鲁棒，但是攻击者可以利用ViT模型来生成对抗样本，并用它们来攻击别的模型（包括ViT和其他模型），带来新的安全风险。如何基于ViT来生成跨模型迁移性更好的对抗样本是一个值得研究的问题。</p>
+<p>另外，随着“预训练-微调”范式的广泛应用，一种新的迁移攻击范式应运而生，即<strong>上下游迁移攻击</strong>。这种攻击方法在预训练模型上生成对抗样本，然后用它们来攻击在下游任务上微调的模型。上下游迁移攻击利用了预训练模型与微调模型之间的继承关系，使得对抗噪声在不同训练阶段和任务之间保持有效。此类攻击不仅提升了攻击的广泛性，同时也对模型的鲁棒性提出了更高的要求。</p>
+<p>在本小节中，我们将介绍几个基于ViT模型提出的、有代表性的跨模型迁移和上下游迁移攻击算法。</p>
+<div class="section" id="id10">
+<h4><span class="section-number">5.1.2.1. </span>跨模型迁移攻击<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
+<p>这里的跨模型迁移攻击主要是从ViT模型往其他模型迁移，大都借助ViT模型的图像块特点，设计不同的迁移增强技术来提升迁移性。</p>
+<p><strong>自集成+词元精炼</strong>：
+ViT模型将输入图像划分为若干固定大小的图像块，然后将其投影到一个高维空间中。这些嵌入向量（称为<em>视觉词元</em>）连同一个特殊的分类词元（cls
+token）一起输入到模型中。分类词元在初始时被设置为一个固定的向量，用于捕获全局信息，并在后续的层中不断更新。ViT模型通常由多个Transformer块组成，每个块包括多头自注意力模块和前馈层模块。其中，多头自注意力模块计算输入向量之间的关系，并生成加权的注意力表示。然后，前馈层模块对这些加权表示进行进一步的非线性变换。每个块的输入包括视觉词元和分类词元，每个块的输出作为下一个块的输入。经过一系列这样的处理后，最终的分类词元携带了图像的全局特征。在分类任务中，最后一个块的分类词元被输入到分类头中，通过一个全连接层进行处理，从而输出预测结果。</p>
+<div class="figure align-default" id="id103">
+<span id="fig-self-ensemble"></span><a class="reference internal image-reference" href="../_images/1.png"><img alt="../_images/1.png" src="../_images/1.png" style="width: 892px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.1 </span><span class="caption-text">自集成示意图 <span id="id11">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id272" title="Naseer, M., Ranasinghe, K., Khan, S., Khan, F. S., &amp; Porikli, F. (2021). On improving adversarial transferability of vision transformers. arXiv preprint arXiv:2106.04169.">Naseer <em>et al.</em>, 2021</a>)</span></span><a class="headerlink" href="#id103" title="Permalink to this image">¶</a></p>
+</div>
+<p>传统的对抗攻击仅使用ViT中最后一个块的分类词元来生成对抗样本，丢弃了其他块的分类词元，从而导致了对抗样本的迁移性较差。<strong>自集成</strong>（self-ensemble）
+<span id="id12">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id272" title="Naseer, M., Ranasinghe, K., Khan, S., Khan, F. S., &amp; Porikli, F. (2021). On improving adversarial transferability of vision transformers. arXiv preprint arXiv:2106.04169.">Naseer <em>et al.</em>, 2021</a>)</span>
+方法的思路是有效地利用多个分类词元来生成对抗样本。如
+<a class="reference internal" href="#fig-self-ensemble"><span class="std std-numref">图5.1.1</span></a>
+（左图）所示，自集成策略通过将单个ViT模型分解为Transformer块的集合，找到多条判别路径，从而充分利用每个Transformer块输出的分类词元来生成对抗样本。一个包含<span class="math notranslate nohighlight">\(n\)</span>个Transformer块的ViT模型，可以记为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-vit">
+<span class="eqno">(5.1.1)<a class="headerlink" href="#equation-eq-vit" title="Permalink to this equation">¶</a></span>\[\mathcal{F}=\left(f_1 \circ f_2 \circ f_3 \circ \ldots f_n\right) \circ g\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(f_i\)</span>表示一个由多头自注意力模块和前馈层模块组成的单个Transformer块，<span class="math notranslate nohighlight">\(g\)</span>是最终的分类头。自集成的策略充分利用每个Transformer块，并且使用共享的分类头作为一条判别路径。例如，使用第<span class="math notranslate nohighlight">\(k\)</span>个Transformer块的分类词元来分类的公式可表示如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-self-ensemble">
+<span class="eqno">(5.1.2)<a class="headerlink" href="#equation-eq-self-ensemble" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathcal{F}_k=\left(\prod_{i=1}^k f_i\right) \circ g, \quad \text {其中} \quad k=1,2, \ldots, n\end{split}\]</div>
+<p>因此，对于一个包含<span class="math notranslate nohighlight">\(n\)</span>个Transformer块的ViT模型，一共可以得到<span class="math notranslate nohighlight">\(n\)</span>条判别路径。对于无目标攻击，使用自集成策略的对抗优化目标为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-self-ensemble-1">
+<span class="eqno">(5.1.3)<a class="headerlink" href="#equation-eq-self-ensemble-1" title="Permalink to this equation">¶</a></span>\[\begin{split}\max _{{\boldsymbol{x}}'} \sum_{k=1}^n \mathbb{1}[ \mathcal{F}_k\left({\boldsymbol{x}}'\right)_{\text {argmax}} \neq y ], \quad \text { s.t. }\left\|{\boldsymbol{x}}-{\boldsymbol{x}}'\right\|_p \leq \epsilon\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathbb{1}[\cdot]\)</span>为指示函数。类似的，有目标攻击的优化目标可以对应的写成最小化到目标类别的损失。</p>
+<p>由于在ViT的训练过程中，只有最后一个Transformer块的分类词元被输入到分类头中，这意味着其它块输出的分类词元与共享的分类头<span class="math notranslate nohighlight">\(g\)</span>并没有对齐，从而导致分类性能不佳。对此，可以使用<strong>词元精炼策略</strong>（token
+refinement）让每个块输出的分类词元与最终的分类头<span class="math notranslate nohighlight">\(g\)</span>对齐，并提高它们的判别能力，从而有助于提高对抗攻击的迁移性。如
+<a class="reference internal" href="#fig-token-refinement"><span class="std std-numref">图5.1.2</span></a>
+（右图）所示，词元精炼模块将每个块的分类词元输入到一个多层感知器中，同时将所有视觉词元输入到一个卷积模块中并进行池化操作，二者输出融合后作为最终分类头的输入。在此基础上，可以通过训练多层感知器和卷积模块使各分类词元、视觉词元和分类头对齐。</p>
+<div class="figure align-default" id="id104">
+<span id="fig-token-refinement"></span><a class="reference internal image-reference" href="../_images/2.png"><img alt="../_images/2.png" src="../_images/2.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.2 </span><span class="caption-text">左图：使用了自集成以及词元精炼的ViT模型；右图：词元精炼模块
+<span id="id13">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id272" title="Naseer, M., Ranasinghe, K., Khan, S., Khan, F. S., &amp; Porikli, F. (2021). On improving adversarial transferability of vision transformers. arXiv preprint arXiv:2106.04169.">Naseer <em>et al.</em>, 2021</a>)</span> 。</span><a class="headerlink" href="#id104" title="Permalink to this image">¶</a></p>
+</div>
+<p>实验表明，自集成和词元精炼方法可以明显改善在ViT模型上生成的对抗样本的迁移性。但是此方法仍存在一定的局限性，比如对于分类词元的依赖很高，而且词元精炼模块的训练也会带来一定的计算开销。</p>
+<div class="figure align-default" id="id105">
+<span id="fig-pna"></span><a class="reference internal image-reference" href="../_images/3.png"><img alt="../_images/3.png" src="../_images/3.png" style="width: 309px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.3 </span><span class="caption-text">PNA攻击示意图 <span id="id14">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id273" title="Wei, Z., Chen, J., Goldblum, M., Wu, Z., Goldstein, T., &amp; Jiang, Y.-G. (2022). Towards transferable adversarial attacks on vision transformers. AAAI Conference on Artificial Intelligence (pp. 2668–2676).">Wei <em>et al.</em>, 2022</a>)</span></span><a class="headerlink" href="#id105" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>PNA+PatchOut</strong>：
+在ViT模型中，多头自注意力模块使用多个平行的自注意力头来学习输入序列的不同部分之间的关系。最终，多头输出会进行拼接和投影，将来自不同特征子空间的信息组合起来。
+研究发现，不同图像块之间过强的交互反而会影响生成对抗样本的迁移性。针对此问题，<strong>PNA</strong>（Pay
+No Attention） <span id="id15">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id273" title="Wei, Z., Chen, J., Goldblum, M., Wu, Z., Goldstein, T., &amp; Jiang, Y.-G. (2022). Towards transferable adversarial attacks on vision transformers. AAAI Conference on Artificial Intelligence (pp. 2668–2676).">Wei <em>et al.</em>, 2022</a>)</span>
+方法在反向传播过程中忽略自注意力分支，从而防止不同图像块之间过强的交互，如
+<a class="reference internal" href="#fig-pna"><span class="std std-numref">图5.1.3</span></a> 所示。这一方法被证明可以提高对抗样本的迁移性。</p>
+<p>对抗噪声对源模型的过拟合是导致其迁移性差的一个主要原因。对此，<strong>PatchOut</strong>方法在生成对抗样本的每轮迭代中，随机选择一部分图像块来进行更新，这可以有效地减轻过拟合现象。其攻击的目标函数可以表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-patchout">
+<span class="eqno">(5.1.4)<a class="headerlink" href="#equation-eq-patchout" title="Permalink to this equation">¶</a></span>\[\begin{split}\underset{\delta}{\mathop{\mathrm{arg\,max}} } \; \mathcal{L}(f({\boldsymbol{x}}+M \odot \delta), y)+\lambda\|\delta\|_2, \quad \text { s.t. }\|\delta\|_{\infty}&lt;\epsilon\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}\)</span>表示损失函数（如常用的交叉熵损失），<span class="math notranslate nohighlight">\(M \in\{0,1\}^{H \times W \times C}\)</span>表示掩码矩阵。如果输入的图像块<span class="math notranslate nohighlight">\({\boldsymbol{x}}_p^i\)</span>被随机选中为保留，则<span class="math notranslate nohighlight">\(M\)</span>对应位置的掩码值为1，否则为0。通过掩码矩阵<span class="math notranslate nohighlight">\(M\)</span>可以控制随机选择哪些图像块进行更新。式
+<a class="reference internal" href="#equation-eq-patchout">(5.1.4)</a> 中的第二项使得扰动具有较大的<span class="math notranslate nohighlight">\(L_2\)</span>范数。
+实验证明，PNA方法和PatchOut方法可以有效地增强对抗样本的迁移性。</p>
+</div>
+<div class="section" id="id16">
+<h4><span class="section-number">5.1.2.2. </span>上下游迁移攻击<a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h4>
+<p>“预训练-微调”已经成为计算机视觉领域的主流范式（其他领域也是如此），推动大模型在各垂直领域的广泛应用。视觉领域的预训练通常使用自监督学习方法在大规模图像数据集上训练一个强大的特征提取器，以此来学习丰富的特征表示。在微调阶段，我们在下游数据集上对预训练模型进行微调，使其适配各类下游任务，如图像分类、目标检测和图像分割等。预训练-微调范式引发了新的迁移安全风险。由于预训练模型和下游微调后的模型无论是在模型架构方面，还是在模型参数方面，都高度同质化。因此，基于预训练模型生成的对抗样本可以轻易的迁移到下游微调模型。我们给这种新的迁移范式，称为<strong>上下游迁移攻击</strong>。接下来，我们将介绍两种上下游迁移攻击的方法，以便读者对此有更详细的了解。</p>
+<p><strong>低层提升攻击</strong>：
+神经网络具有强大的特征提取能力，不同隐藏层提取的特征也有所不同。在视觉任务中，浅层通常提取图像中的一些通用特征，比如纹理、颜色等，而深层提取的特征则更加与任务相关，这些特征通常是语义级别的，包括对象类别、场景理解和复杂模式等。在微调过程中，越深层的参数变化越大，而浅层的参数大都保持不变或者变化很小。由于不同数据集的图像共享类似的浅层特征，所以<strong>低层提升攻击</strong>（Low-level
+Layer Lifting Attack，L4A） <span id="id17">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id274" title="Ban, Y., &amp; Dong, Y. (2022). Pre-trained adversarial perturbations. Advances in Neural Information Processing Systems.">Ban and Dong, 2022</a>)</span>
+选择低层（浅层）特征进行攻击，以增强对抗样本的迁移性。具体来说，L4A攻击通过最大化浅层特征输出来生成对抗样本，这一过程可以形式化表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-l-base">
+<span class="eqno">(5.1.5)<a class="headerlink" href="#equation-eq-l-base" title="Permalink to this equation">¶</a></span>\[\min _{\boldsymbol{\delta}} \mathcal{L}_{base}\left(f_{\boldsymbol{\theta}}, {\boldsymbol{x}}, \boldsymbol{\delta}\right)=-\mathbb{E}_{{\boldsymbol{x}} \sim D_p}\left[\left\|f_{\boldsymbol{\theta}}^k({\boldsymbol{x}}+\boldsymbol{\delta})\right\|_F^2\right]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\|\cdot\|_F\)</span>表示F-范数，<span class="math notranslate nohighlight">\(f_{\boldsymbol{\theta}}^k({\boldsymbol{x}}+\boldsymbol{\delta})\)</span>表示模型第<span class="math notranslate nohighlight">\(k\)</span>层输出的特征。实验发现，<span class="math notranslate nohighlight">\(k\)</span>越小，即选择攻击的层越浅，生成对抗样本的迁移性就越好。可以通过选择多个浅层同时进行攻击，来进一步提升效果，改进后的方法可以表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-l-fuse">
+<span class="eqno">(5.1.6)<a class="headerlink" href="#equation-eq-l-fuse" title="Permalink to this equation">¶</a></span>\[\min _{\boldsymbol{\delta}} \mathcal{L}_{fuse}\left(f_{\boldsymbol{\theta}}, {\boldsymbol{x}}, \boldsymbol{\delta}\right)=-\mathbb{E}_{{\boldsymbol{x}} \sim D_p}\left[\left\|f_{\boldsymbol{\theta}}^{k_1}({\boldsymbol{x}}+\boldsymbol{\delta})\right\|_F^2+\lambda \cdot\left\|f_{\boldsymbol{\theta}}^{k_2}({\boldsymbol{x}}+\boldsymbol{\delta})\right\|_F^2\right]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(k_1\)</span>和<span class="math notranslate nohighlight">\(k_2\)</span>是选择攻击的第<span class="math notranslate nohighlight">\(k_1\)</span>和<span class="math notranslate nohighlight">\(k_2\)</span>层，参数<span class="math notranslate nohighlight">\(\lambda\)</span>
+用于平衡不同层之间的重要性。</p>
+<p>由于预训练数据集和微调数据集在统计分布上往往存在较大差异，且在生成对抗样本的过程中并不知道微调数据集的信息，因此，生成的对抗噪声可能会过拟合到预训练模型和数据分布，从而导致迁移性差。对此，L4A攻击进一步使用不同均值和方差的高斯噪声来防止过拟合，可行形式化表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-l-ugs">
+<span class="eqno">(5.1.7)<a class="headerlink" href="#equation-eq-l-ugs" title="Permalink to this equation">¶</a></span>\[\min _{\boldsymbol{\delta}} \mathcal{L}_{u g s}\left(f_{\boldsymbol{\theta}}, {\boldsymbol{x}}, \boldsymbol{\delta}\right)=-\mathbb{E}_{\boldsymbol{\mu}, \boldsymbol{\sigma}, \mathbf{n}_0 \sim N(\boldsymbol{\mu}, \boldsymbol{\sigma})}\left\{\mathbb{E}_{{\boldsymbol{x}} \sim \mathcal{D}_p}\left[\left\|f_{\boldsymbol{\theta}}^k({\boldsymbol{x}}+\boldsymbol{\delta})\right\|_F^2+\lambda \cdot\left\|f_{\boldsymbol{\theta}}^k\left(\mathbf{n}_0+\boldsymbol{\delta}\right)\right\|_F^2\right]\right\}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\boldsymbol{\mu}\)</span>和<span class="math notranslate nohighlight">\(\boldsymbol{\sigma}\)</span>是从均匀分布<span class="math notranslate nohighlight">\(U\left(\boldsymbol{\mu}_l, \boldsymbol{\mu}_h\right)\)</span>和<span class="math notranslate nohighlight">\(U\left(\boldsymbol{\sigma}_l, \boldsymbol{\sigma}_h\right)\)</span>中采样得到的，而<span class="math notranslate nohighlight">\(\boldsymbol{\mu}_l\)</span>、<span class="math notranslate nohighlight">\(\boldsymbol{\mu}_h\)</span>、<span class="math notranslate nohighlight">\(\boldsymbol{\sigma}_l\)</span>和<span class="math notranslate nohighlight">\(\boldsymbol{\sigma}_h\)</span>是预定义的超参数。L4A的攻击流程如
+<a class="reference internal" href="#fig-l4a"><span class="std std-numref">图5.1.4</span></a> 所示。</p>
+<div class="figure align-default" id="id106">
+<span id="fig-l4a"></span><a class="reference internal image-reference" href="../_images/4.png"><img alt="../_images/4.png" src="../_images/4.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.4 </span><span class="caption-text">低层提升攻击（L4A）示意图 <span id="id18">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id274" title="Ban, Y., &amp; Dong, Y. (2022). Pre-trained adversarial perturbations. Advances in Neural Information Processing Systems.">Ban and Dong, 2022</a>)</span></span><a class="headerlink" href="#id106" title="Permalink to this image">¶</a></p>
+</div>
+<p>实验表明，在不同预训练方法得到的预训练模型上，L4A攻击方法都可以生成有效迁移到下游微调模型的攻击。</p>
+<p><strong>对抗编码器</strong>：基于自监督学习的预训练方法通常使用大量无标签数据来预训练编码器，预训练的编码器可以用作通用特征提取器，在下游任务上展现出优秀的特征提取和泛化能力。在这个过程中，预训练的编码器起到了至关重要的作用，所以它的安全性近年来受到越来越多的关注。
+在此背景下，研究者提出了<strong>对抗编码器</strong>（AdvEncoder）
+<span id="id19">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id275" title="Zhou, Z., Hu, S., Zhao, R., Wang, Q., Zhang, L. Y., Hou, J., &amp; Jin, H. (2023). Downstream-agnostic adversarial examples. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4345–4355).">Zhou <em>et al.</em>, 2023</a>)</span>
+攻击，探索基于预训练的编码器生成具有高迁移性的对抗样本和图像块。</p>
+<p>作为特征提取器，预训练编码器具有一个特性，即<em>对于相似的图像会输出相似的特征向量</em>。这些向量在特征空间中彼此靠近，并且与其他不相似的图像距离较远。下游任务将根据这些特征向量进行决策，因此攻击者只需要在特征空间中尽可能地将对抗样本推离其初始位置即可完成攻击。但是由于下游任务不可知，在生成对抗样本时会面临两个挑战：</p>
+<ol class="arabic simple">
+<li><p><strong>预训练编码器缺乏监督信号</strong>。当攻击者将图像输入预训练编码器时，只会得到相应的特征向量，而不是标签。标签信号的确实使得很多已有对抗样本生成方法无法直接被用来攻击预训练编码器。如果直接在图片上添加对抗扰动，可能无法将对抗样本推出决策边界，而只是在同一类别内部移动。</p></li>
+<li><p><strong>缺乏关于下游任务的信息</strong>。由于预训练数据集和下游微调数据集存在着较大的差异，因此微调后模型的决策边界会发生一定程度的偏移。这可能会导致这样一种情况：微调引起的决策边界变化使得原本已经偏离原始类别的对抗样本再次被下游模型正确分类。</p></li>
+</ol>
+<p>为了解决第一个问题，考虑到图片中的高频成分对于模型决策和生成对抗扰动十分重要，AdvEncoder使用对抗噪声来改变图片中的高频信息（如纹理信息）从而影响预训练编码器的输出。这相当于将高频信息作为监督信号引导对抗样本的生成。高频信息的破坏可以有效地改变图像的语义信息，从而更容易将对抗样本推出原始的决策边界。
+为了解决第二个问题，AdvEncoder使用生成网络来生成对抗噪声，借助生成网络在生成一定模式特征的能力来提高对抗扰动的泛化性，希望生成的对抗样本可以有效偏离微调后的决策边界。</p>
+<div class="figure align-default" id="id107">
+<span id="fig-advencoder"></span><a class="reference internal image-reference" href="../_images/5.png"><img alt="../_images/5.png" src="../_images/5.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.5 </span><span class="caption-text">AdvEncoder框架图 <span id="id20">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id275" title="Zhou, Z., Hu, S., Zhao, R., Wang, Q., Zhang, L. Y., Hou, J., &amp; Jin, H. (2023). Downstream-agnostic adversarial examples. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4345–4355).">Zhou <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id107" title="Permalink to this image">¶</a></p>
+</div>
+<p>如 <a class="reference internal" href="#fig-advencoder"><span class="std std-numref">图5.1.5</span></a>
+所示，AdvEncoder包含一个对抗样本生成器<span class="math notranslate nohighlight">\(G\)</span>、一个高频滤波器<span class="math notranslate nohighlight">\(H\)</span>、以及被攻击的编码器<span class="math notranslate nohighlight">\(E\)</span>。通过将固定噪声<span class="math notranslate nohighlight">\(z\)</span>输入到对抗样本生成器<span class="math notranslate nohighlight">\(G\)</span>中，获得一个通用的对抗噪声，并将其添加到到图像上，得到对抗样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{adv}\)</span>。生成器<span class="math notranslate nohighlight">\(G\)</span>训练的目标函数为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-advencoder">
+<span class="eqno">(5.1.8)<a class="headerlink" href="#equation-eq-advencoder" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{G}=\alpha \mathcal{L}_{a d v}+\beta \mathcal{L}_{h f c}+\lambda \mathcal{L}_q\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{adv}\)</span>是对抗损失函数，<span class="math notranslate nohighlight">\(\mathcal{L}_{hfc}\)</span>是高频成分损失，<span class="math notranslate nohighlight">\(\mathcal{L}_q\)</span>是质量损失，<span class="math notranslate nohighlight">\(\alpha\)</span>、<span class="math notranslate nohighlight">\(\beta\)</span>、<span class="math notranslate nohighlight">\(\lambda\)</span>
+是预先定义好的超参数。</p>
+<p><span class="math notranslate nohighlight">\(\mathcal{L}_{a d v}\)</span>通过最大化编码器输出的干净特征向量和对抗特征向量之间的距离，增强通用对抗噪声的攻击能力。AdvEncoder采用InfoNCE
+<span id="id21">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id276" title="Oord, A. v. d., Li, Y., &amp; Vinyals, O. (2018). Representation learning with contrastive predictive coding.">Oord <em>et al.</em>, 2018</a>)</span>
+损失来衡量预训练编码器<span class="math notranslate nohighlight">\(E\)</span>输出特征向量之间的相似性：</p>
+<div class="math notranslate nohighlight" id="equation-eq-l-adv">
+<span class="eqno">(5.1.9)<a class="headerlink" href="#equation-eq-l-adv" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{a d v}=\log \left[\frac{\exp \left(S\left(E_\theta\left({\boldsymbol{x}}_i^{a d v}\right), E_\theta\left({\boldsymbol{x}}_i\right)\right) / \tau\right)}{\sum_{j=0}^K \exp \left(S\left(E_\theta\left({\boldsymbol{x}}_i^{a d v}\right), E_\theta\left({\boldsymbol{x}}_j\right) / \tau\right)\right)}\right]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(S(\cdot)\)</span>表示余弦相似度，<span class="math notranslate nohighlight">\(\tau\)</span>表示温度超参。</p>
+<p><span class="math notranslate nohighlight">\(\mathcal{L}_{h f c}\)</span>通过扰动图片中的高频成分来改变图像的语义特征，使对抗样本进一步远离原始样本。通过高频成分滤波器<span class="math notranslate nohighlight">\({\mathcal{H}}\)</span>来得到图片中的高频成分，要求对抗样本的高频成分和干净样本的高频成分尽量不相似，从而使得对抗样本和干净样本在语义上不一致。<span class="math notranslate nohighlight">\(\mathcal{L}_{h f c}\)</span>的具体定义为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-l-hfc">
+<span class="eqno">(5.1.10)<a class="headerlink" href="#equation-eq-l-hfc" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{hfc}=-\left\|H\left({\boldsymbol{x}}^{adv}\right)-H({\boldsymbol{x}})\right\|_2\]</div>
+<p>为了实现更好的隐蔽性，使用质量损失<span class="math notranslate nohighlight">\(\mathcal{L}_q\)</span>来控制生成器输出的对抗噪声幅度：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-0">
+<span class="eqno">(5.1.11)<a class="headerlink" href="#equation-chapter-chap-5-0" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_q=\left\|{\boldsymbol{x}}^{a d v}-{\boldsymbol{x}}\right\|_2\]</div>
+<p>在不改变AdvEncoder框架的情况下，可以将生成的通用对抗噪声应用于两种常见的攻击形式：（1）添加到全图的、隐蔽的对抗扰动，添加过程可以表示为
+<a class="reference internal" href="#equation-eq-adv">(5.1.12)</a> ；（2）添加到图像块上的对抗扰动，添加过程可以表示为
+<a class="reference internal" href="#equation-eq-adv-patch">(5.1.13)</a>
+。其中，<span class="math notranslate nohighlight">\(\odot\)</span>表示逐元素相乘，<span class="math notranslate nohighlight">\(m\)</span>是一个二元矩阵，包含对抗扰动图像块的位置信息。</p>
+<div class="math notranslate nohighlight" id="equation-eq-adv">
+<span class="eqno">(5.1.12)<a class="headerlink" href="#equation-eq-adv" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{x}}^{a d v}={\boldsymbol{x}}+ G(z)\]</div>
+<div class="math notranslate nohighlight" id="equation-eq-adv-patch">
+<span class="eqno">(5.1.13)<a class="headerlink" href="#equation-eq-adv-patch" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{x}}^{adv}={\boldsymbol{x}} \odot(1-m)+G(z) \odot m\]</div>
+</div>
+</div>
+<div class="section" id="id22">
+<h3><span class="section-number">5.1.3. </span>查询攻击<a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h3>
+<p>查询攻击是一种黑盒攻击方法，其通过多次查询目标模型来估计对抗梯度信息，从而可以攻击完全黑盒的模型。在攻击ViT模型时，可以利用模型的特性来设计查询策略，从而可以以更少的查询次数获得更准确的攻击。一方面，与卷积神经网络相比，ViT的整体噪声敏感度较低。为了找到初始的对抗样本，针对ViT模型查询攻击需要添加更大幅度的随机噪声。然而，大的初始噪声在攻击过程中更难压缩（使其满足<span class="math notranslate nohighlight">\(\epsilon\)</span>限制）。另一方面，ViT将图像分割为多个非重叠的图像块，这降低了噪声对最终分类结果的影响。这同样也会降低黑盒查询攻击在ViT上的成功率。所以，针对ViT模型的黑盒查询攻击是一个很有挑战性的问题。下面将介绍一种可以部分解决这些挑战的攻击方法。</p>
+<div class="section" id="id23">
+<h4><span class="section-number">5.1.3.1. </span>逐图像块对抗消除<a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h4>
+<p>对于ViT模型<span class="math notranslate nohighlight">\(f\)</span>，向干净样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>添加对抗扰动<span class="math notranslate nohighlight">\(z\)</span>后得到对应的对抗样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}^{\prime} = {\boldsymbol{x}} + z\)</span>，该对抗样本可以让模型做出错误预测<span class="math notranslate nohighlight">\(f\left({\boldsymbol{x}}^{\prime}\right) \neq f({\boldsymbol{x}})\)</span>。选定一个宽为<span class="math notranslate nohighlight">\(w\)</span>，高为<span class="math notranslate nohighlight">\(h\)</span>，左上角坐标为<span class="math notranslate nohighlight">\((sr, sc)\)</span>的图像块，对其进行压缩后得到新的对抗噪声<span class="math notranslate nohighlight">\(\tilde{z}\)</span>：</p>
+<div class="math notranslate nohighlight" id="equation-eq-par-z-1">
+<span class="eqno">(5.1.14)<a class="headerlink" href="#equation-eq-par-z-1" title="Permalink to this equation">¶</a></span>\[\begin{split}\tilde{z}(s r, s c, h, w, \kappa)_{r, c}=\left\{\begin{array}{l}z_{r, c} \cdot \kappa, \quad \text { if } s r \leq r&lt;s r+h \text { and } s c \leq c&lt;s c+w, \\z_{r, c}\end{array}\right.\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(r\)</span>和<span class="math notranslate nohighlight">\(c\)</span>分别是噪声<span class="math notranslate nohighlight">\(z\)</span>中像素的行列坐标，<span class="math notranslate nohighlight">\(\kappa \in[0,1]\)</span>
+是噪声的压缩比率。</p>
+<p>定义图像块的噪声敏感度<span class="math notranslate nohighlight">\(sens\)</span>为模型<span class="math notranslate nohighlight">\(f\)</span>错误分类<span class="math notranslate nohighlight">\({\boldsymbol{x}} + \tilde{z}\)</span>所需的最小噪声压缩比<span class="math notranslate nohighlight">\(\kappa_{m i n }\)</span>，可形式化表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-par-sen">
+<span class="eqno">(5.1.15)<a class="headerlink" href="#equation-eq-par-sen" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}&amp; \operatorname{sens}\left(f, {\boldsymbol{x}}, {\boldsymbol{x}}^{\prime}, s r, s c, h, w\right)=\kappa_{\text {min }}                                                \\&amp; \text { s.t. } \quad f\left({\boldsymbol{x}}+\tilde{z}\left(s r, s c, h, w, \kappa_{min}\right)\right) \neq f({\boldsymbol{x}})                                     \\&amp; \text { and } \forall \kappa^{\prime}&lt;\kappa_{min }, \quad f\left({\boldsymbol{x}}+\tilde{z}\left(s r, s c, h, w, \kappa^{\prime}\right)\right)=f({\boldsymbol{x}}) \\\end{aligned}\end{split}\]</div>
+<p>噪声敏感度<span class="math notranslate nohighlight">\(sens\)</span>衡量了生成对抗性样本所需要的最小噪声量。较小的噪声敏感度意味着在不改变错误结果的情况下，可以去除更多的噪声。
+研究发现，在噪声压缩的过程中，噪声敏感度更高的图像块更容易造成查询失败。同时发现，在ViT模型中，不同图像块的噪声敏感度差异很大。</p>
+<p>理想情况下，基于查询的攻击应首先压缩<em>噪声敏感度低</em>和<em>噪声扰动幅度大</em>的区域。通过这种方式，既可以保证查询的成功率和单步噪声压缩的幅度，又可以在有限的查询次数下最大化噪声压缩效率。基于此想法，
+<strong>逐图像块对抗消除</strong>（Patch-wise Adversarial Removal，PAR）
+<span id="id24">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id277" title="Shi, Y., Han, Y., Tan, Y.-a., &amp; Kuang, X. (2022). Decision-based black-box attack against vision transformers via patch-wise adversarial removal. Advances in Neural Information Processing Systems.">Shi <em>et al.</em>, 2022</a>)</span>
+方法通过一个由粗到细的搜索过程将图像划分为图像块，并分别压缩每个图像块上的噪声。PAR记录每个图像块的噪声扰动幅度和噪声敏感度，并选择具有最高查询值的图像块进行噪声压缩。此外，PAR也可以为其他查询攻击提供噪声初始化，在不引入额外计算的基础上，提高噪声压缩的效率。</p>
+<p>如 <a class="reference internal" href="#fig-par-noise-compression"><span class="std std-numref">图5.1.6</span></a>
+所示，PAR将初始噪声划分为图像块，探测它们的噪声敏感度，并以图像块为单位压缩噪声。具体来说，PAR通过维护两个掩码矩阵来指导探测过程，分别记录目标模型的噪声敏感度和每个图像块的噪声幅度。由于在黑盒攻击场景下无法获取目标ViT模型的详细信息，PAR不假设ViT的图像块大小，而是从一个较大的图像块大小开始进行多轮的由粗到细的搜索。</p>
+<div class="figure align-default" id="id108">
+<span id="fig-par-noise-compression"></span><a class="reference internal image-reference" href="../_images/7.png"><img alt="../_images/7.png" src="../_images/7.png" style="width: 886px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.6 </span><span class="caption-text">PAR的噪声压缩过程 <span id="id25">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id277" title="Shi, Y., Han, Y., Tan, Y.-a., &amp; Kuang, X. (2022). Decision-based black-box attack against vision transformers via patch-wise adversarial removal. Advances in Neural Information Processing Systems.">Shi <em>et al.</em>, 2022</a>)</span></span><a class="headerlink" href="#id108" title="Permalink to this image">¶</a></p>
+</div>
+<p>首先，PAR初始化一个形状为<span class="math notranslate nohighlight">\(PS_0 \times PS_0\)</span>的噪声敏感度掩码<span class="math notranslate nohighlight">\(M_S\)</span>和噪声幅度掩码<span class="math notranslate nohighlight">\(M_N\)</span>，<span class="math notranslate nohighlight">\(PS_0\)</span>是一个超参数，表示PAR初始使用的图像块大小。用初始对抗样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}^{i n i t}\)</span>中每个图像块噪声幅度的<span class="math notranslate nohighlight">\(L_2\)</span>范数来初始化<span class="math notranslate nohighlight">\(M_N\)</span>：</p>
+<div class="math notranslate nohighlight" id="equation-eq-par-initialize-mn">
+<span class="eqno">(5.1.16)<a class="headerlink" href="#equation-eq-par-initialize-mn" title="Permalink to this equation">¶</a></span>\[M_N(\text {row }, \mathrm{col})=\sqrt{\sum_{i=\text { row } * P S_0+1}^{(r o w+1) * P S_0} \sum_{j=c o l * P S_0+1}^{(r o w+1)*P S_0} \left({\boldsymbol{x}}_{i, j}^{i n i t}-{\boldsymbol{x}}_{i, j}\right)^2}\]</div>
+<p>其中，row 和 col
+分别表示<span class="math notranslate nohighlight">\(M_N\)</span>中行和列的下标，且<span class="math notranslate nohighlight">\(\text {row, col} \in\left[1, P S_0\right]\)</span>。噪声敏感度掩码<span class="math notranslate nohighlight">\(M_S\)</span>是二元掩码，值为1表示对应的图像块的噪声敏感度低，值为0表示先前的噪声压缩过程失败。初始时，设置<span class="math notranslate nohighlight">\(M_S\)</span>为全1矩阵。</p>
+<p>在每一次对目标模型进行查询之前，使用逐元素乘积来获得查询值的掩码<span class="math notranslate nohighlight">\(M_Q\)</span>：</p>
+<div class="math notranslate nohighlight" id="equation-eq-par-initialize-ms">
+<span class="eqno">(5.1.17)<a class="headerlink" href="#equation-eq-par-initialize-ms" title="Permalink to this equation">¶</a></span>\[M_S=J_{\text {row}, \mathrm{col}},\quad M_Q=M_N \odot M_S\]</div>
+<p>初始化掩码矩阵后，PAR开始多轮迭代搜索。</p>
+<p>算法 <a class="reference internal" href="#algorithm-par"><span class="std std-numref">图5.1.7</span></a> 定义了详细的迭代搜索过程。
+如果图像块不包含噪声或者之前的查询失败了，那么该图像块的查询值为0。每次迭代对<span class="math notranslate nohighlight">\(M_Q\)</span>进行降序排序，然后去除<span class="math notranslate nohighlight">\(M_Q\)</span>中最高值对应的图像块的噪声。将更新后得到的对抗样本继续输入到目标模型中进行查询，如果其仍然能够使得目标模型错误分类，则查询成功，并保留更新，利用式
+<a class="reference internal" href="#equation-eq-par-initialize-mn">(5.1.16)</a>
+更新<span class="math notranslate nohighlight">\(M_N\)</span>；否则，查询失败，不保留更新，并且在<span class="math notranslate nohighlight">\(M_S\)</span>掩码中将该图像块对应位置设置为0，防止其参与后续更新。</p>
+<p>如果<span class="math notranslate nohighlight">\(M_Q\)</span>的和为0，则说明在当前图像块大小<span class="math notranslate nohighlight">\(PS\)</span>下，所有的图像块要么不含噪声，要么已经被查询过了。在这种情况下，缩小图像块大小，并利用式
+<a class="reference internal" href="#equation-eq-par-initialize-mn">(5.1.16)</a> 和式 <a class="reference internal" href="#equation-eq-par-initialize-ms">(5.1.17)</a>
+重新初始化<span class="math notranslate nohighlight">\(M_N\)</span>和<span class="math notranslate nohighlight">\(M_N\)</span>，重复之前查询探测的过程。这一轮将会进行更加细粒度的查询。当图像块大小已经到达设置的最小值<span class="math notranslate nohighlight">\(PS_{min}\)</span>或者达到最大查询次数<span class="math notranslate nohighlight">\(T\)</span>时，退出探测过程。</p>
+<div class="figure align-default" id="id109">
+<span id="algorithm-par"></span><a class="reference internal image-reference" href="../_images/5.1_par.png"><img alt="../_images/5.1_par.png" src="../_images/5.1_par.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图5.1.7 </span><span class="caption-text">PAR 攻击算法</span><a class="headerlink" href="#id109" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="sec-adv-defense">
+<span id="id26"></span><h2><span class="section-number">5.2. </span>对抗防御<a class="headerlink" href="#sec-adv-defense" title="Permalink to this heading">¶</a></h2>
+<p>为了提高ViT模型的鲁棒性和安全性，研究人员提出了多种对抗防御方法，如大规模对抗训练、对抗微调和扩散净化等，这些方法通过不同的策略来增强模型的基础防御能力。下面将介绍这三个方面比较有代表性的对抗防御方法。</p>
+<div class="section" id="id27">
+<h3><span class="section-number">5.2.1. </span>大规模对抗训练<a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h3>
+<p>对抗训练仍是最可靠的防御方法之一，其通过在对抗样本上训练模型，使模型能够学会识别并抵抗这些恶意输入。然而，此前对抗训练的研究主要集中在小规模模型和数据集上，如ResNet-50和CIFAR-10。为了满足对鲁棒大模型日益增长的需求，研究人员正致力于提升对抗训练的规模，在大一点的模型和海量数据上进行训练。</p>
+<p><strong>AdvXL</strong> <span id="id28">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id282" title="Wang, Z., Li, X., Zhu, H., &amp; Xie, C. (2024). Revisiting adversarial training at scale. arXiv:2401.04727.">Wang <em>et al.</em>, 2024</a>)</span>
+是近期提出的、一种可以实现大规模对抗训练的高效对抗训练策略。AdvXL包括两个阶段：<em>轻量级预训练</em>和<em>密集微调</em>。在预训练阶段，其使用较低分辨率的图像和较弱的攻击进行长时间的预训练；在微调阶段，其使用全分辨率和较强的攻击进行短时间的微调。与普通的单阶段对抗训练相比，这种由弱到强（相对于攻击者）的两阶段对抗训练流程显著降低了整体训练成本，使得大规模对抗训练成为可能。</p>
+<p>AdvXL采用预训练的CLIP文本编码器来处理包含文本描述的大规模网络抓取数据，使得在缺乏精确标签的情况下也能进行对抗训练。
+在对抗训练过程中，AdvXL结合CLIP编码器进行优化，整体优化框架可表示如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-1">
+<span class="eqno">(5.2.1)<a class="headerlink" href="#equation-chapter-chap-5-1" title="Permalink to this equation">¶</a></span>\[\min_{\theta_I} \sum_{(I_i, T_i) \in D} \max_{\delta: \|\delta\|_p \leq \epsilon_p} \mathcal{L}(f_I, f_T, I_i + \delta, T_i)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta_I\)</span>表示图像编码器<span class="math notranslate nohighlight">\(f_I\)</span>的参数，<span class="math notranslate nohighlight">\(\delta\)</span>表示对抗扰动，<span class="math notranslate nohighlight">\(\epsilon_p\)</span>是扰动约束的半径。<span class="math notranslate nohighlight">\(\mathcal{L}\)</span>为对比损失函数，定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-2">
+<span class="eqno">(5.2.2)<a class="headerlink" href="#equation-chapter-chap-5-2" title="Permalink to this equation">¶</a></span>\[\mathcal{L}(f_I, f_T, I_i, T_i) = -\frac{1}{2n} \sum_i \left( \log \frac{\exp(h_T^i \cdot h_I^i / \tau)}{\sum_j \exp(h_T^i \cdot h_I^j / \tau)} + \log \frac{\exp(h_I^i \cdot h_T^i / \tau)}{\sum_j \exp(h_I^i \cdot h_T^j / \tau)} \right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(n\)</span>是批次大小，<span class="math notranslate nohighlight">\(\tau\)</span>是可学习的温度参数，<span class="math notranslate nohighlight">\(I_i\)</span>和<span class="math notranslate nohighlight">\(T_i\)</span>分别表示图像和文本对，<span class="math notranslate nohighlight">\(h_I^i = f_I(I_i) / \|f_I(I_i)\|\)</span>和<span class="math notranslate nohighlight">\(h_T^i = f_T(T_i) / \|f_T(T_i)\|\)</span>分别是图像和文本的归一化投影特征。</p>
+<p>AdvXL在四个不同规模的图像数据集（ImageNet-1K, ImageNet-21K,
+LAION-400M和DataComp-1B）上进行了系统的实验，验证了其在大规模数据和模型上的鲁棒性和泛化能力，为未来的大规模对抗训练提供了新方向。</p>
+</div>
+<div class="section" id="id29">
+<h3><span class="section-number">5.2.2. </span>对抗微调<a class="headerlink" href="#id29" title="Permalink to this heading">¶</a></h3>
+<p>大规模对抗训练往往会耗费大量的计算资源，且需要海量数据的支持。这对于许多数据匮乏的任务而言，难以实现。在这种情况下，只能选择基于微调的方法，在保持准确率的同时提升模型的对抗鲁棒性。</p>
+<p>研究发现，基于非对抗训练的预训练模型进行微调并不会带来对抗鲁棒性，其实是在微调过程中使用对抗训练（此时的对抗训练成为<strong>对抗微调</strong>）也无法弥补基础模型的脆弱性。因此，使用对抗训练过的鲁棒预训练模型是获得下游对抗鲁棒性的基础。本小节所介绍的方法所使用的预训练模型也都是对抗预训练过的鲁棒模型。对抗微调通过在特定任务的数据集上微调预训练的鲁棒模型，可以实现较高的准确率和鲁棒性。这种方法不仅减少了计算资源的消耗，还避免了对大量数据的依赖，为数据匮乏的任务提供了一种高效、可靠的解决方案。接下来，我们将介绍两种有代表性的对抗微调方法。</p>
+<div class="figure align-default" id="id110">
+<span id="fig-autolora"></span><a class="reference internal image-reference" href="../_images/7_8_Auto_Lora.png"><img alt="../_images/7_8_Auto_Lora.png" src="../_images/7_8_Auto_Lora.png" style="width: 721px;" /></a>
+<p class="caption"><span class="caption-number">图5.2.1 </span><span class="caption-text">左图：标准对抗微调；右图：AutoLoRa示意图 <span id="id30">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id279" title="Xu, X., Zhang, J., &amp; Kankanhalli, M. (2023). Autolora: a parameter-free automated robust fine-tuning framework. arXiv preprint arXiv:2310.01818.">Xu <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id110" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>AutoLoRa</strong>
+最简单直接的对抗微调方式就是将对抗训练和微调方法结合，在微调过程中同时优化自然目标（实现高准确率）和对抗目标（实现高鲁棒性）。基于一般微调的对抗微调损失定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-standard-robust-finetuning">
+<span class="eqno">(5.2.3)<a class="headerlink" href="#equation-eq-standard-robust-finetuning" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{vanilla}(D ; \theta, \beta)=\frac{1}{n} \sum_{({\boldsymbol{x}}, y) \in D}\{\underbrace{\mathcal{L}_{CE}\left(h_\theta({\boldsymbol{x}}), y\right)}_{\text {自然目标}}+\underbrace{\beta \cdot \mathcal{L}_{KL}\left(h_\theta(\tilde{{\boldsymbol{x}}}), h_\theta({\boldsymbol{x}})\right)}_{\text {对抗目标}}\}\]</div>
+<p>AutoLoRa <span id="id31">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id279" title="Xu, X., Zhang, J., &amp; Kankanhalli, M. (2023). Autolora: a parameter-free automated robust fine-tuning framework. arXiv preprint arXiv:2310.01818.">Xu <em>et al.</em>, 2023</a>)</span>
+是一种基于<strong>低秩自适应微调</strong>（Low-Rank
+Adaptation，LoRA）的对抗微调方法。 如 <a class="reference internal" href="#fig-autolora"><span class="std std-numref">图5.2.1</span></a>
+所示，AutoLoRa使用低秩的LoRa分支来解耦自然和对抗目标的优化，将对抗数据和自然数据分别输入到预训练模型的特征提取器（蓝色模块）和LoRa分支（黄色模块）中来进行解耦。
+其中，预训练特征提取器进行<em>对抗训练</em>，从而可以获得下游对抗鲁棒性；LoRa模块进行自然训练，从而提升下游泛化。另外，在自然样本上，两个模块之间通过基于KL的逻辑值对齐来保证自然知识从预训练特征提取器到LoRa模块的“迁移”。这个过程类似于知识蒸馏，LoRa分支相当于教师模型，而预训练的特征提取器相当于学生模型，通过最小化学生模型和教师模型之间的逻辑值差异，将自然知识从教师模型蒸馏到学生模型中。AutoLoRa的损失函数定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-autolora">
+<span class="eqno">(5.2.4)<a class="headerlink" href="#equation-eq-autolora" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}&amp; \mathcal{L}_{LoRa}\left(D; \theta, \boldsymbol{A}, \boldsymbol{B}, \lambda_1, \lambda_2\right)=\frac{1}{n} \sum_{({\boldsymbol{x}}, y) \in D}\{\underbrace{\lambda_1 \cdot \mathcal{L}_{CE}\left(h_{\left\{\bar{\theta}_1+\boldsymbol{B} \boldsymbol{A}, \theta_2\right\}}({\boldsymbol{x}}), y\right)}_{\text {自然目标}} \\&amp; +\underbrace{\left(1-\lambda_1\right) \cdot \mathcal{L}_{CE}\left(h_\theta(\tilde{{\boldsymbol{x}}}), y\right)+\lambda_2 \cdot \mathcal{L}_{KL}\left(h_\theta(\tilde{{\boldsymbol{x}}}), h_{\left\{\bar{\theta}_1+\boldsymbol{B} \boldsymbol{A}, \theta_2\right\}}({\boldsymbol{x}})\right)}_{\text {对抗目标}}\}\end{aligned}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta = \left\{\theta_1, \theta_2\right\}\)</span>表示所有可训练的参数，<span class="math notranslate nohighlight">\(\theta_1\)</span>表示预训练特征提取器的参数，<span class="math notranslate nohighlight">\(\theta_2\)</span>表示线性分类头的参数，<span class="math notranslate nohighlight">\(\bar{\theta_1}\)</span>表示<span class="math notranslate nohighlight">\(\theta_1\)</span>不需要更新。<span class="math notranslate nohighlight">\(\boldsymbol{B} \in \mathbb{R}^{d \times r_{nat}}\)</span>和<span class="math notranslate nohighlight">\(\boldsymbol{A} \in \mathbb{R}^{r_{nat} \times v}\)</span>是两个低秩矩阵，<span class="math notranslate nohighlight">\(\boldsymbol{BA} \in \mathbb{R}^{d \times v}\)</span>与特征提取器的参数<span class="math notranslate nohighlight">\(\theta_1 \in \mathbb{R}^{d \times v}\)</span>具有相同的形状。<span class="math notranslate nohighlight">\(\lambda_1\)</span>和<span class="math notranslate nohighlight">\(\lambda_2\)</span>是两个超参数，用于平衡准确率和鲁棒性。</p>
+<p>总结来说，AutoLoRa借助LoRa分支实现了自然目标和对抗目标的解耦，同时通过蒸馏的思想使预训练特征提取器学习到了下游任务的自然知识。最终，微调后的模型展现出较高的准确率和对抗鲁棒性。值得注意的是，这里LoRa分支仅用于微调过程的解耦，在测试阶段是丢掉不用的。此外，AutoLoRa还采用了启发式的方法自动调整学习率和超参数<span class="math notranslate nohighlight">\(\lambda_1\)</span>和<span class="math notranslate nohighlight">\(\lambda_2\)</span>。</p>
+<p><strong>鲁棒线性初始化</strong>（Robust Linear Initialization，RoLI）
+<span id="id32">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id278" title="Hua, A., Gu, J., Xue, Z., Carlini, N., Wong, E., &amp; Qin, Y. (2024). Initialization matters for adversarial transfer learning. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 24831–24840).">Hua <em>et al.</em>, 2024</a>)</span>
+方法旨在从鲁棒性继承的角度进一步提升对抗微调的鲁棒性。
+由于上下游数据分布的差异和“准确率-鲁棒性”权衡，直接对鲁棒预训练模型进行对抗微调智可能只得到次优结果。在微调过程中，模型往往会通过牺牲一部分预训练鲁棒性来提升其在下游任务上的准确率。接下来，我们将介绍一种对抗微调方法，其可以使微调后的模型更好地继承预训练鲁棒性。</p>
+<div class="figure align-default" id="id111">
+<span id="fig-roli"></span><a class="reference internal image-reference" href="../_images/7_7roli.png"><img alt="../_images/7_7roli.png" src="../_images/7_7roli.png" style="width: 444px;" /></a>
+<p class="caption"><span class="caption-number">图5.2.2 </span><span class="caption-text">对鲁棒的预训练模型进行微调，蓝色：标准微调；红色：对抗微调
+<span id="id33">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id278" title="Hua, A., Gu, J., Xue, Z., Carlini, N., Wong, E., &amp; Qin, Y. (2024). Initialization matters for adversarial transfer learning. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 24831–24840).">Hua <em>et al.</em>, 2024</a>)</span> 。</span><a class="headerlink" href="#id111" title="Permalink to this image">¶</a></p>
+</div>
+<p>实验发现，在微调鲁棒预训练模型时，仅微调线性分类头（对应的方法称为“线性探测”，Linear-Probing）在某些数据集上的表现甚至优于其他微调方法，尽管线性分类头需要调整的参数量更少。
+一般认为，模型在下游任务上的鲁棒性主要来源于两个方面：一是从预训练模型中继承的鲁棒性，二是通过对抗微调获得的鲁棒性。研究发现，即使在微调过程中使用的都是干净样本，微调后的模型仍然具有一定的鲁棒性（
+<a class="reference internal" href="#fig-roli"><span class="std std-numref">图5.2.2</span></a>
+蓝色部分）。这说明，微调模型确实可以从预训练模型中继承到一定的鲁棒性。在所有的微调方法中，线性探测比其他方法更好地继承了预训练模型中的鲁棒性。这可能是因为线性探测方法通过只更新线性分类头，避免了破坏从预训练模型中继承的鲁棒特征。</p>
+<p>通过分析比较 <a class="reference internal" href="#fig-roli"><span class="std std-numref">图5.2.2</span></a>
+中标准微调（蓝色部分）和对抗微调（红色部分）所呈现的鲁棒性，可以看到对抗训练在微调阶段带来了额外的鲁棒性增益。
+为了进一步提升模型在下游任务中的鲁棒性，<strong>鲁棒线性初始化</strong>方法先通过对抗训练训练一个<em>对抗线性探测</em>分类头，最大程度地继承预训练模型的鲁棒性，然后再进行对抗微调（如AutoLoRa），从而进一步获得鲁棒性增益。相比于标准的对抗微调，RoLI方法可以在不降低干净准确率的情况下进一步提升鲁棒性。</p>
+</div>
+<div class="section" id="id34">
+<h3><span class="section-number">5.2.3. </span>扩散净化<a class="headerlink" href="#id34" title="Permalink to this heading">¶</a></h3>
+<p>尽管对抗训练可以带来可靠的鲁棒性提升，但是其训练开销巨大，尤其在一些数据集较大或者大模型上难以应用。相比之下，另一类基于输入净化的防御方法，依靠生成模型对输入样本中的对抗噪声进行去除，是一种更直接且实用的对抗防御策略。这种防御方法不对攻击形式和受害者模型做任何假设，可即插即用于广泛的任务场景，并可以防御未知威胁。</p>
+<div class="figure align-default" id="id112">
+<span id="fig-diffpure"></span><a class="reference internal image-reference" href="../_images/5.2.4diffpure.png"><img alt="../_images/5.2.4diffpure.png" src="../_images/5.2.4diffpure.png" style="width: 613px;" /></a>
+<p class="caption"><span class="caption-number">图5.2.3 </span><span class="caption-text">DiffPure流程图 <span id="id35">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id280" title="Nie, W., Guo, B., Huang, Y., Xiao, C., Vahdat, A., &amp; Anandkumar, A. (2022). Diffusion models for adversarial purification. International Conference on Machine Learning (pp. 16805–16827).">Nie <em>et al.</em>, 2022</a>)</span></span><a class="headerlink" href="#id112" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>DiffPure</strong> <span id="id36">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id280" title="Nie, W., Guo, B., Huang, Y., Xiao, C., Vahdat, A., &amp; Anandkumar, A. (2022). Diffusion models for adversarial purification. International Conference on Machine Learning (pp. 16805–16827).">Nie <em>et al.</em>, 2022</a>)</span>
+是一种基于基础扩散模型的对抗净化方法。通过利用扩散模型的正向和反向过程，DiffPure能够在对抗样本输入分类器之前进行净化。
+如 <a class="reference internal" href="#fig-diffpure"><span class="std std-numref">图5.2.3</span></a>
+所示，给定一个预先训练的扩散模型，DiffPure按照前向过程以较小的扩散时间步长
+<span class="math notranslate nohighlight">\(t^*\)</span>
+向对抗图像添加噪声，以获得加噪图像。然后，通过逆向过程从中恢复出干净的图像，并将其输入分类模型进行分类。具体而言：</p>
+<ul class="simple">
+<li><p><strong>扩散过程</strong>：给定一个对抗样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_a\)</span>，在时间步<span class="math notranslate nohighlight">\(t=0\)</span>开始。扩散过程通过加入少量噪声，将对抗样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_a\)</span>扩散到时间步<span class="math notranslate nohighlight">\(t^*\)</span>，得到加噪图片<span class="math notranslate nohighlight">\({\boldsymbol{x}}(t^*)\)</span>，扩散过程由随机微分方程<span class="math notranslate nohighlight">\(d{\boldsymbol{x}} = f({\boldsymbol{x}}, t)dt + g(t)d\mathbf{w}\)</span>得到，其目的是通过增加噪声来逐渐平滑对抗扰动。</p></li>
+<li><p><strong>逆扩散过程</strong>：从噪声图像开始<span class="math notranslate nohighlight">\({\boldsymbol{x}}(t^*)\)</span>，利用了扩散模型的逆向随机微分方程<span class="math notranslate nohighlight">\(d\hat{{\boldsymbol{x}}} = [f(\hat{{\boldsymbol{x}}}, t) - g(t)^2 \nabla_{\hat{{\boldsymbol{x}}}} \log p_t(\hat{{\boldsymbol{x}}})] dt + g(t) d\bar{\mathbf{w}}\)</span>逐步去噪，恢复出干净图像。</p></li>
+</ul>
+<p>在DiffPure方法中，扩散过程通过逐步加入噪声来平滑掉对抗扰动。这个过程中存在一个关键点，即当对抗样本和干净样本的分布足够接近时（即KL散度较小时），可以通过逆向过程恢复出干净的图像。该过程可由下式表达：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-3">
+<span class="eqno">(5.2.5)<a class="headerlink" href="#equation-chapter-chap-5-3" title="Permalink to this equation">¶</a></span>\[\frac{\partial \mathrm{KL}(p_t \| q_t)}{\partial t} \leq 0\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(p_t\)</span>和<span class="math notranslate nohighlight">\(q_t\)</span>分别表示时间<span class="math notranslate nohighlight">\(t\)</span>时刻干净样本和对抗样本的分布。通过在扩散过程中逐步加入噪声，可以确保对抗扰动逐渐被平滑掉，同时对抗样本和干净样本的分布差异（KL散度）随时间单调递减，从而实现对抗净化。</p>
+</div>
+</div>
+<div class="section" id="sec-bd-attack">
+<span id="id37"></span><h2><span class="section-number">5.3. </span>后门攻击<a class="headerlink" href="#sec-bd-attack" title="Permalink to this heading">¶</a></h2>
+<p>我们知道卷积神经网络很容易受到后门攻击的影响，但是ViT的模型设计基于自注意力机制，与卷积神经网络相比有很大的不同，是否会具有一定的后门鲁棒性呢？
+因此，自从ViT模型在视觉领域取得巨大成功后，其对后门攻击的鲁棒性也受到了很多研究者的关注。研究者利用传统后门攻击算法BadNets
+<span id="id38">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id103" title="Gu, T., Dolan-Gavitt, B., &amp; Garg, S. (2017). Badnets: Identifying vulnerabilities in the machine learning model supply chain.">Gu <em>et al.</em>, 2017</a>)</span> 和HTBA <span id="id39">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id134" title="Saha, A., Subramanya, A., &amp; Pirsiavash, H. (2020). Hidden trigger backdoor attacks. AAAI Conference on Artificial Intelligence.">Saha <em>et al.</em>, 2020</a>)</span>
+对ViT模型进行攻击，得到的实验结果显示，ViT也容易受到后门攻击的威胁
+<span id="id40">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id298" title="Subramanya, A., Saha, A., Koohpayegani, S. A., Tejankar, A., &amp; Pirsiavash, H. (2022). Backdoor attacks on vision transformers. arXiv preprint arXiv:2206.08477.">Subramanya <em>et al.</em>, 2022</a>)</span>
+。除了这些基于传统攻击的理解，本节将介绍专门针对ViT模型提出的后门攻击算法，主要包括无数据攻击、补丁攻击、多触发器攻击和量化攻击。</p>
+<div class="section" id="id41">
+<h3><span class="section-number">5.3.1. </span>无数据后门<a class="headerlink" href="#id41" title="Permalink to this heading">¶</a></h3>
+<p><strong>无数据后门攻击</strong>（Data-free Backdoor Injection Attack，DBIA）
+<span id="id42">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id283" title="Lv, P., Ma, H., Zhou, J., Liang, R., Chen, K., Zhang, S., &amp; Yang, Y. (2021). Dbia: data-free backdoor injection attack against transformer networks. arXiv preprint arXiv:2111.11870.">Lv <em>et al.</em>, 2021</a>)</span>
+是一种针对ViT模型提出的后门攻击，其利用Transformer的自注意力机制来生成触发器，并使用<em>代理数据集</em>（surrogate
+dataset）来进行投毒。 DBIA的攻击流程如 <a class="reference internal" href="#fig-dbia-overview"><span class="std std-numref">图5.3.1</span></a>
+所示，其中包含两个主要步骤：投毒代理数据生成和后门注入。</p>
+<div class="figure align-default" id="id113">
+<span id="fig-dbia-overview"></span><a class="reference internal image-reference" href="../_images/DBIA_workflow.png"><img alt="../_images/DBIA_workflow.png" src="../_images/DBIA_workflow.png" style="width: 688px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.1 </span><span class="caption-text">左图：投毒代理数据集；右图：后门注入 <span id="id43">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id283" title="Lv, P., Ma, H., Zhou, J., Liang, R., Chen, K., Zhang, S., &amp; Yang, Y. (2021). Dbia: data-free backdoor injection attack against transformer networks. arXiv preprint arXiv:2111.11870.">Lv <em>et al.</em>, 2021</a>)</span></span><a class="headerlink" href="#id113" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>（1）投毒代理数据生成生成</strong>：首先选择一个代理数据集（网络爬取或者使用开源数据集），使用最小化式
+<a class="reference internal" href="#equation-eq-dbia-max-attention">(5.3.1)</a>
+来对目标ViT模型的注意力信息进行迭代优化，从而生成通用的触发器，最后将触发器添加到数据集中并修改其类别为目标类别。</p>
+<div class="math notranslate nohighlight" id="equation-eq-dbia-max-attention">
+<span class="eqno">(5.3.1)<a class="headerlink" href="#equation-eq-dbia-max-attention" title="Permalink to this equation">¶</a></span>\[\min _t \sum_{i=1}^N\left(\operatorname{Attention}(\widetilde{{\boldsymbol{x}}}_i, L)-target\_value \right)^2\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(target\_value\)</span>是目标注意力值，其在触发器上具有最大的注意力值（即1），在背景上具有最小的注意力值（即0）；<span class="math notranslate nohighlight">\(N\)</span>是代理数据集的大小；<span class="math notranslate nohighlight">\(\widetilde{{\boldsymbol{x}}}_i = (1-m) \cdot {\boldsymbol{x}}_i + m \cdot t\)</span>是用触发器<span class="math notranslate nohighlight">\(t\)</span>投毒后的样本；<span class="math notranslate nohighlight">\(\operatorname{Attention}()\)</span>是一个函数，负责从目标模型中第<span class="math notranslate nohighlight">\(L\)</span>个Transformer块的多头注意力模块中计算对输入<span class="math notranslate nohighlight">\(\widetilde{{\boldsymbol{x}}}\)</span>的注意力图。</p>
+<p><strong>（2）后门注入</strong>：投毒代理数据数据集一般只含有一个类别标签，即后门目标类别。如果一个模型在只有一个标签的数据集上训练，它可能会过拟合到该标签上，并将大部分样本（无论该样本包不包含触发器）预测为该标签，这样会显著影响到其在干净样本上的性能。所以，无法通过直接使用投毒代理数据集对目标模型进行微调来嵌入后门触发器。
+对此，DBIA从目标ViT模型中选择一些绝对权重之和最大且连通的神经元，因为这些神经元对最终结果有者显著的影响。然后，使用PGD方法
+<span id="id44">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id66" title="Madry, A., Makelov, A., Schmidt, L., Tsipras, D., &amp; Vladu, A. (2018). Towards deep learning models resistant to adversarial attacks. International Conference on Learning Representations.">Madry <em>et al.</em>, 2018</a>)</span>
+在投毒代理数据集上对选中的神经元进行微调，同时限制参数的调整幅度（类似对抗攻击的<span class="math notranslate nohighlight">\(L_{\infty}\)</span>限制）以确保微调后的模型在原始任务上具有不错的性能保持。微调所对应的优化问题定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-dbia-finetune">
+<span class="eqno">(5.3.2)<a class="headerlink" href="#equation-eq-dbia-finetune" title="Permalink to this equation">¶</a></span>\[\min _{\theta_n} \sum_{i=1}^N\left(f\left(\widetilde{{\boldsymbol{x}}}_i\right)-y_t\right)^2, \text { s.t. } \quad P_{l_{\infty}\left(\theta_n, \epsilon\right)}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta_n\)</span>是被选中要微调的参数；<span class="math notranslate nohighlight">\(y_t\)</span>是目标类别，<span class="math notranslate nohighlight">\(P_{l_{\infty}\left(\theta_n, \epsilon\right)}\)</span>是投影算子，用于将参数调整的幅度控制在<span class="math notranslate nohighlight">\(\epsilon\)</span>范围内。DBIA在不借助原任务数据集的前提下实现了对ViT的有效攻击。</p>
+</div>
+<div class="section" id="id45">
+<h3><span class="section-number">5.3.2. </span>图像块后门<a class="headerlink" href="#id45" title="Permalink to this heading">¶</a></h3>
+<p>因为ViT模型需要将输入图像划分为一系列图像块并计算图像块之间的注意力，所以它们往往比卷积神经网络更能捕获到图像块之间的全局交互信息。因此，基于图像块的扰动可以影响ViT的自注意力机制。本小结将介绍两种基于图像块的后门攻击。</p>
+<p><strong>BadViT</strong> 这是一种基于数据污染的ViT模型后门攻击方法
+<span id="id46">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id285" title="Yuan, Z., Zhou, P., Zou, K., &amp; Cheng, Y. (2023). You are catching my attention: are vision transformers bad learners under backdoor attacks? IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 24605–24615).">Yuan <em>et al.</em>, 2023</a>)</span>
+，其通过设计基于图像块的触发器样式，将模型的注意力从有益于分类的图像块上转移到带有触发器的图像块上，从而使ViT模型对带有触发器的图片进行错误分类。BadViT的优化目标可形式化表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-backdoor-attack-optimization">
+<span class="eqno">(5.3.3)<a class="headerlink" href="#equation-eq-backdoor-attack-optimization" title="Permalink to this equation">¶</a></span>\[\min_{\theta} \sum_{{\boldsymbol{x}}_i \in D_{cl}} \mathcal{L}_{tr}\left(f\left({\boldsymbol{x}}_i\right), y_i\right)+\sum_{\hat{{\boldsymbol{x}}_j} \in D_{bd}} \mathcal{L}_{bd}\left(f\left(\hat{{\boldsymbol{x}}_j}\right), y^*\right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta\)</span>是模型<span class="math notranslate nohighlight">\(f\)</span>的参数，<span class="math notranslate nohighlight">\(D_{c l}\)</span>是干净数据，<span class="math notranslate nohighlight">\(D_{b d}\)</span>是后门数据，<span class="math notranslate nohighlight">\(\mathcal{L}_{tr}\)</span>和<span class="math notranslate nohighlight">\(\mathcal{L}_{bd}\)</span>分别代表模型在干净和后门数据上的分类损失（干净对应干净类别，后门对应后门类别），<span class="math notranslate nohighlight">\(({\boldsymbol{x}}_i,y_i)\)</span>是干净样本及其类别标签，<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}\)</span>是后门样本，<span class="math notranslate nohighlight">\(y^*\)</span>是攻击的目标类别。</p>
+<div class="figure align-default" id="id114">
+<span id="fig-badvit-visualization"></span><a class="reference internal image-reference" href="../_images/BadVit.png"><img alt="../_images/BadVit.png" src="../_images/BadVit.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.2 </span><span class="caption-text">对DeiT模型在不同触发器（红色框为触发器位置）设定下的干净图像和后门图像的所有层的平均注意力图可视化，注意力图中较亮的颜色表示对应图像块的注意力分数更高，相比之下，BadViT触发器能够有效地吸引模型的注意力
+<span id="id47">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id285" title="Yuan, Z., Zhou, P., Zou, K., &amp; Cheng, Y. (2023). You are catching my attention: are vision transformers bad learners under backdoor attacks? IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 24605–24615).">Yuan <em>et al.</em>, 2023</a>)</span> 。</span><a class="headerlink" href="#id114" title="Permalink to this image">¶</a></p>
+</div>
+<p>BadViT通过最大化模型的每一层中第<span class="math notranslate nohighlight">\(k\)</span>个图像块的注意力分数（在ViT中，每个图像块的注意力分数是指其相对于其他图像块的重要性），高效构建从触发器到目标类别的映射。
+其中第<span class="math notranslate nohighlight">\(l\)</span>层的注意力分数矩阵可以被表示为<span class="math notranslate nohighlight">\(\operatorname{Attention}^l(x)=\left\{\left[A C_i^l\right] \in \mathbb{R}^K \mid i \in[1, K]\right\}\)</span>，其中<span class="math notranslate nohighlight">\(A C_i^l=\frac{1}{K} \sum_{j \in\lfloor K\rfloor} a_{i, j}^l\)</span>是第<span class="math notranslate nohighlight">\(i\)</span>个图像块的平均注意力分数，<span class="math notranslate nohighlight">\(a_{i, j}^l\)</span>是第<span class="math notranslate nohighlight">\(i\)</span>个图像块相对于第<span class="math notranslate nohighlight">\(j\)</span>个图像块的注意力分数。对于一个<span class="math notranslate nohighlight">\(L\)</span>层的模型，对触发器<span class="math notranslate nohighlight">\(t_{adv}\)</span>的优化可以被表示为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-badvit-t-opt">
+<span class="eqno">(5.3.4)<a class="headerlink" href="#equation-eq-badvit-t-opt" title="Permalink to this equation">¶</a></span>\[\underset{t_{a d v}}{\arg \max } \sum_{l \in\lfloor L\rfloor} A C_k^l,  \text { s.t. } A C_k^l=\operatorname{Attention}(\hat{{\boldsymbol{x}}})[k]\]</div>
+<p>可以基于上述优化目标定义基于注意力的损失函数<span class="math notranslate nohighlight">\(\mathcal{L}_{atten}\)</span>如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-attention-loss">
+<span class="eqno">(5.3.5)<a class="headerlink" href="#equation-eq-attention-loss" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{atten}=\sum_{l \in\lfloor L\rfloor} \mathcal{L}_{nll}\left(-\log \left(\text { Attention }^l(\hat{{\boldsymbol{x}}}), k\right)\right.\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{nll}\)</span>是负对数似然损失。随机初始化触发器<span class="math notranslate nohighlight">\(t_{adv}\)</span>后，采用PGD算法进行优化：</p>
+<div class="math notranslate nohighlight" id="equation-eq-badvit-pgd">
+<span class="eqno">(5.3.6)<a class="headerlink" href="#equation-eq-badvit-pgd" title="Permalink to this equation">¶</a></span>\[t_{a d v}^{\prime}=t_{a d v}-\eta \cdot \nabla_{t_{a d v}} \mathcal{L}_{a t t e n}\]</div>
+<p><strong>不可见的BadViT触发器</strong>：BadViT生成的触发器是一种马赛克（如
+<a class="reference internal" href="#fig-badvit-visualization"><span class="std std-numref">图5.3.2</span></a>
+），这种明显的标记在实际部署中很容易被用户察觉到。因此，BadViT的一种变体通过使用<span class="math notranslate nohighlight">\(L_p\)</span>约束来限制触发器的扰动强度，使<span class="math notranslate nohighlight">\(t_{adv}\)</span>对人眼不可见。
+为了实现这一效果，其对触发器<span class="math notranslate nohighlight">\(t_{adv}\)</span>的优化过程进行如下修改：</p>
+<div class="math notranslate nohighlight" id="equation-eq-invisible-optimization">
+<span class="eqno">(5.3.7)<a class="headerlink" href="#equation-eq-invisible-optimization" title="Permalink to this equation">¶</a></span>\[t_{a d v}^{\prime}=\operatorname{Clip}_\epsilon\left(t_{a d v}-\eta \cdot \nabla_{t_{a d v}} \mathcal{L}_{a t t e n}\right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\epsilon\)</span>是扰动强度的限制，<span class="math notranslate nohighlight">\(\operatorname{Clip}_{\epsilon}\)</span>是限制触发器满足<span class="math notranslate nohighlight">\(\left\|t_{a d v}\right\|_p \leq \epsilon\)</span>的裁剪操作。此外，在将触发器添加到图像上去的过程中，其采用混合比例为<span class="math notranslate nohighlight">\(\alpha\)</span>的混合策略，而不是直接将触发器粘贴到图像上，形式化表示如下:</p>
+<div class="math notranslate nohighlight" id="equation-eq-badvit-blend">
+<span class="eqno">(5.3.8)<a class="headerlink" href="#equation-eq-badvit-blend" title="Permalink to this equation">¶</a></span>\[\hat{{\boldsymbol{x}}}=\mu_{blend}\left({\boldsymbol{x}}, t_{adv}, m\right)=(1-\alpha) {\boldsymbol{x}}+\alpha \cdot m_k \cdot t_{a d v}\]</div>
+<p><a class="reference internal" href="#fig-badvits-overview"><span class="std std-numref">图5.3.3</span></a>
+展示了BadViT的攻击流程。BadViT可以生成一个通用的、基于图像块的触发器，可以将模型的注意力吸引到在触发器所在位置，从而建立触发器和攻击目标之间的强关联，是一种能够对ViT模型的鲁棒性带来严重威胁的后门攻击方法。</p>
+<div class="figure align-default" id="id115">
+<span id="fig-badvits-overview"></span><a class="reference internal image-reference" href="../_images/7_2_1_8_BadViTs_overview.png"><img alt="../_images/7_2_1_8_BadViTs_overview.png" src="../_images/7_2_1_8_BadViTs_overview.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.3 </span><span class="caption-text">BadViT攻击流程图 <span id="id48">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id285" title="Yuan, Z., Zhou, P., Zou, K., &amp; Cheng, Y. (2023). You are catching my attention: are vision transformers bad learners under backdoor attacks? IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 24605–24615).">Yuan <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id115" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>TrojViT</strong>与BadViT类似，TrojViT <span id="id49">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id286" title="Zheng, M., Lou, Q., &amp; Jiang, L. (2023). Trojvit: trojan insertion in vision transformers. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4025–4034).">Zheng <em>et al.</em>, 2023</a>)</span>
+也利用生成的图像块触发器来进行后门攻击。TrojViT的整体攻击流程如
+<a class="reference internal" href="#fig-trojvit-trigger"><span class="std std-numref">图5.3.4</span></a> 所示，生成的图像块触发器如
+<a class="reference internal" href="#fig-trojvit-example"><span class="std std-numref">图5.3.5</span></a> 所示。TrojViT主要包含两个步骤：</p>
+<div class="figure align-default" id="id116">
+<span id="fig-trojvit-trigger"></span><a class="reference internal image-reference" href="../_images/7_2_1_10_trojvit_workflow.png"><img alt="../_images/7_2_1_10_trojvit_workflow.png" src="../_images/7_2_1_10_trojvit_workflow.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.4 </span><span class="caption-text">TrojViT的攻击流程 <span id="id50">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id286" title="Zheng, M., Lou, Q., &amp; Jiang, L. (2023). Trojvit: trojan insertion in vision transformers. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4025–4034).">Zheng <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id116" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-default" id="id117">
+<span id="fig-trojvit-example"></span><a class="reference internal image-reference" href="../_images/7_2_1_9_trojvit_trigger.png"><img alt="../_images/7_2_1_9_trojvit_trigger.png" src="../_images/7_2_1_9_trojvit_trigger.png" style="width: 148px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.5 </span><span class="caption-text">TrojViT触发器示例 <span id="id51">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id286" title="Zheng, M., Lou, Q., &amp; Jiang, L. (2023). Trojvit: trojan insertion in vision transformers. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4025–4034).">Zheng <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id117" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>（1）图像块触发器生成</strong>：这里生成的是一个由多个部分组成的图像块触发器，每个部分都会被嵌入到输入图像的关键图像块中（如
+<a class="reference internal" href="#fig-trojvit-trigger"><span class="std std-numref">图5.3.4</span></a> ）。 触发器的生成主要包括两步：</p>
+<p><strong>a）对图像块进行显著性排序</strong>：目的是通过排序来找到关键图像块。对于输入图片<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>，
+定义<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}={\boldsymbol{x}}+P \odot M\)</span>为在<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>上插入触发器的图片，其中<span class="math notranslate nohighlight">\(P\)</span>表示触发器的扰动，<span class="math notranslate nohighlight">\(M\)</span>是一个二进制掩码矩阵，用于指示哪些图像块有触发器，<span class="math notranslate nohighlight">\(P \odot M\)</span>表示触发器，<span class="math notranslate nohighlight">\(\odot\)</span>表示逐元素相乘。ViT模型将输入<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>分成<span class="math notranslate nohighlight">\(n\)</span>个图像块，即<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}} = \{\hat{{\boldsymbol{x}}}_0, \hat{{\boldsymbol{x}}}_1, ..., \hat{{\boldsymbol{x}}}_{n-1} \}\)</span>，其中<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i}\)</span>表示第<span class="math notranslate nohighlight">\(i\)</span>个图像块，<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i,j}\)</span>表示第<span class="math notranslate nohighlight">\(i\)</span>个图像块中的第<span class="math notranslate nohighlight">\(j\)</span>个像素。使用像素显著分数<span class="math notranslate nohighlight">\(\mathcal{G}_{\hat{{\boldsymbol{x}}}_{i, j}}\)</span>来表示在对目标类别<span class="math notranslate nohighlight">\(y_{k}\)</span>进行攻击时，像素<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i,j}\)</span>的重要性。当<span class="math notranslate nohighlight">\(\mathcal{G}_{\hat{{\boldsymbol{x}}}_{i, j}}\)</span>值越大，说明像素<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i,j}\)</span>对于目标类别<span class="math notranslate nohighlight">\(y_{k}\)</span>的影响越大。<span class="math notranslate nohighlight">\(\mathcal{G}_{\hat{{\boldsymbol{x}}}_{i, j}}\)</span>可以通过计算损失函数<span class="math notranslate nohighlight">\(\mathcal{L}_{C E}\left(\hat{{\boldsymbol{x}}}, y_{k}\right)\)</span>对于像素<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i,j}\)</span>的梯度的绝对值得到。图像块
+中<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i}\)</span>的显著性分数可以通过对该图像块内的所有像素<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_{i,j}\)</span>的显著性分数求和得到，如式
+<a class="reference internal" href="#equation-eq-trojvit-salience-score">(5.3.9)</a> 所示：</p>
+<div class="math notranslate nohighlight" id="equation-eq-trojvit-salience-score">
+<span class="eqno">(5.3.9)<a class="headerlink" href="#equation-eq-trojvit-salience-score" title="Permalink to this equation">¶</a></span>\[\mathcal{G}_{\hat{x}_i}=\sum_{j=1}^d \mathcal{G}_{\hat{{\boldsymbol{x}}}_{i, j}}=\sum_{j=1}^d\left|\frac{\nabla \mathcal{L}_{C E}\left(\hat{{\boldsymbol{x}}}, y_{k}\right)}{\nabla \hat{{\boldsymbol{x}}}_{i, j}}\right|\]</div>
+<p>根据图像块的显著性分数，生成逐像素块的二进制掩码矩阵<span class="math notranslate nohighlight">\(M\)</span>，以协助挑选关键图像块来进行攻击。一个图像块在<span class="math notranslate nohighlight">\(M\)</span>中用一个元素表示。如果<span class="math notranslate nohighlight">\(M_t\)</span>为1，则它对应的图像块将会替换为触发器图像块，否则它对应的图像块保持不变，如下式所示：</p>
+<div class="math notranslate nohighlight" id="equation-eq-trojvit-choose-patch">
+<span class="eqno">(5.3.10)<a class="headerlink" href="#equation-eq-trojvit-choose-patch" title="Permalink to this equation">¶</a></span>\[\begin{split}M_t= \begin{cases}1, &amp; \text { if } \mathcal{G}_{\hat{{\boldsymbol{x}}}_t} \in top\left(\mathcal{G}_{\hat{{\boldsymbol{x}}}_{[0: n-1]}}, N\right) \\ 0, &amp; \text { otherwise }\end{cases}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(top(S,N)\)</span>返回集合<span class="math notranslate nohighlight">\(S\)</span>前<span class="math notranslate nohighlight">\(N\)</span>个元素。即如果<span class="math notranslate nohighlight">\(\mathcal{G}_{\hat{{\boldsymbol{x}}}_i}\)</span>是集合<span class="math notranslate nohighlight">\(\mathcal{G}_{\left.\hat{{\boldsymbol{x}}}_{[0: n-1]}\right]}\)</span>中的前<span class="math notranslate nohighlight">\(N\)</span>个元素，则<span class="math notranslate nohighlight">\(M_t\)</span>值为1，否则为0。</p>
+<p><strong>b）生成触发器</strong>：首先基于掩码矩阵<span class="math notranslate nohighlight">\(M\)</span>，得到触发器<span class="math notranslate nohighlight">\(P \odot M\)</span>，并使用“注意力-目标损失”（Attention-Target
+Loss，ATL）来优化扰动<span class="math notranslate nohighlight">\(P\)</span>。这里通常要考虑两个要求：1）在触发器中具有扰动<span class="math notranslate nohighlight">\(P\)</span>的图像块应该比输入中没有触发器的其他图像块获得更多的注意力。这可以用<span class="math notranslate nohighlight">\(\mathcal{L}_{ATTN}\)</span>来实现，</p>
+<div class="math notranslate nohighlight" id="equation-eq-trojvit-l-attn">
+<span class="eqno">(5.3.11)<a class="headerlink" href="#equation-eq-trojvit-l-attn" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{ATTN}^l(\hat{{\boldsymbol{x}}}, T)=-\log \sum_{h, i} a t t n_{i \rightarrow T}^{l, h}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(l\)</span>表示ViT的第<span class="math notranslate nohighlight">\(l\)</span>层，<span class="math notranslate nohighlight">\(h\)</span>是ViT的头，T是被选中的图像块索引的集合，对于任意的<span class="math notranslate nohighlight">\(t \in T\)</span>，都有<span class="math notranslate nohighlight">\(M_t = 1\)</span>。<span class="math notranslate nohighlight">\(\mathcal{L}_{ATTN}^l\)</span>是<span class="math notranslate nohighlight">\(h\)</span>在<span class="math notranslate nohighlight">\(T\)</span>个选定图像块上的注意力分布之和的负对数似然。
+2）一旦输入图片中插入了触发器，受攻击的ViT模型应该以更大的概率输出预定义的目标类别<span class="math notranslate nohighlight">\(y_k\)</span>，可以通过交叉熵损失函数来实现。因此，ATL损失可定义为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-trojvit-atl">
+<span class="eqno">(5.3.12)<a class="headerlink" href="#equation-eq-trojvit-atl" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{A T L}\left(\hat{{\boldsymbol{x}}}, y_k\right)=\mathcal{L}_{C E}\left(\hat{{\boldsymbol{x}}}, y_k\right)+\lambda \cdot \sum_l^L \mathcal{L}_{ATTN}^l(\hat{{\boldsymbol{x}}}, T)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(L\)</span>是ViT模型的总层数，<span class="math notranslate nohighlight">\(\lambda\)</span>是注意力损失的权重。Attention-Target
+损失同时考虑了注意力损失和交叉熵损失来优化扰动<span class="math notranslate nohighlight">\(P\)</span>。
+ATL损失的计算过程如 <a class="reference internal" href="#fig-trojvit-attention-target-loss"><span class="std std-numref">图5.3.6</span></a>
+所示，其中<span class="math notranslate nohighlight">\({\boldsymbol{x}}_1\)</span>，<span class="math notranslate nohighlight">\({\boldsymbol{x}}_2\)</span>都是干净的图像块，<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_3\)</span>表示插入了触发器的图像块。输入图像块的查询（query）、键（key）和值（value）分别表示为<span class="math notranslate nohighlight">\(q_i\)</span>、<span class="math notranslate nohighlight">\(k_i\)</span>和<span class="math notranslate nohighlight">\(v_i\)</span>，其中<span class="math notranslate nohighlight">\(i\)</span>是图像块的索引。
+在注意力模块中，注意力权重是通过对一个查询<span class="math notranslate nohighlight">\(q_i\)</span>和所有键的点积进行Softmax计算得到的。得到的注意力权重<span class="math notranslate nohighlight">\(S^j_i\)</span>是图像块<span class="math notranslate nohighlight">\(i\)</span>对于图像块<span class="math notranslate nohighlight">\(j\)</span>的注意力。可以通过最小化<span class="math notranslate nohighlight">\(\mathcal{L}_{ATTN}^l\)</span>来使得<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_3\)</span>获得更多的注意力，也通过最小化<span class="math notranslate nohighlight">\(\mathcal{L}_{C E}\)</span>优化<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_3\)</span>来攻击目标类别<span class="math notranslate nohighlight">\(y_k\)</span>。然而，同时实现这两个要求并不容易，因为这两个损失函数的梯度<span class="math notranslate nohighlight">\(\nabla \mathcal{L}_{ATTN}=\nabla \lambda \cdot \sum_l \mathcal{L}_{ATTN}^l(\hat{{\boldsymbol{x}}}, m) / \nabla \hat{{\boldsymbol{x}}}\)</span>和<span class="math notranslate nohighlight">\(\nabla \mathcal{L}_{C E}=\nabla \mathcal{L}_{C E}\left(\hat{{\boldsymbol{x}}}, y_k\right) / \nabla \hat{{\boldsymbol{x}}}\)</span>
+在训练过程中可能会相互冲突（符号相反）。为了解决这个问题，TrojViT采用了<em>梯度手术</em>（gradient
+surgery） <span id="id52">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id307" title="Yu, T., Kumar, S., Gupta, A., Levine, S., Hausman, K., &amp; Finn, C. (2020). Gradient surgery for multi-task learning. Advances in Neural Information Processing Systems.">Yu <em>et al.</em>, 2020</a>)</span> 的方法：</p>
+<div class="math notranslate nohighlight" id="equation-eq-trojvit-gradient-surgery">
+<span class="eqno">(5.3.13)<a class="headerlink" href="#equation-eq-trojvit-gradient-surgery" title="Permalink to this equation">¶</a></span>\[\begin{split}\nabla \mathcal{L}_{A T L}=\left\{\begin{array}{l}\nabla \mathcal{L}_{C E}+\nabla \mathcal{L}_{ATTN}, \text { if } \cos \left(\nabla \mathcal{L}_{C E}, \nabla \mathcal{L}_{ATTN}\right)&gt;0 . \\\nabla \mathcal{L}_{C E}+\nabla \mathcal{L}_{ATTN}-\frac{\nabla \mathcal{L}_{C E} \cdot \nabla \mathcal{L}_{ATTN}}{\left\|\nabla \mathcal{L}_{C E}\right\|^2} \cdot \nabla \mathcal{L}_{C E}, \text { otherwise}\end{array}\right.\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(cos(\cdot,\cdot)\)</span>是<span class="math notranslate nohighlight">\(cos\)</span>相似度。</p>
+<div class="figure align-default" id="id118">
+<span id="fig-trojvit-attention-target-loss"></span><a class="reference internal image-reference" href="../_images/7_2_1_11_trojvit_attention_target_loss.png"><img alt="../_images/7_2_1_11_trojvit_attention_target_loss.png" src="../_images/7_2_1_11_trojvit_attention_target_loss.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.6 </span><span class="caption-text">ATL损失计算过程举例 <span id="id53">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id286" title="Zheng, M., Lou, Q., &amp; Jiang, L. (2023). Trojvit: trojan insertion in vision transformers. IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 4025–4034).">Zheng <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id118" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>（2）木马注入</strong>：TrojViT通过修改模型参数<span class="math notranslate nohighlight">\(W\)</span>向ViT模型中注入木马。TrojVit只需使用几个插入了图像块触发器的测试图像就可以修改ViT模型的重要参数，而不需要任何其他训练数据。TrojViT攻击对测试图像依赖性低，甚至可以随机选取。为了减轻木马注入对原模型参数的影响，TrojViT提出<em>调整参数蒸馏</em>（Tuned
+Parameter
+Distillation，TPD）技术，在注入木马的同时减少对模型参数的修改。首先，初始化选择一些需要调整的参数<span class="math notranslate nohighlight">\(W_T\)</span>，而<span class="math notranslate nohighlight">\(W_T\)</span>之外的参数在木马注入的过程中将会被冻住。TrojViT在实现的过程中直接选择了最后一个注意力层以及分类头中的参数进行注入。
+根据式 <a class="reference internal" href="#equation-eq-trojvit-atl">(5.3.12)</a> 和式
+<a class="reference internal" href="#equation-eq-trojvit-gradient-surgery">(5.3.13)</a>
+对<span class="math notranslate nohighlight">\(W_T\)</span>进行更新，在每一轮迭代的过程中，计算<span class="math notranslate nohighlight">\(W_T\)</span>中的每个神经元更新的绝对值，如果其更新的绝对值小于预设的阈值，则将该神经元从<span class="math notranslate nohighlight">\(W_T\)</span>中移除，不参与该轮以及后续的迭代更新。通过这种方法，可以逐步地减少需要更新的参数，从而以较少的位数修改来插入木马。</p>
+<p>相比前面介绍的两个攻击方法，TrojViT对数据依赖更小。BadViT则需要使用少量原始训练数据，DBIA需要使用测试数据集生成代理数据集，相比之下，TrojViT仅通过随机抽样测试数据来进行后门攻击，具有更高的灵活性。</p>
+</div>
+<div class="section" id="id54">
+<h3><span class="section-number">5.3.3. </span>多触发器后门<a class="headerlink" href="#id54" title="Permalink to this heading">¶</a></h3>
+<p>尽管后门攻击已经在很多研究中得到了广泛的探讨，但大多数研究都集中在单一触发器攻击上，即利用一种类型的触发器污染数据集。然而，现实世界的后门攻击可能要复杂得多，存在多个攻击者同时投毒一个数据的情况。研究者将这类攻击称为<strong>多触发器后门攻击</strong>（Multi-Trigger
+Backdoor Attack，MTBA） <span id="id55">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id289" title="Li, Y., Ma, X., He, J., Huang, H., &amp; Jiang, Y.-G. (2024). Multi-trigger backdoor attacks: more triggers, more threats. arXiv preprint arXiv:2401.15295.">Li <em>et al.</em>, 2024</a>)</span> ，如
+<a class="reference internal" href="#fig-mtba-trigger"><span class="std std-numref">图5.3.7</span></a> 所示。</p>
+<div class="figure align-default" id="id119">
+<span id="fig-mtba-trigger"></span><a class="reference internal image-reference" href="../_images/MTBA_Overview.png"><img alt="../_images/MTBA_Overview.png" src="../_images/MTBA_Overview.png" style="width: 765px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.7 </span><span class="caption-text">单触发器和多触发器后门攻击 <span id="id56">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id289" title="Li, Y., Ma, X., He, J., Huang, H., &amp; Jiang, Y.-G. (2024). Multi-trigger backdoor attacks: more triggers, more threats. arXiv preprint arXiv:2401.15295.">Li <em>et al.</em>, 2024</a>)</span></span><a class="headerlink" href="#id119" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>MTBA</strong> 研究者主要探索使用了三种策略来实现多触发器的后门攻击：</p>
+<ul class="simple">
+<li><p><strong>并行投毒</strong>（Parallel
+Poisoning）：多个独立的攻击者使用不一样的触发器投毒同一个数据集的不同训练子集。</p></li>
+<li><p><strong>顺序投毒</strong>（Sequential
+Poisoning）：不同的攻击者在不同时间对同一数据集进行攻击，每次攻击都在新的数据子集上注入新的触发器，后面的触发器有一定概率会覆盖前面的触发器。</p></li>
+<li><p><strong>混合触发器投毒</strong>（Hybrid-Trigger
+Poisoning）：攻击者将多个触发器融合成一个超级复合触发器，以一个触发器达到多个触发器的效果。</p></li>
+</ul>
+<p>基于上述三类多触发器后门攻击，研究者进行了200多次实验，覆盖10种触发器类型、4种投毒率、3种标签修改策略、2个数据集和4种DNN架构，总结出了下列几个主要现象：</p>
+<ul class="simple">
+<li><p><strong>共存效应</strong>（Coexisting
+Effect）：在10%的投毒率下，大多数触发器能够在单个模型中共存，并达到相当高的攻击成功率。</p></li>
+<li><p><strong>覆盖效应</strong>（Overwriting
+Effect）：在顺序攻击中，先前有效的触发器在新触发器注入后可能变得无效，表明了触发器之间可能存在覆盖效应。</p></li>
+<li><p><strong>交叉激活效应</strong>（Cross-activating
+Effect）：某些触发器能够被其他类型的触发器激活，表明它们之间存在一定程度的相似性或共享特征。</p></li>
+<li><p><strong>复合触发器可以激活多种攻击</strong>（Hybrid-trigger
+Attack）：混合触发器不仅本身能够实现高攻击成功率，还能在训练过程中交叉激活其某些组成成员的触发器。</p></li>
+</ul>
+<div class="figure align-default" id="id120">
+<span id="fig-labeling-mode"></span><a class="reference internal image-reference" href="../_images/labeling_mode.png"><img alt="../_images/labeling_mode.png" src="../_images/labeling_mode.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.8 </span><span class="caption-text">三种标签修改策略示意图 <span id="id57">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id289" title="Li, Y., Ma, X., He, J., Huang, H., &amp; Jiang, Y.-G. (2024). Multi-trigger backdoor attacks: more triggers, more threats. arXiv preprint arXiv:2401.15295.">Li <em>et al.</em>, 2024</a>)</span></span><a class="headerlink" href="#id120" title="Permalink to this image">¶</a></p>
+</div>
+<p>此外，多攻击者的存在也会导致不同的标签修改方式，研究者探讨了下面三种常见的标签修改方式（见
+<a class="reference internal" href="#fig-labeling-mode"><span class="std std-numref">图5.3.8</span></a> ）：</p>
+<ul class="simple">
+<li><p><strong>All2One</strong>：这种策略将所有的后门样本标记为一个固定的后门标签。也就是说，无论原始样本属于哪个类别，被投毒后都会改为同一类错误标签，这模拟了所有攻击者对同一个后门目标感兴趣的场景。</p></li>
+<li><p><strong>All2All</strong>：这种策略将后门样本的标签修改为下一类（在类别总数范围内循环）。例如，如果原始样本的标签是k，那么投毒后的样本标签将被改为<span class="math notranslate nohighlight">\((k+1)\%K\)</span>（假设总共有K个类别，<span class="math notranslate nohighlight">\(\%\)</span>为取模操作）。这种策略模拟不同的攻击者对不同类别感兴趣的场景。</p></li>
+<li><p><strong>All2Random</strong>：这种策略将后门样本的标签随机修改为一个错误的类别。这种策略模拟了攻击者之间没有共同目标标签、随机攻击的情况，每个标签被选为后门目标标签的概率是相等的。</p></li>
+</ul>
+</div>
+<div class="section" id="id58">
+<h3><span class="section-number">5.3.4. </span>量化后门<a class="headerlink" href="#id58" title="Permalink to this heading">¶</a></h3>
+<p>模型量化是一种通过降低模型参数的精度或者删除部分冗余参数的模型轻量化技术，其可以大幅降低模型的存储大小，提升其推理效率，使模型可以部署在内存和计算能力受限的IoT设备上。然而，近期的研究发现，模型的量化过程也可以被后门攻击，所植入的后门只有在量化后才会被激活。这一类攻击被称为<strong>量化后门攻击</strong>
+<span id="id59">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id290" title="Ma, H., Qiu, H., Gao, Y., Zhang, Z., Abuadbba, A., Xue, M., … Abbott, D. (2023). Quantization backdoors to deep learning commercial frameworks. IEEE Transactions on Dependable and Secure Computing.">Ma <em>et al.</em>, 2023</a>)</span> 。</p>
+<div class="figure align-default" id="id121">
+<span id="fig-pq-trigger"></span><a class="reference internal image-reference" href="../_images/PQ_overview1.png"><img alt="../_images/PQ_overview1.png" src="../_images/PQ_overview1.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图5.3.9 </span><span class="caption-text">PQ后门攻击示意图 <span id="id60">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id290" title="Ma, H., Qiu, H., Gao, Y., Zhang, Z., Abuadbba, A., Xue, M., … Abbott, D. (2023). Quantization backdoors to deep learning commercial frameworks. IEEE Transactions on Dependable and Secure Computing.">Ma <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id121" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>PQ后门攻击</strong>
+量化后门攻击发生在模型训练后，部署前。一个有代表性的方法是（Post-training
+Quantization，PQ）后门攻击 <span id="id61">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id290" title="Ma, H., Qiu, H., Gao, Y., Zhang, Z., Abuadbba, A., Xue, M., … Abbott, D. (2023). Quantization backdoors to deep learning commercial frameworks. IEEE Transactions on Dependable and Secure Computing.">Ma <em>et al.</em>, 2023</a>)</span>
+，简称<strong>PQ后门攻击</strong>。这是一种及其隐蔽的后门攻击方法，只有在对模型进行量化后，休眠的后门才会被唤醒。如
+<a class="reference internal" href="#fig-pq-trigger"><span class="std std-numref">图5.3.9</span></a> 所示，PQ后门攻击主要分为两个阶段：</p>
+<ul class="simple">
+<li><p><strong>量化前后门植入</strong>：在全精度(32位浮点数)模型量化之前，攻击者预先在模型中植入一个休眠的后门，此后门不会影响模型的准确率，因此原则上可以绕过现有的所有后门检测方法。</p></li>
+<li><p><strong>量化后后门激活</strong>：当模型通过量化框架进行量化后，预先安插的后门被激活，模型在有触发器的样本上输出后门类别。</p></li>
+</ul>
+<p>具体来说，PQ后门攻击首先对一个高精度（32位浮点数）模型进行训练，让模型在干净和投毒样本上一起训练，完成后门植入。这一步模型训练所使用的损失函数为：</p>
+<div class="math notranslate nohighlight" id="equation-lbd">
+<span class="eqno">(5.3.14)<a class="headerlink" href="#equation-lbd" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{bd} = \sum_{{\boldsymbol{x}} \in D} \mathcal{L}_{CE} \left(f_{bd}\left({\boldsymbol{x}}\right), y\right) + \sum_{{\boldsymbol{x}}_t \in D_t} \mathcal{L}_{CE} \left(f_{bd}\left({\boldsymbol{x}}_t\right), y_t\right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{CE}\)</span>表示交叉熵分类损失函数，<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>为干净样本，<span class="math notranslate nohighlight">\(y\)</span>为真实标签，<span class="math notranslate nohighlight">\({\boldsymbol{x}}_t\)</span>表示含有触发器的样本，<span class="math notranslate nohighlight">\(y_t\)</span>为修改后的标签，<span class="math notranslate nohighlight">\(D\)</span>为干净训练数据子集，<span class="math notranslate nohighlight">\(D_t\)</span>为投毒数据子集，<span class="math notranslate nohighlight">\(f_{bd}\)</span>是全精度的后门模型。下一步是移除比较明显的后门，并保留隐蔽的后门，所使用的损失函数定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-pq-l-rm">
+<span class="eqno">(5.3.15)<a class="headerlink" href="#equation-eq-pq-l-rm" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathcal{L}_{rm} &amp; = \mathcal{L}_3 + \mathcal{L}_4                                                                                                                       \\\mathcal{L}_3    &amp; = \sum_{{\boldsymbol{x}} \in D} \mathcal{L}_{CE}\left(f_{rm}\left({\boldsymbol{x}}\right),y\right) + \sum_{{\boldsymbol{x}} \in D_c} \mathcal{L}_{CE}\left(f_{rm}\left({\boldsymbol{x}}_t\right),y\right) \\\mathcal{L}_4    &amp; = \sum_{\tilde{\theta} \in  \tilde{\Theta}} \frac{1}{n}{\lVert \tilde{\theta}_{rm}-\tilde{\theta}_{bd} \rVert}_2^2 + {\lVert S_{rm}-S_{bd} \rVert}_2^2\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(f_{rm}\)</span>表示正在接受后门移除的全精度模型（也就是上式中的<span class="math notranslate nohighlight">\(f_{bd}\)</span>），<span class="math notranslate nohighlight">\(D_c\)</span>为用来移除后门的少量干净样本（即防御数据集），<span class="math notranslate nohighlight">\(\tilde{\theta}\)</span>为量化参数，<span class="math notranslate nohighlight">\(S\)</span>是量化参数对应的缩放因子。其中，<span class="math notranslate nohighlight">\(\mathcal{L}_3\)</span>用来确保可以移除<span class="math notranslate nohighlight">\(f_{bd}\)</span>中比较明显的后门，<span class="math notranslate nohighlight">\(\mathcal{L}_4\)</span>第一项是为了在全精度模型后门被移除后，保留量化模型的后门效果，第二项确保<span class="math notranslate nohighlight">\(\tilde{f}_{rm}\)</span>的浮点32位“仿真推断”行为与<span class="math notranslate nohighlight">\(\tilde{f}_{rm}\)</span>保持一致。</p>
+<p>实验结果表明，PQ后门攻击对于不同的后训练量化方法（即TensorFlow
+Lite框架提供的全整数和动态范围量化）是有效的。在面对不同的后门检测时，PQ
+后门攻击表现出很高的隐蔽性，在全精度模型中无法被检测到休眠的后门，而量化后的模型表现出接近100%的攻击成功率。量化后门攻击揭示了在大模型蓬勃发展的当下一种新的安全风险，预训练模型可以轻易将后门隐藏在高精度模型中，去投毒所有使用此模型的下游应用。</p>
+</div>
+</div>
+<div class="section" id="sec-bd-defense">
+<span id="id62"></span><h2><span class="section-number">5.4. </span>后门防御<a class="headerlink" href="#sec-bd-defense" title="Permalink to this heading">¶</a></h2>
+<p>针对前文介绍的后门攻击，研究者提出了一些有针对性的防御方法，目前这些方法大都探索解决ViT模型的图像块脆弱性缺陷，希望通过寻找、检测或阻断可疑的图像块来完成后门防御。本节将介绍三个有代表性的针对ViT模型的后门防御方法。</p>
+<div class="section" id="id63">
+<h3><span class="section-number">5.4.1. </span>图像阻断<a class="headerlink" href="#id63" title="Permalink to this heading">¶</a></h3>
+<p>研究发现，当使用GradRollOut（RollOut方法 <span id="id64">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id293" title="Abnar, S., &amp; Zuidema, W. (2020). Quantifying attention flow in transformers. Annual Meeting of the Association for Computational Linguistics.">Abnar and Zuidema, 2020</a>)</span>
+的梯度版本，通过聚合Transformer的多层注意力来解释模型的预测）、GradCAM
+<span id="id65">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id292" title="Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D., &amp; Batra, D. (2017). Grad-cam: visual explanations from deep networks via gradient-based localization. IEEE International Conference on Computer Vision.">Selvaraju <em>et al.</em>, 2017</a>)</span>
+等解释性算法对ViT的决策过程进行可视化时，会发现对模型预测有重大影响的图像区域往往与后门触发器有关。
+如 <a class="reference internal" href="#fig-image-blocking"><span class="std std-numref">图5.4.2</span></a>
+所示，通过可视化热力图可以看出对ViT模型预测有重大影响的图像区域往往与植入的触发器相对应，而传统卷积神经网络则观察不到这种关联。基于此发现，研究人员提出了<strong>图像阻断</strong>
+<span id="id66">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id291" title="Subramanya, A., Koohpayegani, S. A., Saha, A., Tejankar, A., &amp; Pirsiavash, H. (2024). A closer look at robustness of vision transformers to backdoor attacks. IEEE/CVF Winter Conference on Applications of Computer Vision (pp. 3874–3883).">Subramanya <em>et al.</em>, 2024</a>)</span>
+防御方法，在训练阶段和测试阶段利用两种图像阻断技术来避免后门攻击，如
+<a class="reference internal" href="#fig-image-blocking1"><span class="std std-numref">图5.4.1</span></a> 所示。</p>
+<div class="figure align-default" id="id122">
+<span id="fig-image-blocking1"></span><a class="reference internal image-reference" href="../_images/Image_blocking_1.png"><img alt="../_images/Image_blocking_1.png" src="../_images/Image_blocking_1.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图5.4.1 </span><span class="caption-text">在测试期间，当一个触发器被粘贴到原图像上时，观察到ViT能够使用解释图突出显示触发器，而传统的卷积神经网络却不可以
+<span id="id67">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id291" title="Subramanya, A., Koohpayegani, S. A., Saha, A., Tejankar, A., &amp; Pirsiavash, H. (2024). A closer look at robustness of vision transformers to backdoor attacks. IEEE/CVF Winter Conference on Applications of Computer Vision (pp. 3874–3883).">Subramanya <em>et al.</em>, 2024</a>)</span> 。</span><a class="headerlink" href="#id122" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>（1）测试时图像阻断</strong>：这是一种有效的即时防御策略，核心在于利用模型的解释能力来识别图像中可能含有后门触发器的区域。其使用如GradRollOut之类的解释性算法，获得一个热力图，直观地显示出对模型决策产生显著影响的区域。一旦发现潜在的触发器区域，就可以对这些区域进行遮挡或修改，以中和它们的影响。随后，将修改后的图像再次输入模型进行推理，此时由于后门触发器已被阻断，模型往往能够给出正确的预测。</p>
+<p><strong>（2）训练时图像阻断</strong>：此方法在模型训练阶段就开始发挥作用，通过随机选择并阻断图像中的小块区域，迫使模型学习不依赖于这些区域的特征。这种阻断不仅包括简单地用黑色补丁替换图像区域，还包括一种称为<em>词元随机丢弃</em>（Token
+Drop）的技术，它通过减少输入序列中的令牌数量，进一步促使模型关注图像的整体结构而非局部细节，让模型学会在不依赖特定图像区域的情况下进行预测。这种方法不仅优化了模型的训练过程，减少了计算量，还增强了模型对后门攻击的抵抗力。</p>
+<div class="figure align-default" id="id123">
+<span id="fig-image-blocking"></span><a class="reference internal image-reference" href="../_images/Image_blocking.png"><img alt="../_images/Image_blocking.png" src="../_images/Image_blocking.png" style="width: 758px;" /></a>
+<p class="caption"><span class="caption-number">图5.4.2 </span><span class="caption-text">图中展示了对ResNet50和ViT-Base执行阻塞防御的例子
+<span id="id68">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id291" title="Subramanya, A., Koohpayegani, S. A., Saha, A., Tejankar, A., &amp; Pirsiavash, H. (2024). A closer look at robustness of vision transformers to backdoor attacks. IEEE/CVF Winter Conference on Applications of Computer Vision (pp. 3874–3883).">Subramanya <em>et al.</em>, 2024</a>)</span>
+。其中，ViT可以成功地定位补丁，从而产生一个成功的防御。还可以观察到，一旦触发器被准确阻断，原始源预测就被恢复。结果是随机选择的，而不是精选的，所有例子的攻击都是成功的。</span><a class="headerlink" href="#id123" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="id69">
+<h3><span class="section-number">5.4.2. </span>图像块处理<a class="headerlink" href="#id69" title="Permalink to this heading">¶</a></h3>
+<p>ViT模型的后门攻击除了容易被可视化暴漏外，它对输入图像的随机变换也比较敏感，即在位置编码之前对图像块进行变换可以引发模型在干净和后门图像上的预测性能变化差异。
+基于此，研究者提出<strong>图像块处理</strong>（Patch Processing）方法
+<span id="id70">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id294" title="Doan, K. D., Lao, Y., Yang, P., &amp; Li, P. (2023). Defending backdoor attacks on vision transformer via patch processing. AAAI Conference on Artificial Intelligence.">Doan <em>et al.</em>, 2023</a>)</span>
+，其利用ViT模型对图像块变换的敏感性来检测后门投毒样本。
+图像块处理方法包括以下几个步骤：</p>
+<p><strong>步骤1（离线）</strong>：对于一小部分干净样本，应用<em>图像块随机丢弃</em>（PatchDrop）和<em>图像块随机打乱</em>（PatchShuffle）操作，对每个图像进行<span class="math notranslate nohighlight">\(T\)</span>次转换。对于每个样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>，计算<span class="math notranslate nohighlight">\(F_d\left({\boldsymbol{x}}\right) = \sum_{t=1}^{T}\mathbb{1}\{f\left({\boldsymbol{x}}\right) \neq f\left(R_d^{\left(t\right)}\left({\boldsymbol{x}}\right)\right)\}\)</span>和<span class="math notranslate nohighlight">\(F_s\left({\boldsymbol{x}}\right) = \sum_{t-1}^{T}\mathbb{1}\{F\left({\boldsymbol{x}}\right) \neq f\left(R_s^{t}\left({\boldsymbol{x}}\right)\right)\}\)</span>，其中<span class="math notranslate nohighlight">\(R_d^{\left(t\right)}\)</span>和<span class="math notranslate nohighlight">\(R_s^{\left(t\right)}\)</span>分别表示随机应用PatchDrop和PatchShuffle。直观来说，<span class="math notranslate nohighlight">\(F_d\left({\boldsymbol{x}}\right)\)</span>和<span class="math notranslate nohighlight">\(F_s\left({\boldsymbol{x}}\right)\)</span>记录了在图像块处理后，对<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>的预测标签变为其他标签的预期次数。</p>
+<p><strong>步骤2（离线）</strong>：对给定在步骤1中创建的样本<span class="math notranslate nohighlight">\(\{F_d\left({\boldsymbol{x}}_i\right)\}_{i=1,..,K}\)</span>或<span class="math notranslate nohighlight">\(\{F_s\left({\boldsymbol{x}}_i\right)\}_{i=1,..,K}\)</span>，这里为PatchDrop和PatchShuffle分别设置阈值超参数<span class="math notranslate nohighlight">\(k_d\)</span>和<span class="math notranslate nohighlight">\(k_s\)</span>，选择在第<span class="math notranslate nohighlight">\(n\)</span>个百分位数的值以确保较小的误报率：</p>
+<ul class="simple">
+<li><p>对于PatchDrop，通常选择一个较大的值，因为在随机丢弃操作后，后门攻击的成功率显著降低。</p></li>
+<li><p>对于PatchShuffle，通常选择一个较小的值，因为在随机变换操作后，后门攻击的成功率并没有降低，而干净数据的准确性受到很大影响。</p></li>
+</ul>
+<p><strong>步骤3（推理期间）</strong>：对于推理阶段的样本，随机应用<span class="math notranslate nohighlight">\(T\)</span>次PatchDrop和PatchShuffle，并分别记录标签变化的次数，即<span class="math notranslate nohighlight">\(F_d\left({\boldsymbol{x}}\right)\)</span>和<span class="math notranslate nohighlight">\(F_s\left({\boldsymbol{x}}\right)\)</span>。如果<span class="math notranslate nohighlight">\(F_d\left({\boldsymbol{x}}\right)\)</span>大于选定的PatchDrop阈值<span class="math notranslate nohighlight">\(k_d\)</span>，或者<span class="math notranslate nohighlight">\(F_s\left({\boldsymbol{x}}\right)\)</span>小于选定的PatchShuffle阈值<span class="math notranslate nohighlight">\(k_s\)</span>，则将样本标记为后门样本。否则，<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>被标记为干净样本。</p>
+<p>图像块处理防御方法只需要少量（少于1000个）干净样本用于阈值选择。此外，研究者展示了在没有干净样本时，此防御仍然有效，这使其应用范围更加广泛。</p>
+</div>
+<div class="section" id="id71">
+<h3><span class="section-number">5.4.3. </span>图像块搜索<a class="headerlink" href="#id71" title="Permalink to this heading">¶</a></h3>
+<p>近期研究表明，自监督学习（SSL）也容易受到图像块后门投毒攻击，攻击者可以通过在一小部分数据（自监督学习中的数据都是未标记的）上添加后门触发器，使模型学习触发器与某个后门类比的对应关系。对此，一种直接的防御策略就是后门样本检测，在自监督学习的过程中发现那些异常的样本，并将它们从训练过程中移除。</p>
+<p>一个有代表性的方法是<strong>图像块搜索</strong>（PatchSearch）
+<span id="id72">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id295" title="Tejankar, A., Sanjabi, M., Wang, Q., Wang, S., Firooz, H., Pirsiavash, H., &amp; Tan, L. (2023). Defending against patch-based backdoor attacks on self-supervised learning. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Tejankar <em>et al.</em>, 2023</a>)</span>
+，其通过单独训练一个分类器来识别有毒样本，并使用下面的三步防御方法（如
+<a class="reference internal" href="#fig-ssl"><span class="std std-numref">图5.4.3</span></a> ）：</p>
+<ol class="arabic simple">
+<li><p>首先，使用k-means聚类算法对训练数据集进行聚类，以便将视觉上相似的图像分在一组。由于投毒图像在表示空间中彼此接近，期望投毒图像会聚在一起。</p></li>
+<li><p>使用Grad-CAM等输入解释方法在图像中定位触发器候选位置。由于自监督学习中没有可用的监督分类器，这里使用基于聚类的分类权重。</p></li>
+<li><p>为每个图像分配一个有毒分数，衡量图像的中毒程度。这通过将候选触发器添加到随机图像上，并统计这些图像被分配到触发器所在聚类的数目来计算。</p></li>
+<li><p>通过一个迭代搜索过程，寻找毒性高的簇，并对簇中的图像进行评分。此过程通过随机采样、评分、移除（移除每次迭代中毒性最低的簇）和排名来找到高毒性样本。</p></li>
+<li><p>使用迭代搜索得到的高毒性样本来训练一个毒药分类器，用来准确地识别有毒样本。</p></li>
+</ol>
+<div class="figure align-default" id="id124">
+<span id="fig-ssl"></span><a class="reference internal image-reference" href="../_images/SSL.png"><img alt="../_images/SSL.png" src="../_images/SSL.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.4.3 </span><span class="caption-text">图像块搜索检测示意图 <span id="id73">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id295" title="Tejankar, A., Sanjabi, M., Wang, Q., Wang, S., Firooz, H., Pirsiavash, H., &amp; Tan, L. (2023). Defending against patch-based backdoor attacks on self-supervised learning. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Tejankar <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id124" title="Permalink to this image">¶</a></p>
+</div>
+<p>利用训练好的有毒样本分类模型，我们就可以在训练数据集中搜索并移除投毒样本，然后在清理后的训练集上重新训练得到一个干净的模型。PatchSearch是一个强大的工具，能显著提高模型在有毒数据上的鲁棒性，性能接近无后门攻击时的情况，展现出了一定的鲁棒学习优势。</p>
+</div>
+</div>
+<div class="section" id="sec-model-steal">
+<span id="id74"></span><h2><span class="section-number">5.5. </span>模型抽取<a class="headerlink" href="#sec-model-steal" title="Permalink to this heading">¶</a></h2>
+<p>很多基座ViT模型都需要在海量数据上进行大规模的预训练，这个过程成本高昂，使得这些模型具有很高的价值。此外，在垂直领域对这些模型进行微调也需要大量专业数据，而这些专业数据是各领域比较难获取的宝贵资源，同样具有很高的商业价值。因此，视觉大模型及其应用成为模型抽取攻击者的主要目标。攻击者可以以很低的成本获取功能相似的替代模型并从中获利。在大模型时代，模型抽取攻击可能引发新的知识产权危机，因为企业和研究机构的模型技术可能会被泄露，从而迅速失去竞争优势。本小节将介绍两种针对视觉ViT模型的抽取攻击。</p>
+<div class="section" id="cont-steal">
+<h3><span class="section-number">5.5.1. </span>Cont-Steal攻击<a class="headerlink" href="#cont-steal" title="Permalink to this heading">¶</a></h3>
+<p>与传统抽取模型概率输出的方法不同，Cont-Steal攻击方法
+<span id="id75">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id296" title="Sha, Z., He, X., Yu, N., Backes, M., &amp; Zhang, Y. (2023). Can't steal? cont-steal! contrastive stealing attacks against image encoders. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Sha <em>et al.</em>, 2023</a>)</span>
+首次尝试抽取图像编码器（encoder）和它编码的嵌入（embedding），也就是抽取特征抽取器和特征。一般的模型抽取攻击流程是，首先获取一个替代数据集，然后通过查询目标模型来给替代数据集打标签，最后在替代数据集上训练一个替代模型，攻击完毕。而对于抽取图像编码器来说，需要完成对替代编码器和目标编码器的特征对齐。
+为了实现这一目标，Cont-Steal将对比学习与模型抽取结合，通过巧妙的定义相似对和不相似对，使替代编码器和目标编码器可以更好的进行表征对齐，已完成对编码器器成功抽取。下面将详细介绍Cont-Steal攻击的抽取步骤。</p>
+<div class="figure align-default" id="id125">
+<span id="fig-cont-stealing"></span><a class="reference internal image-reference" href="../_images/7.2_cont_stealing.png"><img alt="../_images/7.2_cont_stealing.png" src="../_images/7.2_cont_stealing.png" style="width: 675px;" /></a>
+<p class="caption"><span class="caption-number">图5.5.1 </span><span class="caption-text">Cont-Steal攻击示意图 <span id="id76">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id296" title="Sha, Z., He, X., Yu, N., Backes, M., &amp; Zhang, Y. (2023). Can't steal? cont-steal! contrastive stealing attacks against image encoders. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Sha <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id125" title="Permalink to this image">¶</a></p>
+</div>
+<p>首先，构建一个<em>替代数据集</em>，这个数据集中的样本可能是和受害者模型训练数据同分布的，当然也可以是不同分布的。之后，Cont-Steal使用数据增强对替代数据集中的样本进行增强，对于每一个样本都会增强后得到两个增强样本：<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{i,s}\)</span>和<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{i,t}\)</span>。这些样本可以组成<span class="math notranslate nohighlight">\(N\)</span>个样本对（<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{i,s}\)</span>，<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{j,t}\)</span>），同一个样本的不同增强版本构成正样本对（即<span class="math notranslate nohighlight">\(i=j\)</span>），不同样本的增强版本构成负样本对（即<span class="math notranslate nohighlight">\(i \neq j\)</span>）。
+攻击者将样本对中的<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{i,s}\)</span>输入替代编码器<span class="math notranslate nohighlight">\(E_S\)</span>，将<span class="math notranslate nohighlight">\(\tilde{{\boldsymbol{x}}}_{j,t}\)</span>输入受害者（目标）编码器<span class="math notranslate nohighlight">\(E_T\)</span>，并通过下面的损失函数来训练替代模型<span class="math notranslate nohighlight">\(E_S\)</span>：</p>
+<div class="math notranslate nohighlight" id="equation-eq-cont-steal-5">
+<span class="eqno">(5.5.1)<a class="headerlink" href="#equation-eq-cont-steal-5" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{ContSteal}=\frac{1}{N}\sum_{i=1}^{N}-\log \frac{D_{encoder}^+(i)}{D_{encoder}^-(i)+D_{self}^-(i)}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(i\)</span>是<span class="math notranslate nohighlight">\(N\)</span>个样本对的索引下标，<span class="math notranslate nohighlight">\(D_{self}^-(\cdot)\)</span>为表征自不相似度，<span class="math notranslate nohighlight">\(D_{encoder}^-(\cdot)\)</span>为负样本对表征相似度，<span class="math notranslate nohighlight">\(D_{encoder}^+(\cdot)\)</span>为正样本对表征相似度。这三个距离定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-cont-steal-1">
+<span class="eqno">(5.5.2)<a class="headerlink" href="#equation-eq-cont-steal-1" title="Permalink to this equation">¶</a></span>\[D_{encoder}^+(i) = \operatorname{exp}(\operatorname{sim}(E_S(\tilde{{\boldsymbol{x}}}_{i,s}),E_T(\tilde{{\boldsymbol{x}}}_{i,t}))/\tau)\]</div>
+<div class="math notranslate nohighlight" id="equation-eq-cont-steal-2">
+<span class="eqno">(5.5.3)<a class="headerlink" href="#equation-eq-cont-steal-2" title="Permalink to this equation">¶</a></span>\[D_{encoder}^-(i) = \sum_{k=1}^{N} \operatorname{exp}(\operatorname{sim}(E_S(\tilde{{\boldsymbol{x}}}_{i,s}),E_T(\tilde{{\boldsymbol{x}}}_{k,t}))/\tau)\]</div>
+<div class="math notranslate nohighlight" id="equation-eq-cont-steal-3">
+<span class="eqno">(5.5.4)<a class="headerlink" href="#equation-eq-cont-steal-3" title="Permalink to this equation">¶</a></span>\[D_{self}^-(i) = \sum_{k=1}^{N} \mathbb{1}_{[k \neq i]}( \operatorname{exp}(\operatorname{sim}(E_S(\tilde{{\boldsymbol{x}}}_{i,s}),E_S(\tilde{{\boldsymbol{x}}}_{k,t}))/\tau))\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(E_S(\cdot)\)</span>和<span class="math notranslate nohighlight">\(E_T(\cdot)\)</span>分别表示替代编码器和受害者编码器，<span class="math notranslate nohighlight">\(\operatorname{sim}(u,v)=u^{T}v/\left \| u \right \| \left \| v \right \|\)</span>代表<span class="math notranslate nohighlight">\(u\)</span>和<span class="math notranslate nohighlight">\(v\)</span>之间的余弦相似度，<span class="math notranslate nohighlight">\(\tau\)</span>是用于控制温度的超参数。
+<span class="math notranslate nohighlight">\(D_{encoder}^+(\cdot)\)</span>拉进正样本对之间在两个编码器上的特征距离，同时<span class="math notranslate nohighlight">\(D_{encoder}^-(\cdot)\)</span>推远负样本对之间在两个编码器上的额特征距离；此外，<span class="math notranslate nohighlight">\(D_{self}^-(\cdot)\)</span>在替代编码器（不涉及目标编码器）上让负样本对不相似，从而完成对比学习在替代编码器器上的完整定义。
+如 <a class="reference internal" href="#fig-cont-stealing"><span class="std std-numref">图5.5.1</span></a>
+所示，Cont-Steal所设计的损失函数有助于正负样本之间更好区分，并互相为对方提供参考，从而更好的抽取模型的图像编码功能。
+实验表明，这种攻击方式可以以很小的成本抽取到ViT、MAE和CLIP等图像编码器的功能，展示出一定的现实威胁。</p>
+<div class="figure align-default" id="id126">
+<span id="fig-rda-stealing"></span><a class="reference internal image-reference" href="../_images/7.2_RDA_stealing.png"><img alt="../_images/7.2_RDA_stealing.png" src="../_images/7.2_RDA_stealing.png" style="width: 751px;" /></a>
+<p class="caption"><span class="caption-number">图5.5.2 </span><span class="caption-text">RDA攻击示意图 <span id="id77">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id297" title="Wu, S., Ma, C., Wei, K., Xu, X., Ding, M., Qian, Y., &amp; Xiang, T. (2023). Refine, discriminate and align: stealing encoders via sample-wise prototypes and multi-relational extraction. arXiv preprint arXiv:2312.00855.">Wu <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id126" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="rad">
+<h3><span class="section-number">5.5.2. </span>RAD攻击<a class="headerlink" href="#rad" title="Permalink to this heading">¶</a></h3>
+<p>Cont-Steal的攻击方式更像是一种知识蒸馏，需要在训练替代编码器的过程中对目标编码器进行持续不断的查询，所以会浪费很多查询。实际上，同一个样本的不同增强版本之间可以认为是存在一个特征中心的，增强的样本都围绕这个特征中心变化，而且这个特征中心可以通过目标编码器直接算出来，且在训练过程中保持不变。每个样本都有一个特征中心，这个特征中心被称为<strong>嵌入原型</strong>（embedding
+prototype） <span id="id78">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id297" title="Wu, S., Ma, C., Wei, K., Xu, X., Ding, M., Qian, Y., &amp; Xiang, T. (2023). Refine, discriminate and align: stealing encoders via sample-wise prototypes and multi-relational extraction. arXiv preprint arXiv:2312.00855.">Wu <em>et al.</em>, 2023</a>)</span> 。基于这种思想，研究人员提出RAD
+<span id="id79">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id297" title="Wu, S., Ma, C., Wei, K., Xu, X., Ding, M., Qian, Y., &amp; Xiang, T. (2023). Refine, discriminate and align: stealing encoders via sample-wise prototypes and multi-relational extraction. arXiv preprint arXiv:2312.00855.">Wu <em>et al.</em>, 2023</a>)</span>
+攻击方法，进一步提升攻击效果和效率。RAD是三个关键技术的首字母简写：<em>精炼</em>（Refine）、<em>判别</em>（Discriminate）和<em>校准</em>（Aligning）。</p>
+<p>“精炼”就是上面提到的利用嵌入原型来提升抽取效率的技术。具体来说，RAD攻击对每个样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i \in D_S\)</span>进行<span class="math notranslate nohighlight">\(n\)</span>次增强得到<span class="math notranslate nohighlight">\(\{{\boldsymbol{x}}'_{i,t,c}\}_{c=1}^{n} = \{ {\boldsymbol{x}}'_{i,t,1},\cdots, {\boldsymbol{x}}'_{i,t,n}\}\)</span>，将这些增强版本传入目标编码器<span class="math notranslate nohighlight">\(E_T\)</span>获得<span class="math notranslate nohighlight">\(n\)</span>个对应的特征编码：<span class="math notranslate nohighlight">\(\{E_T({\boldsymbol{x}}'_{i,t,c})\}_{c=1}^{n} = \{ E_T({\boldsymbol{x}}'_{i,t,1}),\cdots, E_T({\boldsymbol{x}}'_{i,t,n})\}\)</span>。
+样本的嵌入原型就是这<span class="math notranslate nohighlight">\(n\)</span>特征编码的中心：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-1">
+<span class="eqno">(5.5.5)<a class="headerlink" href="#equation-eq-rda-steal-1" title="Permalink to this equation">¶</a></span>\[p_{{\boldsymbol{x}}_i} = \frac{1}{n} \sum_{c=1}^{n}E_T({\boldsymbol{x}}'_{i,t,c}), \quad {\boldsymbol{x}}_i \in D_S\]</div>
+<p>训练时，样本会被重新增强<span class="math notranslate nohighlight">\(m\)</span>次得到<span class="math notranslate nohighlight">\(\{{\boldsymbol{x}}'_{i,s,q}\}_{q=1}^{m} = \{ {\boldsymbol{x}}'_{i,s,1},\cdots, {\boldsymbol{x}}'_{i,s,m}\}\)</span>，之后输入到<em>替代模型</em><span class="math notranslate nohighlight">\(E_S\)</span>中，获得对应的特征编码<span class="math notranslate nohighlight">\(\{E_S({\boldsymbol{x}}'_{i,s,q})\}_{q=1}^{m} = \{ E_S({\boldsymbol{x}}'_{i,s,1}),\cdots, E_S({\boldsymbol{x}}'_{i,s,m})\}\)</span>。
+然后，使用下面的损失函数来训练替代模型：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-8">
+<span class="eqno">(5.5.6)<a class="headerlink" href="#equation-eq-rda-steal-8" title="Permalink to this equation">¶</a></span>\[\mathcal{L} = \lambda_{1} \cdot \mathcal{L}_{D} + \lambda_{2} \cdot \mathcal{L}_{A}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{D}\)</span>为判别损失，<span class="math notranslate nohighlight">\(\mathcal{L}_{A}\)</span>为对齐损失，<span class="math notranslate nohighlight">\(\lambda_{1}\)</span>和<span class="math notranslate nohighlight">\(\lambda_{2}\)</span>是用来调节损失函数中每部分权重的预设系数。其中，判别损失用来拉进一个样本的不同增强版本到其特征中心的距离，同时推远其他样本的增强版本到特征中心的距离；而对齐损失融合了<em>均方误差</em>和<em>余弦相似度</em>两个距离指标来加强样本到特征中心的对齐。</p>
+<p>辨别损失<span class="math notranslate nohighlight">\(\mathcal{L}_D\)</span>定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-4">
+<span class="eqno">(5.5.7)<a class="headerlink" href="#equation-eq-rda-steal-4" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{D} = - \frac{1}{N} \sum_{i}^{N}\log \frac{\mathcal{L}_{pos}({\boldsymbol{x}}_i)}{\mathcal{L}_{neg}({\boldsymbol{x}}_i)}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{pos}\)</span>和<span class="math notranslate nohighlight">\(\mathcal{L}_{neg}\)</span>损失定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-2">
+<span class="eqno">(5.5.8)<a class="headerlink" href="#equation-eq-rda-steal-2" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{pos} = \frac{1}{m} \sum_{q=1}^{m} \exp(\operatorname{sim}(E_S({\boldsymbol{x}}'_{i,s,q}), p_{{\boldsymbol{x}}_i})/\tau)\]</div>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-3">
+<span class="eqno">(5.5.9)<a class="headerlink" href="#equation-eq-rda-steal-3" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}\mathcal{L}_{neg} = &amp; \frac{1}{m} \sum_{q=1}^{m} \sum_{k=1}^{N} \mathbb{1}_{[i \ne k]} (\exp(\operatorname{sim}(E_S({\boldsymbol{x}}'_{i,s,q}), p_{{\boldsymbol{x}}_k})/\tau) \\ + &amp; \exp(\operatorname{sim}(E_S({\boldsymbol{x}}'_{i,s,q}), E_S({\boldsymbol{x}}'_{k,s,q})/\tau) )\end{aligned}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\operatorname{sim}({\boldsymbol{u}},{\boldsymbol{v}})\)</span>表示<span class="math notranslate nohighlight">\({\boldsymbol{u}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{v}}\)</span>之间的余弦相似度，<span class="math notranslate nohighlight">\(\tau\)</span>是温度参数。
+对齐损失<span class="math notranslate nohighlight">\(\mathcal{L}_A\)</span>定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-7">
+<span class="eqno">(5.5.10)<a class="headerlink" href="#equation-eq-rda-steal-7" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{A} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{\mathcal{L}'_{ang}({\boldsymbol{x}}_i)}{\mathcal{L}'_{amp}({\boldsymbol{x}}_i)}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}'_{amp}\)</span>和<span class="math notranslate nohighlight">\(\mathcal{L}'_{ang}\)</span>损失项定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-5">
+<span class="eqno">(5.5.11)<a class="headerlink" href="#equation-eq-rda-steal-5" title="Permalink to this equation">¶</a></span>\[\mathcal{L}'_{amp} = \frac{1}{m} \sum_{q=1}^{m}{\|E_S({\boldsymbol{x}}'_{i,s,q})-p_{{\boldsymbol{x}}_i} \|}^{2}\]</div>
+<div class="math notranslate nohighlight" id="equation-eq-rda-steal-6">
+<span class="eqno">(5.5.12)<a class="headerlink" href="#equation-eq-rda-steal-6" title="Permalink to this equation">¶</a></span>\[\mathcal{L}'_{ang} = \frac{1}{m} \sum_{q=1}^{m} \operatorname{sim}(E_S({\boldsymbol{x}}'_{i,s,q}),p_{{\boldsymbol{x}}_i})\]</div>
+<p>从上面判别损失和对齐损失的定义式不难看出，这两个损失项所涉及到模型只有替代模型<span class="math notranslate nohighlight">\(E_S\)</span>，并没有目标模型<span class="math notranslate nohighlight">\(E_T\)</span>。这也就是说，RAD训练替代模型的过程并不需要查询目标模型。如前文所述，这主要是得益于嵌入原型（即特征中心）的使用，相当于固定了目标编码器的监督信号，可大大减少查询次数。
+实验表明，RDA方法比Cont-Steal更具威胁性，它只使用Cont-Steal十分之一的查询次数即可获得相当甚至更好的抽取性能。</p>
+<p>目前针对视觉大模型的模型抽取攻击相对较少，相关的研究仍处于初级阶段。并且目前的研究重点关注在对视觉大模型编码器功能的抽取，其他方面的研究仍是空白。然而，可以看到，目前的攻击方法已经可以以很低的开销获得一个和受害者模型类似的替代模型。因而这种攻击具有很强的现实威胁，需要引起工业界和研究人员的注意，尽快提出一些有针对性的防御方法。在人工智能广泛部署的大形势下，一些应用领域中使用的视觉大模型需要更加谨慎地考虑模型的可信性问题，特别是对于一些敏感性高的应用，如医疗图像识别、人脸识别等，模型抽取攻击可能导致严重的隐私泄露和误导。因此，公司和研究机构在部署这些模型之前应该加强安全检查，确保其具有一定能力抵御模型抽取攻击。</p>
+</div>
+</div>
+<div class="section" id="sec-deepfake">
+<span id="id80"></span><h2><span class="section-number">5.6. </span>深度伪造<a class="headerlink" href="#sec-deepfake" title="Permalink to this heading">¶</a></h2>
+<p>狭义来讲，深度伪造（Deepfake，可以分解为deep
+learning和fake）特指基于深度学习模型的换脸技术；广义来讲，深度伪造是可以生成让人信以为真的虚假内容的人工智能机技术。
+实际上，深度伪造技术也有一些积极的、具有创造性的应用，比如电影配音、“复活”历史人物、虚拟试衣、娱乐特效等。
+但其一旦被滥用，所带来的危害性更大，比如制造虚假国家领导人讲话视频、传播虚假政治流言、利用虚假信息来操纵公众舆论、伪造明星视频等，侵犯了受害者的权益，造成了极其严重的负面社会影响，损害大众对人工智能技术的信任。所以，我们在研究深度生成技术的同时，需要加强监管和发展有效的检测技术。接下来，本章将从生成和检测两个方面出发，介绍几个有代表性的深度伪造以及检测方法。</p>
+<div class="section" id="id81">
+<h3><span class="section-number">5.6.1. </span>生成<a class="headerlink" href="#id81" title="Permalink to this heading">¶</a></h3>
+<p>深度伪造技术主要涉及面部交换，即将一个人的面部从源图像转移到目标图像，同时保留目标图像的姿势、表情、光照条件和其他属性。随着合成面部图像技术的快速发展，面部交换近年来引起了广泛关注。作为面部图像合成中最广泛使用的技术之一，它促进了各种实际应用，如肖像外观变换、用于面部分析的数据增强方法以及隐私保护。
+面部交换方法可以分为基于3D模型和生成对抗网络的方法。基于3D模型的方法通常使用3D可变形模型，在源脸和目标脸之间建立密集的点对点对应关系。</p>
+<p><strong>Face2Face</strong> 一个经典的换脸算法是Face2Face <span id="id82">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id299" title="Thies, J., Zollhöfer, M., Stamminger, M., Theobalt, C., &amp; Nießner, M. (2016). Face2face: real-time face capture and reenactment of rgb videos. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Thies <em>et al.</em>, 2016</a>)</span>
+，这是一个实时面部表情转移技术。Face2Face是一个3D方法，它通过脸部捕捉和再现来转移表情，使用密集的光度一致性测量来跟踪源视频和目标视频的面部表情,
+后通过源和目标之间快速有效的变形传递来实现重演。
+此方法从目标视频帧中检索并定位与表情最匹配的口型，并进行变形以产生准确的配合,
+加上优化策略实现了低延迟的视频人脸再现，能够在源人脸作出对应表情动作之后马上以视频的形式再现到目标人脸上。此项技术可以用于电影后期制作、视频会议以及增强或改变在线视频中的表情。</p>
+<div class="figure align-default" id="id127">
+<span id="fig-5-6-1-face2face-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.1_face2face_pipeline.png"><img alt="../_images/5.6.1_face2face_pipeline.png" src="../_images/5.6.1_face2face_pipeline.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.1 </span><span class="caption-text">Face2Face算法流程 <span id="id83">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id299" title="Thies, J., Zollhöfer, M., Stamminger, M., Theobalt, C., &amp; Nießner, M. (2016). Face2face: real-time face capture and reenactment of rgb videos. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Thies <em>et al.</em>, 2016</a>)</span></span><a class="headerlink" href="#id127" title="Permalink to this image">¶</a></p>
+</div>
+<p>如 <a class="reference internal" href="#fig-5-6-1-face2face-pipeline"><span class="std std-numref">图5.6.1</span></a>
+所示，Face2Face算法主要包括以下几个步骤：</p>
+<p><strong>（1）人脸参数化：</strong>
+首先在预处理步骤使用一种基于全局非刚性模型的捆绑方法，利用预先录制的一组训练帧来整体重建目标演员的面部形状特征3D模型。由于该预处理步骤在整套训练帧上全局进行，因此可以解决单目重建中常见的几何歧义问题。使用多线性主成分分析（multi-linear
+PCA）技术对脸部进行参数化，前两维代表面部身份信息，即几何形状和皮肤反射率，第三维控制面部表情：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-4">
+<span class="eqno">(5.6.1)<a class="headerlink" href="#equation-chapter-chap-5-4" title="Permalink to this equation">¶</a></span>\[M_{geo}(\boldsymbol{\alpha},\boldsymbol{\delta}) = {\boldsymbol{a}}_{id} + E_{id}\cdot\boldsymbol{\alpha} + E_{exp}\cdot\boldsymbol{\delta},\]</div>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-5">
+<span class="eqno">(5.6.2)<a class="headerlink" href="#equation-chapter-chap-5-5" title="Permalink to this equation">¶</a></span>\[M_{alb}(\boldsymbol{\beta}) = {\boldsymbol{a}}_{alb} + E_{alb}\cdot\boldsymbol{\beta}\]</div>
+<p>在上面的公式中，假定形状和反射率在平均形状<span class="math notranslate nohighlight">\({\boldsymbol{a}}_{id}\in {\mathbb{R}}^{3n}\)</span>和反射率<span class="math notranslate nohighlight">\({\boldsymbol{a}}_{alb}\in {\mathbb{R}}^{3n}\)</span>附近呈现多元正太概率分布，给出了形状<span class="math notranslate nohighlight">\(E_{id}\in {\mathbb{R}}^{3n\times80}\)</span>、反射率<span class="math notranslate nohighlight">\(E_{alb}\in {\mathbb{R}}^{3n\times80}\)</span>、表情<span class="math notranslate nohighlight">\(E_{exp}\in {\mathbb{R}}^{3n\times76}\)</span>以及它们的标准差<span class="math notranslate nohighlight">\(\sigma_{id} {\mathbb{R}}^{80}\)</span>、<span class="math notranslate nohighlight">\(\sigma_{alb} {\mathbb{R}}^{80}\)</span>、<span class="math notranslate nohighlight">\(\sigma_{exp} {\mathbb{R}}^{76}\)</span>。构建出来的模型有53K个点，106K个面。合成图像<span class="math notranslate nohighlight">\(C_{S}\)</span>可以通过在<em>刚性模型变换</em><span class="math notranslate nohighlight">\(\Phi(v)\)</span>和<em>全透视变换</em><span class="math notranslate nohighlight">\(\Pi(v)\)</span>
+下对模型进行光栅化来生成。
+其中的若干参数可以组成一个未知参数集，通过三个子项的联合变分优化（joint
+variational
+optimization）来得到，优化目标包括（1）<em>图像一致性</em>（Photo
+Consistency），测量像素级的光度对准误差来量化合成图像对输入数据的解释程度；（2）<em>特征对齐</em>（Feature
+Alignment），计算在 RGB
+流中检测到的一组显著面部特征点对之间的特征相似性；（3）<em>统计正则</em>（Statistical
+Regularization），基于正态分布人群的假设来强制参数在统计上接近均值。</p>
+<p><strong>（2）表情迁移：</strong>
+为了表情的实时迁移并在迁移过程中保持演员的独特性，Face2Face提出一种<em>子空间变形迁移</em>（sub-space
+deformation
+transfer）技术，将源演员的表情变化传递到目标演员，同时保留每个演员表情的个性化特征。假设源身份为<span class="math notranslate nohighlight">\(\boldsymbol{\alpha}^S\)</span>和目标身份为<span class="math notranslate nohighlight">\(\boldsymbol{\alpha}^T\)</span>，传递过程以源身份的中性表情<span class="math notranslate nohighlight">\(\boldsymbol{\delta}_{N}^S\)</span>和目标身份的中性表情<span class="math notranslate nohighlight">\(\boldsymbol{\delta}_{N}^T\)</span>作为输入，输出是迁移后的表情<span class="math notranslate nohighlight">\(\boldsymbol{\delta}^T\)</span>。首先，计算源变形梯度<span class="math notranslate nohighlight">\(A_{i}\in {\mathbb{R}}^{3\times 3}\)</span>，将源演员的三角片从中性（neutral）转换为变形（deformed）状态。然后，基于未变形状态<span class="math notranslate nohighlight">\(v_{i}=M_i(\boldsymbol{\alpha}^T,\boldsymbol{\delta}_{N}^T)\)</span>，通过最小二乘法计算得到变形目标状态<span class="math notranslate nohighlight">\(\hat{v}_{i}\)</span>，此优化问题可形式表示为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-6">
+<span class="eqno">(5.6.3)<a class="headerlink" href="#equation-chapter-chap-5-6" title="Permalink to this equation">¶</a></span>\[E(\boldsymbol{\delta}^T) = \|A\boldsymbol{\delta}^T-\boldsymbol{b}\|^2_{2}\]</div>
+<p>其中，矩阵<span class="math notranslate nohighlight">\(A\)</span>是常数矩阵，包含了投影到表情子空间的模板网格的边缘信息，<span class="math notranslate nohighlight">\(\boldsymbol{b}\)</span>是在中性空间目标的边缘信息。上式的最小值可以通过求解相应的正交方程（normal
+equations）来获得。由于系统矩阵是常数，所以可以使用<em>奇异值分解</em> (SVD)
+预先计算其伪逆，这样能大幅度减少优化问题的维度，从而实现快速的实时传递效率。</p>
+<p><strong>（3）嘴型检索：</strong>
+在表情迁移后，仍然需要对嘴型进行最后的匹配和调整，以使其看起来更加真实自然。Face2Face
+方法引入了一种新的基于图像的嘴部合成方法，通过从目标演员视频序列中检索并变形（warp）最匹配的嘴部图像。
+该方法基于一种“帧到簇”（Frame-to-Cluster）的匹配策略和特征相似性度量，找到包含最佳目标嘴的帧。其使用几何和光度特征（包括旋转、表情参数、关键点等信息）来表示视频帧，并在这个空间中检索最匹配的目标嘴部帧。在此过程中，研究者将目标演员的人脸帧聚类为10个簇，然后通过与这些簇的代表帧（距离簇内其他帧最近的帧）比较，检索得到最匹配的嘴型帧。此外，为了保证时序上的连贯性，研究者使用一个<em>密集外观图</em>（dense
+appearance
+graph）强制让检索到的嘴型帧与上一步的嘴型帧和目标嘴型帧之间都相似（以保证连续性）。
+最后，在光流对齐后，对像素级空间进行 alpha
+混合，并进行照明校正，将原始视频帧、照明校正后的投影嘴部帧和渲染的面部模型融合在一起，完成最终的换脸。</p>
+<div class="figure align-default" id="id128">
+<span id="fig-5-6-1-fsgan-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.1_fsgan_pipeline.png"><img alt="../_images/5.6.1_fsgan_pipeline.png" src="../_images/5.6.1_fsgan_pipeline.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.2 </span><span class="caption-text">FSGAN算法流程 <span id="id84">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id300" title="Nirkin, Y., Keller, Y., &amp; Hassner, T. (2019). FSGAN: subject agnostic face swapping and reenactment. IEEE International Conference on Computer Vision.">Nirkin <em>et al.</em>, 2019</a>)</span></span><a class="headerlink" href="#id128" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>FSGAN</strong>
+在Face2Face之后又出现了很多效果很好的换脸算法，比如<strong>FSGAN</strong>（Face
+Swapping GAN） <span id="id85">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id300" title="Nirkin, Y., Keller, Y., &amp; Hassner, T. (2019). FSGAN: subject agnostic face swapping and reenactment. IEEE International Conference on Computer Vision.">Nirkin <em>et al.</em>, 2019</a>)</span>
+。相比Face2Face，FSGAN是一个基于GAN的纯视觉方法，只对图片像素进行操作和生成。FSGAN是一个主体无关的神经网络模型，它可以应用于不同主体的脸部，而不需要针对特定主体进行训练。其主要思想是，先将源图人脸的角度转换到与目标人脸相同，同时生成分割脸部、头发和背景的掩码，然后再将源图的脸部和目标图的头发背景进行融合，最终达到换脸效果。
+FSGAN的算法流程如 <a class="reference internal" href="#fig-5-6-1-fsgan-pipeline"><span class="std std-numref">图5.6.2</span></a>
+所示，其三个主要步骤都是依靠生成对抗网络来完成的。
+FSGAN所使用的模型包含四个生成器，共有四个生成器Gr、Gs、Gc和Gb，其中Gr的作用是用源图的脸部生成对应目标脸部的姿势和表情，Gs用来得到目标脸部的头发、脸部和背景的分割，Gc用来把Gr生成的脸部与目标图脸部相比缺失的部分补齐，最后Gb的作用是将补齐的人脸与目标图进行融合。</p>
+<p>首先，对于第一个生成器Gr，给定一个图像<span class="math notranslate nohighlight">\(I\)</span>和一个脸部的热力图表示<span class="math notranslate nohighlight">\(H(p)\)</span>，用<span class="math notranslate nohighlight">\(F_{s}\)</span>和<span class="math notranslate nohighlight">\(F_{t}\)</span>来分别表示源图脸部和目标图脸部，然后通过对3D关键点插值得到旋转角度后的源图以及对应的掩码：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-7">
+<span class="eqno">(5.6.4)<a class="headerlink" href="#equation-chapter-chap-5-7" title="Permalink to this equation">¶</a></span>\[I_ {r_ {j}}  ,  S_ {r_ {j}} = G_ {r}  (  I_ {r_{j-1}} ; H(p_{j})),\]</div>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-8">
+<span class="eqno">(5.6.5)<a class="headerlink" href="#equation-chapter-chap-5-8" title="Permalink to this equation">¶</a></span>\[I_ {r_ {0}}=I_{s}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(1\leq j \leq n\)</span>，<span class="math notranslate nohighlight">\(H(p_{j})\)</span>表示不同转动角度下的热力图，<span class="math notranslate nohighlight">\(I_ {r_ {j}}\)</span>表示生成的图像，<span class="math notranslate nohighlight">\(S_ {r_ {j}}\)</span>表示生成的掩码。</p>
+<p>对于第二个生成器Gs，其输入是一张图片，输出一个对背景、人脸和头发进行编码的3通道分割掩码。对于遮挡部分的人脸，使用第三个生成器Gc来进行人脸补齐，Gc渲染面部图像Fs，使得到的面部渲染Ir覆盖Ft的整个分割掩模St，从而解决这种遮挡。最后，使用第四个生成器Gb进行人脸的融合。
+这四个生成器需要基于三个损失函数进行训练：（1）特定域感知损失，（2）重建损失，（3）对抗损失。下面详细介绍这三个损失函数。</p>
+<p><strong>（1）特定域感知损失</strong>：为了捕捉精细的面部细节，FSGAN使用下面的感知损失：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-9">
+<span class="eqno">(5.6.6)<a class="headerlink" href="#equation-chapter-chap-5-9" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{perc}({\boldsymbol{x}}, y) = \sum_{i=1}^{n} \frac{1}{C_i H_i W_i} \left\| f_i({\boldsymbol{x}}) - f_i(y) \right\|_1\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(f_i\)</span>表示预训练的特征提取网络第i层的特征图，这里的预训练网络使用的是在人脸识别和人脸属性分类数据集上训练得到的VGG19。上面损失中<span class="math notranslate nohighlight">\(L_1\)</span>距离的使用可以帮助捕获高频细节。</p>
+<p><strong>（2）重建损失</strong>：用感知损失捕获人脸的细节之后，单用一个损失函数通常会产生颜色步准确的图像。所以，需要使用一个像素级的损失函数<span class="math notranslate nohighlight">\(\mathcal{L}_{pixel}\)</span>来解决这个问题：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-10">
+<span class="eqno">(5.6.7)<a class="headerlink" href="#equation-chapter-chap-5-10" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{pixel}({\boldsymbol{x}}, y) = \left\| {\boldsymbol{x}} - y \right\|_1\]</div>
+<p>上述两个损失共同组成了一个重建损失，形式化表示如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-11">
+<span class="eqno">(5.6.8)<a class="headerlink" href="#equation-chapter-chap-5-11" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{rec}({\boldsymbol{x}}, y) = \lambda_{perc} \mathcal{L}_{perc}({\boldsymbol{x}}, y) + \lambda_{pixel} \mathcal{L}_{pixel}({\boldsymbol{x}}, y)\]</div>
+<p><strong>（3）对抗损失</strong>：这是生成对抗网络必备的训练损失。对于一个生成器<span class="math notranslate nohighlight">\(G\)</span>和多个判别器<span class="math notranslate nohighlight">\(\{D_1, ..., D_n\}\)</span>，对抗损失函数定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-12">
+<span class="eqno">(5.6.9)<a class="headerlink" href="#equation-chapter-chap-5-12" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{adv}(G, D) = \min_{G} \max_{D_1,...,D_n} \sum_{i=1}^{n} \mathcal{L}_{GAN}(G, D_i)\]</div>
+<p>其中，针对单个生成器<span class="math notranslate nohighlight">\(G\)</span>和多个判别器<span class="math notranslate nohighlight">\(D_i\)</span>的<span class="math notranslate nohighlight">\(\mathcal{L}_{GAN}\)</span>损失函数定义如下:</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-13">
+<span class="eqno">(5.6.10)<a class="headerlink" href="#equation-chapter-chap-5-13" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{GAN}(G, D_i) = \mathbb{\mathbb{E}}_{({\boldsymbol{x}},y)}[\log D_i({\boldsymbol{x}}, y)] + \mathbb{\mathbb{E}}_{{\boldsymbol{x}}}[\log (1 - D_I({\boldsymbol{x}}, G({\boldsymbol{x}})))]\]</div>
+<p>四个生成器Gr、Gs、Gc和Gb的训练过程如下。首先，对于Gr生成器的部分，定义并使用<em>逐步一致性损失</em>（用于在小步骤中逐步训练人脸重构，超参数为<span class="math notranslate nohighlight">\(\lambda_{stepwise}\)</span>）进行训练:</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-14">
+<span class="eqno">(5.6.11)<a class="headerlink" href="#equation-chapter-chap-5-14" title="Permalink to this equation">¶</a></span>\[\mathcal{L}(G_r) = \lambda_{stepwise} \mathcal{L}_{rec}(\tilde{I}_{r_{n}}, \tilde{I}_t)+ \lambda_{rec} \mathcal{L}_{rec}(\tilde{I}_r, \tilde{I}_t)+ \lambda_{adv} \mathcal{L}_{adv}+ \lambda_{seg} \mathcal{L}_{pixel}(S_r, S_t)\]</div>
+<p>其中，对于一个（<span class="math notranslate nohighlight">\(I_s,I_t\)</span>）对，<span class="math notranslate nohighlight">\(I_{r_n}\)</span>是<span class="math notranslate nohighlight">\(I_s\)</span>经过<span class="math notranslate nohighlight">\(n\)</span>次迭代后生成的图片，在用<span class="math notranslate nohighlight">\(S_t\)</span>和<span class="math notranslate nohighlight">\(S_{r_j}\)</span>作为分割掩码来去掉背景的情况下，<span class="math notranslate nohighlight">\(I_{r_n}\)</span>和<span class="math notranslate nohighlight">\(I_t\)</span>应该是一样的图片。</p>
+<p>对于Gs，使用标准的交叉熵损失函数和来自Gr生成器的指导信息：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-15">
+<span class="eqno">(5.6.12)<a class="headerlink" href="#equation-chapter-chap-5-15" title="Permalink to this equation">¶</a></span>\[\mathcal{L}(G_s) = \mathcal{L}_{CE} + \lambda_{reenactment} \mathcal{L}_{pixel}(S_t, S^t_r)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(S^t_r\)</span>是来自Gr生成的分割掩码。</p>
+<p>生成器Gc通过重建和对抗损失进行训练：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-16">
+<span class="eqno">(5.6.13)<a class="headerlink" href="#equation-chapter-chap-5-16" title="Permalink to this equation">¶</a></span>\[\mathcal{L}(G_c) = \lambda_{rec} \mathcal{L}_{rec}(I_c, \tilde{I}_t) + \lambda_{adv} \mathcal{L}_{adv}\]</div>
+<p>用来进行人脸融合的生成器Gb使用泊松融合损失进行训练。首先定义泊松
+融合优化：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-17">
+<span class="eqno">(5.6.14)<a class="headerlink" href="#equation-chapter-chap-5-17" title="Permalink to this equation">¶</a></span>\[P(I_t; I^t_r, S_t) = \arg\min_f \left\|\nabla f - \nabla I^t_r\right\|_2^2,\text{s.t. } f(i, j) = I_t(i, j), \quad \forall S_t(i, j) = 0\]</div>
+<p>那么泊松损失函数为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-18">
+<span class="eqno">(5.6.15)<a class="headerlink" href="#equation-chapter-chap-5-18" title="Permalink to this equation">¶</a></span>\[\mathcal{L}(G_b) = \lambda_{rec} \mathcal{L}_{rec}(G_b(I_t; I^t_r, S_t), P(I_t; I^t_r, S_t)) + \lambda_{adv} \mathcal{L}_{adv}\]</div>
+<p>在Face2Face和FSGAN的基础上，近年来人脸交换技术不断发展，涌现了大量新的方法。近期，研究者提出了更加先进的人脸交换算法，而FaceSwapper就是其中之一，它采用了一次性的渐进式交换方式，是一种基于GAN的伪造方法。</p>
+<p><strong>FaceSwapper</strong> 尽管面部交换技术取得了显著进展，但仍然存在诸多挑战。
+首先，为了实现逼真的面部交换，现有方法通常需要来自同一身份的许多图像进行外观建模。这些方法的一个缺点是它们的泛化能力差，难以适应任意面孔。
+其次，完全分离身份信息和属性信息是困难的，这导致交换面部的可控性较差。
+此外，先前的方法在利用语义信息方面受到了一定限制。
+因此，必须利用大量图像来训练基于注意力或细化模型的面部交换模型。
+与之前方法不同，FaceSwapper <span id="id86">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id301" title="Li, Q., Wang, W., Xu, C., Sun, Z., &amp; Yang, M.-H. (2024). Learning disentangled representation for one-shot progressive face swapping. IEEE Transactions on Pattern Analysis and Machine Intelligence.">Li <em>et al.</em>, 2024</a>)</span>
+专注于一个更有挑战性的任务，即<em>一次性渐进面部交换</em>，在训练和测试中只给出源身份和目标身份各一张面部图像，能够很好地泛化和适应任意面孔。</p>
+<div class="figure align-default" id="id129">
+<span id="fig-5-6-1-faceswapper-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.1_faceswapper_pipeline.png"><img alt="../_images/5.6.1_faceswapper_pipeline.png" src="../_images/5.6.1_faceswapper_pipeline.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.3 </span><span class="caption-text">FaceSwapper算法流程 <span id="id87">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id301" title="Li, Q., Wang, W., Xu, C., Sun, Z., &amp; Yang, M.-H. (2024). Learning disentangled representation for one-shot progressive face swapping. IEEE Transactions on Pattern Analysis and Machine Intelligence.">Li <em>et al.</em>, 2024</a>)</span></span><a class="headerlink" href="#id129" title="Permalink to this image">¶</a></p>
+</div>
+<p>FaceSwapper同样也是一个基于生成对抗网络的方法。如
+<a class="reference internal" href="#fig-5-6-1-faceswapper-pipeline"><span class="std std-numref">图5.6.3</span></a>
+所示，FaceSwapper由两个核心模块组成：<em>解耦表示模块</em>（Disentangled
+Representation Module，DRM）和<em>语义引导融合模块</em>（Semantic-guided
+Fusion Module，SFM）。
+解耦表示模块将人脸图片的属性（姿态、表情、灯光和背景）和身份信息分离，需要用到两个编码器，一个用来提取人脸的身份信息，另一个用来提取人脸的属性信息。这种信息分离是实现渐进式面部交换的基础，分离的属性和身份信息将会输入语义引导融合模块进行换脸图像的生成。
+而语义引导融合模块则利用面部语义信息（即定义面部区域的掩码信息）来指导属性信息和身份信息的融合，通过一些特殊的网络结构来完成最终图像的生成。</p>
+<p><em>解耦表示模块</em>包含两个编码器，属性编码器<span class="math notranslate nohighlight">\(E_{attr}\)</span>和身份编码器<span class="math notranslate nohighlight">\(E_{id}\)</span>。属性编码器负责提取人脸图像中的属性信息，如姿态、表情、光照和背景等；身份编码器比较灵活，用于提取和学习人脸图像中的身份信息。在网络结构上，由于身份信息可以直接用向量表示，而属性信息包含大量与身份无关的信息，难以用向量表示，因此由多层特征图组成的残差瓶颈块被附加在属性编码器的末尾以表示属性信息。具体来说，属性编码器后连接5个下采样残差块和2个残差瓶颈块，身份编码器后连接有6个下采样残差块，然后在最后附加一个卷积层和一个全连接层。</p>
+<div class="figure align-default" id="id130">
+<span id="fig-5-6-1-sfm-module"></span><a class="reference internal image-reference" href="../_images/5.6.1_SFM_module.png"><img alt="../_images/5.6.1_SFM_module.png" src="../_images/5.6.1_SFM_module.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.4 </span><span class="caption-text">语义引导融合模块 <span id="id88">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id301" title="Li, Q., Wang, W., Xu, C., Sun, Z., &amp; Yang, M.-H. (2024). Learning disentangled representation for one-shot progressive face swapping. IEEE Transactions on Pattern Analysis and Machine Intelligence.">Li <em>et al.</em>, 2024</a>)</span></span><a class="headerlink" href="#id130" title="Permalink to this image">¶</a></p>
+</div>
+<p><em>语义引导融合模块</em>如 <a class="reference internal" href="#fig-5-6-1-sfm-module"><span class="std std-numref">图5.6.4</span></a>
+所示，其只包含一个语义引导融合的解码器<span class="math notranslate nohighlight">\(G_{f}\)</span>。其将网络前面的编码器输出作为输入，并生成图像作为输出。具体来说，属性编码器<span class="math notranslate nohighlight">\(E_{attr}\)</span>会产生<span class="math notranslate nohighlight">\(E_{attr}(I_{{\boldsymbol{x}}})\)</span>和<span class="math notranslate nohighlight">\(E_{attr}(I_{y})\)</span>的输出，身份编码器<span class="math notranslate nohighlight">\(E_{id}\)</span>会对应产生<span class="math notranslate nohighlight">\(E_{id}(I_{{\boldsymbol{x}}})\)</span>和<span class="math notranslate nohighlight">\(E_{id}(I_{y})\)</span>的输出,语义引导融合的解码器<span class="math notranslate nohighlight">\(G_{f}\)</span>将<span class="math notranslate nohighlight">\(E_{id}(I_{{\boldsymbol{x}}})\)</span>和<span class="math notranslate nohighlight">\(E_{attr}(I_{y})\)</span>作为输入，来产生最后的换脸图像<span class="math notranslate nohighlight">\(I_{{\boldsymbol{x}}\to y}\)</span>。在这个模块中，使用了BiSeNet
+<span id="id89">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id302" title="Yu, C., Wang, J., Peng, C., Gao, C., Yu, G., &amp; Sang, N. (2018). Bisenet: bilateral segmentation network for real-time semantic segmentation. European Conference on Computer Vision.">Yu <em>et al.</em>, 2018</a>)</span>
+的语义分割方法来将人脸的面部和其他背景分割开来，生成一个语义掩码，这样就将语义信息加入到模型中了。</p>
+<p>语义引导融合模块的结构包含2个瓶颈块和5个下采样语义引导脸部交换模块。从
+<a class="reference internal" href="#fig-5-6-1-sfm-module"><span class="std std-numref">图5.6.4</span></a>
+中可以看到，语义引导模块就是在标准残差块上将归一化层替换成了<em>语义引导去归一化层</em>（Semantic-guided
+Denormalization
+Layer，SDL），在SDL中使用实例归一化，可以防止均值和协方差偏移，并简化学习过程。因为属性编码器提供的脸部空间信息是受到限制的，仅能够获得外表信息而无法获得姿态和表情信息，所以在这个模块中同时加入了脸部关键点来辅助解码器捕获空间信息。</p>
+<p><a class="reference internal" href="#fig-5-6-1-sfm-module"><span class="std std-numref">图5.6.4</span></a>
+中下面是SDL的详细结构，其中<span class="math notranslate nohighlight">\(S^i\)</span>是分割掩码，<span class="math notranslate nohighlight">\(n^i\)</span>是前一层传来的特征图，<span class="math notranslate nohighlight">\(E_{id}\)</span>是身份编码器传来的特征向量，而<span class="math notranslate nohighlight">\(L^i\)</span>就是脸部的关键点数据。首先将特征图与掩码做点乘，然后再用点积与跳连的方式将身份信息和脸部空间信息引入模型，就得到了SDL层的输出<span class="math notranslate nohighlight">\(n^i_{out}\)</span>，即：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-19">
+<span class="eqno">(5.6.16)<a class="headerlink" href="#equation-chapter-chap-5-19" title="Permalink to this equation">¶</a></span>\[n_{out}^i = {n^i} \otimes \left( {1 - {S^i}} \right) + {p^i}\]</div>
+<p>其中，</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-20">
+<span class="eqno">(5.6.17)<a class="headerlink" href="#equation-chapter-chap-5-20" title="Permalink to this equation">¶</a></span>\[{p^i} = {\phi ^i}\left( {{L^i}} \right) \otimes {m^i} + {\varphi ^i}\left( {{L^i}} \right),{m^i} = {\alpha ^i}\left( {{E_{id}\left( {{I_x}} \right)}} \right) \odot {\bar n^i} + {\beta ^i}\left( {{E_{id}\left( {{I_x}} \right)}} \right)\]</div>
+<p>在这里<span class="math notranslate nohighlight">\(p^i\)</span>是去归一化后的激活值，而<span class="math notranslate nohighlight">\(\phi ^i\left( {{L^i}} \right)\)</span>和<span class="math notranslate nohighlight">\(\varphi ^i\left( {{L^i}} \right)\)</span>
+是学习到的缩放尺度和偏差调制参数。</p>
+<p>FaceSwapper方法中用到了<em>身份保存损失</em>（以保留源图像的个性化特征）、<em>属性保存损失</em>（以维护目标图像的属性）、<em>重建损失</em>（确保编码器和解码器彼此可逆）以及<em>对抗损失</em>（鼓励合成高度逼真的图像）。
+对于<em>身份保存损失</em>，采用最小化特征空间中<span class="math notranslate nohighlight">\(I_{{\boldsymbol{x}}\to y}\)</span>和<span class="math notranslate nohighlight">\(I_{{\boldsymbol{x}}}\)</span>之间的距离，从而嵌入个性化的身份相关信息。对于<em>属性保留损失</em>，利用
+SFM
+的多层特征图来表示属性，其中有一个组件称为属性提取器，要最小化<span class="math notranslate nohighlight">\(I_{{\boldsymbol{x}}\to y}\)</span>和<span class="math notranslate nohighlight">\(I_{y}\)</span>之间属性特征的距离。对于<em>重建损失</em>，采用的是自编码器的方式，通过最小化重建原始输入人脸和生成人脸之间的差异来约束网络生成真实且有意义的人脸图像。对于<em>对抗损失</em>，为了使图像与真实面部图像难以区分，鉴别器网络<span class="math notranslate nohighlight">\(D\)</span>将以样本对作为输入，其中正样本对为交换过的面部图像与目标面部的关键点图像，负样本对为真实面部图像与其对应的关键点图像。鉴别器<span class="math notranslate nohighlight">\(D\)</span>不仅可以引导生成器生成逼真的面部图像，还可以促使生成的图像包含与目标图像一样的面部关键点。</p>
+</div>
+<div class="section" id="id90">
+<h3><span class="section-number">5.6.2. </span>检测<a class="headerlink" href="#id90" title="Permalink to this heading">¶</a></h3>
+<div class="figure align-default" id="id131">
+<span id="fig-8-2-2-deepfake-detection"></span><a class="reference internal image-reference" href="../_images/8.2.2_deepfake_detection.png"><img alt="../_images/8.2.2_deepfake_detection.png" src="../_images/8.2.2_deepfake_detection.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.5 </span><span class="caption-text">深度伪造检测的一般流程 <span id="id91">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id303" title="Masood, M., Nawaz, M., Malik, K. M., Javed, A., Irtaza, A., &amp; Malik, H. (2023). Deepfakes generation and detection: state-of-the-art, open challenges, countermeasures, and way forward. Applied Intelligence, 53(4), 3974–4026.">Masood <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id131" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>传统方法</strong>
+深度伪造检测就是判断一个视频是否是伪造的，可以理解成是一个二分类任务，大多数检测算法遵循如
+<a class="reference internal" href="#fig-8-2-2-deepfake-detection"><span class="std std-numref">图5.6.5</span></a>
+所示的流程。首先对视频进行预处理并提取特征，然后将特征输入分类器得到判断结果。大多数检测方法都采用手工或基于深度学习的方法来提取特征，少部分方法使用两者结合的方式。很多检测方法利用多种模态（如音频和视觉信号）构建更有效的检测表征。</p>
+<p>基于手工特征的检测方法可以使用<em>加速鲁棒特征</em>（SURF）描述符进行特征提取来检测交换面部的技术，然后在提取的特征上训练一个简单的分类器（如SVM）
+进行分类。更先进的方式是使用预训练的深度神经网络进行特征提取，如ResNet
+和
+VGG等，而且最好是在类似的视频上预训练的模型，否则在通用数据集如ImageNet上训练的模型往往不具备人脸特征提取能力。特征提取时可以先用dlib工具提取人脸的关键点，然后基于关键点进行特征提取。基于特征工程的检测方法可解释性比较好，但是相比端到端的方法来说性能往往比较差。</p>
+<p><strong>多注意力深伪检测</strong>（Multi-attentional Deepfake Detection，MADD）
+<span id="id92">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id304" title="Zhao, H., Wei, T., Zhou, W., Zhang, W., Chen, D., &amp; Yu, N. (2021). Multi-attentional deepfake detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Zhao <em>et al.</em>, 2021</a>)</span>
+是一个端到端的检测方法，其相比起前面的算法在准确度和稳定性上都有了很大的提升。MADD的核心思想是把深伪检测看作是一个细粒度的二分类任务，并使用多注意力机制去捕获浅层的纹理特征。</p>
+<div class="figure align-default" id="id132">
+<span id="fig-5-6-2-mutiattention-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.2_mutiattention_pipeline.png"><img alt="../_images/5.6.2_mutiattention_pipeline.png" src="../_images/5.6.2_mutiattention_pipeline.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.6 </span><span class="caption-text">多注意力深伪检测算法流程 <span id="id93">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id304" title="Zhao, H., Wei, T., Zhou, W., Zhang, W., Chen, D., &amp; Yu, N. (2021). Multi-attentional deepfake detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Zhao <em>et al.</em>, 2021</a>)</span></span><a class="headerlink" href="#id132" title="Permalink to this image">¶</a></p>
+</div>
+<p>如 <a class="reference internal" href="#fig-5-6-2-mutiattention-pipeline"><span class="std std-numref">图5.6.6</span></a>
+所示，MADD具有三个关键组成部分：</p>
+<ul class="simple">
+<li><p><strong>纹理增强模块</strong>：此模块对来自特定层的特征使用局部平均池化操作，然后通过图像块划分进行下采样，得到池化后的特征图
+<span class="math notranslate nohighlight">\(D\)</span>；将输入和<span class="math notranslate nohighlight">\(D\)</span>做差，得到表示纹理信息的特征级残差，再通过一个密集连接的卷积模块来增强这个残差，输出纹理特征图。</p></li>
+<li><p><strong>注意力模块</strong>：此模块将网络中的中间结果作为输入，进行一个1*1的卷积、一层批归一化、一层ReLU，输出<span class="math notranslate nohighlight">\(k\)</span>个注意力图，每个都与一个具体的区域相联系。</p></li>
+<li><p><strong>双线性注意力池化</strong>：此操作融合前面的特征信息，将注意力图和浅层纹理特征做点积，得到一个纹理特征矩阵；与此同时，将骨干上的深层特征与注意力图做类似的点积得到全局特征，最后一起输入分类器中得到分类结果。</p></li>
+</ul>
+<p>但是，由于缺乏细粒度的标签，训练多注意力网络可能会容易陷入网络退化状态。
+具体来说，不同的注意力图往往会关注相同的区域，这不利于捕捉给定输入的丰富信息。
+此外，对于不同的输入图像，我们希望每个注意力图都定位在固定的语义区域，所以在这个方法中引入了<em>区域独立性损失</em>（Regional
+Independence Loss）：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-21">
+<span class="eqno">(5.6.18)<a class="headerlink" href="#equation-chapter-chap-5-21" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathcal{L}_{RIL} = \sum_{i=1}^{B}\sum_{j=1}^{M} \max\left(\left\| V_j^i - {\boldsymbol{c}}_j^t \right\|_2^2 - m_{in}(y_i), 0\right)_+ \\+ \sum_{i,j \in (M,M), \ i \neq j} \max\left( m_{out} - \left\| {\boldsymbol{c}}_i^t - {\boldsymbol{c}}_j^t \right\|_2^2, 0\right)\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(V \in {\mathbb{R}}^{M\times N}\)</span>是在神经网络特定层抽取的语义特征向量，<span class="math notranslate nohighlight">\(B\)</span>是批大小，<span class="math notranslate nohighlight">\(M\)</span>是特征图的数量，<span class="math notranslate nohighlight">\(m_{in}\)</span>表示特征和其特征中心的间隔，当<span class="math notranslate nohighlight">\(y_i\)</span>为不同的值时，<span class="math notranslate nohighlight">\(m_{in}\)</span>也会设定不同的值。<span class="math notranslate nohighlight">\(m_{out}\)</span>表示特征中心之间的距离。这个公式的前半部分是为了让类内距离最小，后半部分是为了让类间距离最大。<span class="math notranslate nohighlight">\({\boldsymbol{c}} \in {\mathbb{R}}^{M\times N}\)</span>是<span class="math notranslate nohighlight">\(V\)</span>的特征中心，会在每一步中进行如下的迭代更新：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-22">
+<span class="eqno">(5.6.19)<a class="headerlink" href="#equation-chapter-chap-5-22" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{c}}^t = {\boldsymbol{c}}^{t-1} - \alpha \left( {\boldsymbol{c}}^{t-1} - \frac{1}{B} \sum_{i=1}^{B} V^i \right)\]</div>
+<p>最后，该方法的整体损失函数为<span class="math notranslate nohighlight">\(\mathcal{L} = \lambda_1\mathcal{L}_{CE} + \lambda_2\mathcal{L}_{RIL}\)</span>。</p>
+<p>MADD方法的关键创新是将深伪检测问题转成一个细粒度分类问题求解，并融入了注意力对浅层特征的提取方法，最后达到一个很好的鉴别效果。</p>
+<p><strong>F3Net</strong>
+该方法的主要思想是使用频域的信息做为特征来对虚假图像进行分类。之所以利用频率信息来挖掘伪造模式，是因为频率提供了一种互补的视角，可以很好地描述细微的伪造痕迹或压缩错误。
+F3Net <span id="id94">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id305" title="Qian, Y., Yin, G., Sheng, L., Chen, Z., &amp; Shao, J. (2020). Thinking in frequency: face forgery detection by mining frequency-aware clues. European Conference on Computer Vision.">Qian <em>et al.</em>, 2020</a>)</span>
+使用两种特征：一种是高频分解的图像分量；另一种是局部频率统计信息。前者的目的是学习伪造模式中不易被发现的痕迹，后者目的是从局部统计信息中提取高频语义去描述真假脸部的频率统计信息之间的差异。</p>
+<div class="figure align-default" id="id133">
+<span id="fig-5-6-2-f3net-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.2_f3net_pipeline.png"><img alt="../_images/5.6.2_f3net_pipeline.png" src="../_images/5.6.2_f3net_pipeline.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.7 </span><span class="caption-text">F3Net算法流程 <span id="id95">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id305" title="Qian, Y., Yin, G., Sheng, L., Chen, Z., &amp; Shao, J. (2020). Thinking in frequency: face forgery detection by mining frequency-aware clues. European Conference on Computer Vision.">Qian <em>et al.</em>, 2020</a>)</span></span><a class="headerlink" href="#id133" title="Permalink to this image">¶</a></p>
+</div>
+<p>如 <a class="reference internal" href="#fig-5-6-2-f3net-pipeline"><span class="std std-numref">图5.6.7</span></a> 所示，F3Net主要由两个分支组成：</p>
+<p><strong>（1）频率感知分解</strong>（Frequency-Aware
+Decomposition，FAD）：FAD根据一组可学习的频率滤波器，自适应地将输入图像在频率域中进行分割，分解出的频率组分可以逆变换回空间域，从而得到一系列频率感知的图像。这些图像沿通道轴堆叠，然后输入到卷积神经网络中挖掘伪造模式：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-23">
+<span class="eqno">(5.6.20)<a class="headerlink" href="#equation-chapter-chap-5-23" title="Permalink to this equation">¶</a></span>\[\hat{y}_i = {\mathcal{D}}^{-1}\left\{ {\mathcal{D}}({\boldsymbol{x}}) \odot \left[ f^i_{base} + \sigma(f^i_{w}) \right] \right\}, \quad i = \{1, \ldots, N\}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(f^i_{w}\)</span>是可学习的频率滤波器，<span class="math notranslate nohighlight">\({\mathcal{D}}({\boldsymbol{x}})\)</span>是对<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>做DCT变换将其转换到频率域，最后分解后转换到空间域。</p>
+<p><strong>（2）局部频率统计</strong>（Local Frequency Statistics，LFS）：LFS在输入
+RGB 图像上应用滑动窗口 DCT (SWDCT)（即在图像的滑动窗口上密集地进行 DCT
+变换），以提取局部化的频率响应。然后，在一系列可学习的频段上对平均频率响应进行计数。这些频率统计信息重新组装成一个多通道的空间映射图：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-24">
+<span class="eqno">(5.6.21)<a class="headerlink" href="#equation-chapter-chap-5-24" title="Permalink to this equation">¶</a></span>\[q_i = \log_{10} \left\| {\mathcal{D}}(\mathbf{p}) \odot \left[ h^i_{\text{base}} + \sigma(h^i_{w}) \right] \right\|_1, \quad i = \{1, \ldots, M\}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(h^i_{w}\)</span>是可学习的滤波器，对一个窗口<span class="math notranslate nohighlight">\(p\)</span>，局部频率统计<span class="math notranslate nohighlight">\(q\)</span>最后会转换为一个<span class="math notranslate nohighlight">\(1 \times 1 \times M\)</span>的向量，然后从所有窗口收集的这些统计向量重新组装成一个矩阵，其空间大小是输入图像的降采样大小，其通道数等于<span class="math notranslate nohighlight">\(M\)</span>。该映射图与输入图像具有相同的布局，用于检测细节异常的频率分布。在成套的频段内计算统计量可以减少统计表示的冗余，同时产生更平滑的分布，避免异常值的干扰。</p>
+<p>最后，通过跨注意力融合模块（cross-attention fusion
+module）对来自两个分支的数据进行融合，使用交叉注意力机制得到注意力图，然后与两个特征图分别做点积，最后再加上特征图原图输入到分类器中。</p>
+<p>F3Net的核心创新点是提出了一种考虑了频域信息的深伪检测框架，在低精度的图片上检测效果一骑绝尘，在高质量的图片上的检测能力也不落下风，为深度伪造监测提供了新的思路。</p>
+<p><strong>Face X-ray</strong>
+这是一个经典的人脸伪造检测算法。鉴于大多数人脸修改算法的最后一步都是将更改后的面部融合到现有背景图像中，Face
+X-ray <span id="id96">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id306" title="Li, L., Bao, J., Zhang, T., Yang, H., Chen, D., Wen, F., &amp; Guo, B. (2020). Face x-ray for more general face forgery detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Li <em>et al.</em>, 2020</a>)</span>
+提出通过检测伪造图像的融合边界异常来检测面部修改。此方法只假设换脸算法存在人脸融合这一步，并不依赖于具体的面部修改算法或者换脸造成的面部伪影信息。同时，该方法的训练比较灵活，不一定需要最先进的面部修改算法和它生成的修改样例，可以基于一般的面部修改算法进行。</p>
+<div class="figure align-default" id="id134">
+<span id="fig-5-6-2-facexray-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.2_facexray_pipeline.png"><img alt="../_images/5.6.2_facexray_pipeline.png" src="../_images/5.6.2_facexray_pipeline.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.8 </span><span class="caption-text">Face X-ray算法流程 <span id="id97">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id306" title="Li, L., Bao, J., Zhang, T., Yang, H., Chen, D., Wen, F., &amp; Guo, B. (2020). Face x-ray for more general face forgery detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Li <em>et al.</em>, 2020</a>)</span></span><a class="headerlink" href="#id134" title="Permalink to this image">¶</a></p>
+</div>
+<p>此前检测方法主要把注意力集在“分类”，在混合了伪造和真实视频的数据集上训练一个逐帧的二分类模型。与此前方法不同，Face
+X-ray主要关注融合边界的“定位”。每张图像都有自己独特的标记或基础统计属性，因此，可以利用跨边界的基础图像统计指标的不一致性来定位融合边界，从而检测伪造的人脸图像，具体流程如
+<a class="reference internal" href="#fig-5-6-2-facexray-pipeline"><span class="std std-numref">图5.6.8</span></a> 所示。</p>
+<p>首先定义检测问题。给定一个人脸图像<span class="math notranslate nohighlight">\(I\)</span>，Face
+X-ray要判断它是否是由<span class="math notranslate nohighlight">\(I_F\)</span>和<span class="math notranslate nohighlight">\(I_B\)</span>生成的伪造图像<span class="math notranslate nohighlight">\(I_M\)</span>：</p>
+<div class="math notranslate nohighlight" id="equation-eq-face-x-ray">
+<span class="eqno">(5.6.22)<a class="headerlink" href="#equation-eq-face-x-ray" title="Permalink to this equation">¶</a></span>\[I_M = M \circ I_F + (1 - M) \circ I_B\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\circ\)</span>表示元素积，<span class="math notranslate nohighlight">\(I_F\)</span>表示提供面部属性的前景图像，<span class="math notranslate nohighlight">\(I_B\)</span>表示提供背景的图像，<span class="math notranslate nohighlight">\(M\)</span>是区分替换区域的掩码。Face
+X-ray的检测结果是一个图像（矩阵）<span class="math notranslate nohighlight">\(B\)</span>，如果输入是伪造的图像，则<span class="math notranslate nohighlight">\(B\)</span>将显示融合边界；如果输入是真实图像，则<span class="math notranslate nohighlight">\(B\)</span>的所有像素都为零，形式化表示为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-25">
+<span class="eqno">(5.6.23)<a class="headerlink" href="#equation-chapter-chap-5-25" title="Permalink to this equation">¶</a></span>\[B_{i,j} = 4 \cdot M_{i,j} \cdot (1 - M_{i,j})\]</div>
+<p>当结果矩阵<span class="math notranslate nohighlight">\(B\)</span>为全0时，掩码矩阵<span class="math notranslate nohighlight">\(M\)</span>是一个全0或全1的矩阵，用于分隔前景图像区域。结果矩阵<span class="math notranslate nohighlight">\(B\)</span>里的元素最大取值为0.25，此时对应的<span class="math notranslate nohighlight">\(M\)</span>元素为0.5。</p>
+<p>对于训练数据的生成，由于Face
+X-ray只关心融合边界，因此完全可以通过融合两张真实图像来创建训练数据。首先，选定两张真实照片，然后生成一个随机掩码来分隔处理区域，最后遵循公式
+<a class="reference internal" href="#equation-eq-face-x-ray">(5.6.22)</a> 来生成融合图像，以及生成边界。在实践中，Face
+X-ray会随训练过程动态生成标记数据。基于此训练数据，可以训练一个基于卷积神经网络的框架（表示为<span class="math notranslate nohighlight">\(NN_b\)</span>）来生成结果矩阵。此框架以待检测图像<span class="math notranslate nohighlight">\(I\)</span>为输入，输出<span class="math notranslate nohighlight">\(\hat{B} = NN_b(I)\)</span>；此外还有一个分类头（表示为<span class="math notranslate nohighlight">\(NN_c\)</span>）输出预测的概率：<span class="math notranslate nohighlight">\(\hat{c} = NN_c(\hat{B})\)</span>。分类头<span class="math notranslate nohighlight">\(NN_c\)</span>由全局平均池化层、全连接层和
+Softmax 激活层按顺序组成。
+在训练期间，可以对这两个输出头应用下面的损失函数进行训练：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-26">
+<span class="eqno">(5.6.24)<a class="headerlink" href="#equation-chapter-chap-5-26" title="Permalink to this equation">¶</a></span>\[\mathcal{L} = λ\mathcal{L}_{b} + \mathcal{L}_{c}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_b\)</span>（训练结果矩阵输出头）和<span class="math notranslate nohighlight">\(\mathcal{L}_c\)</span>（训练分类头）损失函数定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-27">
+<span class="eqno">(5.6.25)<a class="headerlink" href="#equation-chapter-chap-5-27" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_b = - \sum_{\{I,B\} \in D} \sum_{i,j} \frac{1}{N} \left( B_{i,j} \log \hat{B}_{i,j} + (1 - B_{i,j}) \log(1 - \hat{B}_{i,j}) \right)\]</div>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-28">
+<span class="eqno">(5.6.26)<a class="headerlink" href="#equation-chapter-chap-5-28" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_c = - \sum_{\{I,c\} \in D} \left( c \log(\hat{c}) + (1 - c) \log(1 - \hat{c}) \right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(D\)</span>为训练数据集，包含独立制作的融合图像<span class="math notranslate nohighlight">\(I\)</span>和标签<span class="math notranslate nohighlight">\(c\)</span>（类别为“真实”或者“融合”）。</p>
+<div class="figure align-default" id="id135">
+<span id="fig-5-6-2-iid-pipeline"></span><a class="reference internal image-reference" href="../_images/5.6.2_IID_pipeline.png"><img alt="../_images/5.6.2_IID_pipeline.png" src="../_images/5.6.2_IID_pipeline.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图5.6.9 </span><span class="caption-text">IID算法流程 <span id="id98">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id308" title="Huang, B., Wang, Z., Yang, J., Ai, J., Zou, Q., Wang, Q., &amp; Ye, D. (2023). Implicit identity driven deepfake face swapping detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Huang <em>et al.</em>, 2023</a>)</span></span><a class="headerlink" href="#id135" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>隐式身份驱动的检测</strong>
+在最新（2024年）提出的检测算法中，<em>隐式身份驱动的</em>（Implicit
+Identity Driven，IID） <span id="id99">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id308" title="Huang, B., Wang, Z., Yang, J., Ai, J., Zou, Q., Wang, Q., &amp; Ye, D. (2023). Implicit identity driven deepfake face swapping detection. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Huang <em>et al.</em>, 2023</a>)</span>
+换脸检测算法有比较亮眼的表现。 如 <a class="reference internal" href="#fig-5-6-2-iid-pipeline"><span class="std std-numref">图5.6.9</span></a>
+所示，IID方法基于人脸的身份信息来检测伪造的人脸。此方法认为伪造人脸图像中含有两种不同的身份信息，即源人脸和目标人脸的身份，而真实人脸图像中的两种身份信息是相同的。下面将详细介绍IID方法的训练和检测步骤。</p>
+<p>首先，人脸交换是将源图片的人脸换成目标图片的人脸，并输出一张伪造出来的人脸。假脸对应的身份来自于源脸，且看起来像源脸，所以这种身份信息称为<em>显式身份</em>。与此同时，假脸图片仍可能会包含目标脸的身份信息，这种身份信息称为<em>隐式身份</em>。因此，给定一张人脸图像，可以将其分别嵌入到显式和隐式身份特征空间中，并使用两种特征之间的距离作为判断真假的依据：距离很近则为真，距离很远则为假。</p>
+<p>基于上述假设，要解决的问题就是如何提取显示和隐式身份信息。IID方法提出将图像<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i \in \mathbb{R}^{h \times w \times 3}\)</span>输入到通用人脸识别模型<span class="math notranslate nohighlight">\(f_{em}\)</span>中得到其显式身份特征<span class="math notranslate nohighlight">\(f_{em}({\boldsymbol{x}}_i)\)</span>。此外，训练一个骨干网络作为隐式身份嵌入网络<span class="math notranslate nohighlight">\(f_{im}\)</span>，然后将图像输入到这个网络中得到嵌入特征向量<span class="math notranslate nohighlight">\(f_{im}({\boldsymbol{x}}_i)\)</span>。隐式身份嵌入网络使用下面定义的<em>显示身份对比</em>（Explicit
+Identity Contrast，EIC）损失来训练：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-29">
+<span class="eqno">(5.6.27)<a class="headerlink" href="#equation-chapter-chap-5-29" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{eic} = \frac{1}{N_F} \sum_{i \in F} \delta \left( f_{im}({\boldsymbol{x}}_i), f_{em}({\boldsymbol{x}}_i) \right) - \frac{1}{N_R} \sum_{i \in R} \delta \left( f_{im}({\boldsymbol{x}}_i), f_{em}({\boldsymbol{x}}_i) \right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(R\)</span>和<span class="math notranslate nohighlight">\(F\)</span>表示真实和伪造图片集合，<span class="math notranslate nohighlight">\(N_R\)</span>和<span class="math notranslate nohighlight">\(N_F\)</span>表示真实和伪造图片的数量，<span class="math notranslate nohighlight">\(\delta(\cdot,\cdot)\)</span>是余弦相似度。
+可以看到在最小化EIC损失的时候，能够将虚假人脸的显式身份和隐式身份在隐式特征空间中拉远，而将真实人脸的距离拉近，这样正样本会收敛到其隐式身份（等同显式身份），而负样本则会自动区分隐显身份差异。</p>
+<p>上述训练只是帮助区分了显示和隐式两种身份信息，但是并没有将伪造图像与其隐式身份做进一步的关联。
+为此，IID方法将伪造图像和其隐式身份（也就是目标人脸）标注为同一个类别，然后利用下面的<em>隐式身份探索</em>（Implicit
+Identity Exploration，IIE）损失来完成：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-30">
+<span class="eqno">(5.6.28)<a class="headerlink" href="#equation-chapter-chap-5-30" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{iie}^{+} = -\mathbb{E}_{({\boldsymbol{x}}_i,y_i) \sim \mathcal{K}} \left[ \log \frac{e^{s (\cos (\theta_{y_i}) - m)}}{e^{s (\cos (\theta_{y_i}) - m)} + \sum_{j \neq y_i} e^{s \cos \theta_j}} \right]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta_{j}\)</span>表示归一化隐式特征向量<span class="math notranslate nohighlight">\(f_{im}({\boldsymbol{x}}_i)\)</span>和在高维特征空间中,第<span class="math notranslate nohighlight">\(j\)</span>个身份的归一化代理向量之间的角度，<span class="math notranslate nohighlight">\(s\)</span>是特征缩放，<span class="math notranslate nohighlight">\(m\)</span>是间隔超参数。此外，间隔<span class="math notranslate nohighlight">\(m\)</span>对于伪造人脸来说是动态变化的：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-31">
+<span class="eqno">(5.6.29)<a class="headerlink" href="#equation-chapter-chap-5-31" title="Permalink to this equation">¶</a></span>\[m_{fake} = \alpha \cdot \frac{1}{N_r} \sum_{i \in R_{mini}} \cos (\theta_{y_i})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(R_{mini}\)</span>表示一小批真实样本集，这保证了在真实人脸收敛之后间隔才发挥作用，也是强力约束的关键。</p>
+<p>此外，IID还需要让同一伪造视频的不同帧之间保持隐式身份一致。首先给样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i\)</span>一个未知隐式身份标签<span class="math notranslate nohighlight">\(y_i^*\)</span>，同时给同一视频的其他帧相同的身份。以此为基础，将所有帧的隐式特征向量抽取出来并存放在表<span class="math notranslate nohighlight">\(V\)</span>中。在前向传播过程中计算<span class="math notranslate nohighlight">\(f_{im}({\boldsymbol{x}}_i)\)</span>和向量表的距离<span class="math notranslate nohighlight">\(V^T f_{im}({\boldsymbol{x}}_i)\)</span>，同时在反向传播的时候更新表中<span class="math notranslate nohighlight">\(y_i^*\)</span>列所对应的向量<span class="math notranslate nohighlight">\({\boldsymbol{v}}_{y_i^*} \gets \beta {\boldsymbol{v}}_{y_i^*} + (1 - \beta) f_{im}({\boldsymbol{x}}_i)\)</span>，其中<span class="math notranslate nohighlight">\(\beta \in [0,1]\)</span>超参数。通过Softmax函数定义样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i\)</span>被分类为<span class="math notranslate nohighlight">\(y_i^*\)</span>的概率，并最大化对数似然函数的期望：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-32">
+<span class="eqno">(5.6.30)<a class="headerlink" href="#equation-chapter-chap-5-32" title="Permalink to this equation">¶</a></span>\[\mathcal{L}_{iie}^{-} = -\mathbb{E}_{({\boldsymbol{x}}_i, y_i^*) \sim \mathcal{U}} \left[ \log \frac{e^{\left( {\boldsymbol{v}}_{y_i^*}^T f_{im}({\boldsymbol{x}}_i) / \tau \right)}}{\sum_{j=1}^{Q} e^{\left( {\boldsymbol{v}}_j^T f_{im}({\boldsymbol{x}}_i) / \tau \right)}} \right]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\tau\)</span>为温度超参数。</p>
+<p>结合上述各损失函数最终得到IID方法的完整损失函数：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-5-33">
+<span class="eqno">(5.6.31)<a class="headerlink" href="#equation-chapter-chap-5-33" title="Permalink to this equation">¶</a></span>\[\mathcal{L} = \mathcal{L}_{bce} + \lambda_1 \mathcal{L}_{eic} + \lambda_2 (\mathcal{L}_{iie}^{+} + \mathcal{L}_{iie}^{-})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{bce}\)</span>是二元交叉熵损失函数。</p>
+<p>与此前的F3net 和 Face X-ray 相比，IID
+方法在多个数据集上都取得了更优异的性能。这体现了该方法在深度伪造检测方面的独到之处。虽然先进的检测方法正在不断的被提出，生成式人工智能技术的快速发展势必会带来更多样化、更复杂、更难以分辨的伪造内容，所以深度伪造检测任务依然十分严峻。我们需要持续不懈的研究探索，才能够及时应对不断升级的人工智能生成虚假内容威胁。</p>
+</div>
+</div>
+<div class="section" id="id100">
+<h2><span class="section-number">5.7. </span>本章小结<a class="headerlink" href="#id100" title="Permalink to this heading">¶</a></h2>
+<p>本章介绍了针对视觉ViT模型的各类攻防方法。其中，章节
+<a class="reference internal" href="#sec-adv-attack"><span class="std std-numref">5.1</span></a>
+介绍了对抗攻击方法，包括白盒攻击、迁移攻击和查询攻击；章节
+<a class="reference internal" href="#sec-adv-defense"><span class="std std-numref">5.2</span></a>
+介绍了对抗防御方法，包括大规模对抗训练、对抗微调和扩散净化；章节
+<a class="reference internal" href="#sec-bd-attack"><span class="std std-numref">5.3</span></a>
+介绍了后门攻击，包括无数据后门、图像块后门、多触发器后门和量化后门；章节
+<a class="reference internal" href="#sec-bd-defense"><span class="std std-numref">5.4</span></a>
+介绍了后门防御，包括图像阻断、图像块处理以及图像块搜索；章节
+<a class="reference internal" href="#sec-model-steal"><span class="std std-numref">5.5</span></a>
+介绍了模型抽取攻击，包括Cont-Steal攻击和RAD攻击；章节
+<a class="reference internal" href="#sec-deepfake"><span class="std std-numref">5.6</span></a> 介绍了深度伪造的几个代表性生成和检测方法。
+通过了解这些针对 ViT
+模型的攻击和防御方法，读者可以大致了解当前在视觉大模型安全领域的研究进展，认识到各种潜在的安全威胁及应对这些威胁的最新技术手段。</p>
+</div>
+<div class="section" id="id101">
+<h2><span class="section-number">5.8. </span>习题<a class="headerlink" href="#id101" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>简要说明在对抗攻击方面ViT是否比CNN更鲁棒，并阐述原因。</p></li>
+<li><p>列举三种对抗防御策略，并描述它们的基本思想。</p></li>
+<li><p>简要说明对抗攻击和后门攻击的区别是什么。</p></li>
+<li><p>解释性算法如PatchSearch如何在后门防御中发挥作用？请描述其工作原理及应用效果。</p></li>
+<li><p>简单解释什么是模型抽取攻击，并讨论该攻击方法是否可以与对抗攻击和后门攻击相结合。</p></li>
+<li><p>检测深度伪造视频的一般流程是什么？</p></li>
+</ol>
+<dl class="footnote brackets">
+<dt class="label" id="id102"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>虽然很多ViT模型并不算是视觉大模型，但是大部分视觉大模型的基座都是ViT，所以本章关注的视觉大模型指即是ViT模型。</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+        </div>
+        <div class="side-doc-outline">
+            <div class="side-doc-outline--content"> 
+<div class="localtoc">
+    <p class="caption">
+      <span class="caption-text">Table Of Contents</span>
+    </p>
+    <ul>
+<li><a class="reference internal" href="#">5. 视觉大模型安全</a><ul>
+<li><a class="reference internal" href="#sec-adv-attack">5.1. 对抗攻击</a><ul>
+<li><a class="reference internal" href="#id4">5.1.1. 白盒攻击</a></li>
+<li><a class="reference internal" href="#id9">5.1.2. 迁移攻击</a><ul>
+<li><a class="reference internal" href="#id10">5.1.2.1. 跨模型迁移攻击</a></li>
+<li><a class="reference internal" href="#id16">5.1.2.2. 上下游迁移攻击</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id22">5.1.3. 查询攻击</a><ul>
+<li><a class="reference internal" href="#id23">5.1.3.1. 逐图像块对抗消除</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-adv-defense">5.2. 对抗防御</a><ul>
+<li><a class="reference internal" href="#id27">5.2.1. 大规模对抗训练</a></li>
+<li><a class="reference internal" href="#id29">5.2.2. 对抗微调</a></li>
+<li><a class="reference internal" href="#id34">5.2.3. 扩散净化</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-bd-attack">5.3. 后门攻击</a><ul>
+<li><a class="reference internal" href="#id41">5.3.1. 无数据后门</a></li>
+<li><a class="reference internal" href="#id45">5.3.2. 图像块后门</a></li>
+<li><a class="reference internal" href="#id54">5.3.3. 多触发器后门</a></li>
+<li><a class="reference internal" href="#id58">5.3.4. 量化后门</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-bd-defense">5.4. 后门防御</a><ul>
+<li><a class="reference internal" href="#id63">5.4.1. 图像阻断</a></li>
+<li><a class="reference internal" href="#id69">5.4.2. 图像块处理</a></li>
+<li><a class="reference internal" href="#id71">5.4.3. 图像块搜索</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-model-steal">5.5. 模型抽取</a><ul>
+<li><a class="reference internal" href="#cont-steal">5.5.1. Cont-Steal攻击</a></li>
+<li><a class="reference internal" href="#rad">5.5.2. RAD攻击</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-deepfake">5.6. 深度伪造</a><ul>
+<li><a class="reference internal" href="#id81">5.6.1. 生成</a></li>
+<li><a class="reference internal" href="#id90">5.6.2. 检测</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id100">5.7. 本章小结</a></li>
+<li><a class="reference internal" href="#id101">5.8. 习题</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+            </div>
+        </div>
+
+      <div class="clearer"></div>
+    </div><div class="pagenation">
+     <a id="button-prev" href="chap-4.html" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" role="botton" accesskey="P">
+         <i class="pagenation-arrow-L fas fa-arrow-left fa-lg"></i>
+         <div class="pagenation-text">
+            <span class="pagenation-direction">Previous</span>
+            <div>4. 防御算法基础</div>
+         </div>
+     </a>
+     <a id="button-next" href="chap-6.html" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" role="botton" accesskey="N">
+         <i class="pagenation-arrow-R fas fa-arrow-right fa-lg"></i>
+        <div class="pagenation-text">
+            <span class="pagenation-direction">Next</span>
+            <div>6. 大语言模型安全</div>
+        </div>
+     </a>
+  </div>
+        
+        </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+
+常用符号表
+==========
+
+.. figure:: images/table1.png
+   :width: 600px
+
+.. raw:: html
+
+   <!-- $$
+   \begin{array}{ll}
+   \hline
+   {\mathcal{X}}, {\mathcal{Y}}, {\mathcal{F}} & 空间，表示输入、输出和假设空间 \\
+   X, Y, D, {\mathcal{D}} & 集合，表示样本、标签和数据集 \\
+   x, y, \alpha, \beta, \epsilon, \gamma, \lambda & 标量，表示样本、标签以及各种超参数变量 \\
+   \theta, {\boldsymbol{\theta}} & 向量，表示模型参数 \\
+   {\boldsymbol{x}}, {\boldsymbol{w}}, {\boldsymbol{m}} & 向量，表示高维输入、参数和掩码向量 \\
+   {\boldsymbol{A}}, {\boldsymbol{W}} & 矩阵，表示特征激活和模型参数矩阵 \\
+   {\boldsymbol{x}}^{\top}, {\boldsymbol{w}}^{\top}, {\boldsymbol{A}}^{\top}, {\boldsymbol{W}}^{\top} & 向量和矩阵的转置 \\
+   [C]=\{0,1,\cdots, C-1\} & 集合，元素包含0到C-1 \\
+   {\boldsymbol{I}} & 单位矩阵，维度根据具体上下文确定 \\
+   \hline
+   \mathbb{E}, R, {\mathcal{L}} & 期望、风险和损失函数 \\
+   {\mathcal{A}}, {\mathcal{M}}, {\mathcal{O}} & 算法，机制，输出 \\
+   f, g, h & 函数，通常表示模型所代表的函数 \\
+   P(a)\;或\;p(a) & 离散或连续变量a的概率分布 \\
+   {\mathcal{N}}({\boldsymbol{x}}; {\boldsymbol{\mu}}, {\boldsymbol{\Sigma}}) & 均值为{\boldsymbol{\mu}}，方差为{\boldsymbol{\Sigma}}的高斯分布 \\
+   {\mathcal{U}}(-\epsilon,\epsilon) & 上下界分别为\epsilon和-\epsilon的均匀分布 \\
+   \hline
+   \frac{\partial f}{\partial {\boldsymbol{x}}} & 偏导数，f相对{\boldsymbol{x}}的偏导数 \\
+   \nabla_{{\boldsymbol{x}}}\mathcal{L} & 梯度，\mathcal{L}对{\boldsymbol{x}}的梯度 \\
+   \nabla_{\boldsymbol{x}}^2 f({\boldsymbol{x}})\;\text{or}\;{\boldsymbol{H}}( f)({\boldsymbol{x}}) & f在点{\boldsymbol{x}}处的海森矩阵 \\
+   \int_{{\boldsymbol{x}}}f({\boldsymbol{x}})d{\boldsymbol{x}} & 在整个定义域{\boldsymbol{x}}上的积分 \\
+   \hline
+   {\lVert \cdot \rVert}_{p=0,1,2} & L_p范数 \\
+   \sigma({\boldsymbol{x}}) & 激活函数，通常指sigmoid函数 \\
+   ReLU({\boldsymbol{x}}) = \max(0,{\boldsymbol{x}}) & ReLU激活函数 \\
+   \exp({\boldsymbol{x}})\;或\;e^{{\boldsymbol{x}}} & 指数函数，以自然常数e为底 \\
+   \log({\boldsymbol{x}}) & 对数函数，以自然常数e为底 \\
+   \mathbb{1}[\cdot] & 指示函数，输入为真时输出1，否则输出0 \\
+   \hline
+   \end{array} 
+   $$ -->

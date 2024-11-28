@@ -1,0 +1,1662 @@
+
+.. _chap_4:
+
+防御算法基础
+============
+
+
+基于第 :numref:`chap_3`
+章介绍的各类攻击算法，可以较为系统的去评测一个人工智能模型的安全性，但更重要的是，我们需要从根本上提升这些模型的安全性。比如，针对推理阶段的攻击，我们可以通过检测技术对其进行检测和拒绝服务；针对训练阶段的攻击，我们可以对训练数据进行清洗，也可以设计鲁棒的训练算法，让模型对投毒或后门数据免疫。当然，攻击者也可以设计针对性攻击 [1]_
+（adaptive
+attack）来绕过这些防御机制。而防御所需要做的就是，如何设计既高效又容易被再次攻破的防御算法来提升模型的鲁棒性。
+
+对此，本章将介绍针对对抗攻击、数据投毒、后门攻击、数据抽取、模型抽取五类攻击算法的防御策略。需要注意的是，这里的介绍主要围绕领域内的代表性防御工作进行，并不一定完全防住这五类攻击。也就是说，很多攻击方法现在并没有有效的防御手段。
+
+.. _sec_adv defense:
+
+对抗防御
+--------
+
+
+针对对抗攻击的防御技术主要有三类，一类是攻击检测技术，旨在检测输入样本是否是对抗样本；第二类是鲁棒性增强技术，旨在通过鲁棒优化算法来提升模型自身的鲁棒性以防御更广泛的攻击；第三类是输入净化技术，旨在通过输入转换或者去噪将对抗样本修复成干净样本。下面将围绕这三类防御技术详细介绍有代表性的防御方法。
+
+.. _sec_adv-detection:
+
+攻击检测
+~~~~~~~~
+
+
+.. _fig_adv_detection_pipeline:
+
+.. figure:: images/7.5_adv_detection_pipeline.png
+   :width: 810px
+
+   对抗样本检测器的训练流程
+
+
+
+**对抗样本检测**\ （Adversarial Example
+Detection，AED）是一种很直接、高效、实用的防御策略，在实际应用场景下可以检测对抗攻击并拒绝服务。
+:numref:`fig_adv_detection_pipeline`
+展示了训练一个对抗样本检测器的一般流程。对抗样本检测任务本身是一个\ **二分类问题**\ ，检测器需要对输入进行“正常”还是“对抗”的判别。我们可以收集一定数量的正常样本和其对应的对抗样本，然后基于要保护的模型\ :math:`f`\ 抽取不同类型的特征，比如中间层特征、激活分布等。最后将两类样本的特征标记为“正常”和“对抗”类别，组成对抗检测训练数据集\ :math:`D_{train}`\ 。我们可以在\ :math:`D_{train}`\ 上训练一个任意的分类模型作为最终的检测器\ :math:`g`\ 。在测试阶段，我们先将待检测的样本送入模型\ :math:`f`\ 抽取特征，然后以抽取的特征为检测器\ :math:`g`\ 的输入进行检测。
+
+在介绍具体的检测方法之前，我们先来分析一下对抗样本检测任务本身的一些特点。
+
+-  **对抗样本检测是异常检测（anomaly
+   detection）的一个特例**\ ，只不过这里“异常”的是对抗样本。所以任何异常检测的方法都可以用来检测对抗样本。
+-  **对抗样本检测的关键是特征提取**\ ，特征的好坏直接决定了检测器的性能。这里会产生一个疑问：“为什么不能把正常和对抗样本直接输入检测模型，让模型自己去学习检测”？实验表明，这种方式效果并不好，原因有二：（1）对抗噪声也是一种特征，导致对抗样本与正常样本在输入空间并没有区分度；（2）容易过拟合到有限类型的训练对抗样本，导致检测器泛化性差。不过端到端的检测器训练还是值得探索的，尤其是在推理阶段与原始模型\ :math:`f`\ 的融合。
+-  **训练对抗样本的多样性决定了检测器的泛化能力**\ ，所以训练一个高性能的检测器往往需要尽可能多地利用不同类型的对抗样本来训练。
+-  **对抗样本检测器也是一种深度神经网络模型**\ ，它本身也会受到对抗攻击，而且往往都不鲁棒。如何训练一个对抗鲁棒的检测器仍是有待研究的问题。
+-  **对抗样本检测需要面对已知和未知的攻击**\ ，对泛化能力要求高。很多检测器只能检测一些特定类别的对抗样本，或者某些特定参数下生成的对抗样本。如何训练更通用的对抗样本检测器是构建检测防御的首要任务。
+-  **以检测为中心的防御实际上是一种实用性极高的对抗防御策略。**\ 对抗样本检测脱离于模型的训练与部署之外，对模型不会产生任何干预，而且训练和推理效率很高，还可以训练多个检测器来应对多样化对抗攻击。
+
+下面介绍六种有一定代表性的对抗样本检测方法，包括：二级分类法、异常分布检测法、预测不一致性以及重建不一致性。这里的分类方法部分参照了Carlini和Wagner在2017年发表的工作
+:cite:`carlini2017adversarial` 。
+
+二级分类法
+^^^^^^^^^^
+
+二级分类法为对抗样本定义一个新的类别，然后利用原模型（即要保护的模型），通过增加检测分支、增加新检测模型等方式来训练对抗样本检测器。
+相对于原分类任务来说，对抗样本检测是一个二级分类任务，所以我们将此类方法称为二级分类法。代表性的工作包括对抗重训练（adversarial
+retraining） :cite:`grosse2017statistical` 、对抗分类法
+:cite:`gong2017adversarial` 、级联分类器（cascade classifier）
+:cite:`metzen2017detecting`
+等。这些检测方法的思想比较类似：先普通训练一个分类器，然后对其生成对抗样本，那么生成的对抗样本一定具有独特的性质可以自成一类。
+
+**对抗重训练** 检测方法包括以下四步：
+
+1. 在正常训练集\ :math:`D_{train}`\ 上训练得到模型\ :math:`f`\ 。
+2. 基于\ :math:`D_{train}`\ 对抗攻击模型\ :math:`f`\ 得到对抗样本集\ :math:`D_{adv}`\ 。
+3. 将\ :math:`D_{adv}`\ 中的所有样本标注为\ :math:`C+1`\ 类别。
+4. 在\ :math:`D_{train} \cup D_{adv}`\ 上训练得到\ :math:`f_{secure}`\ 。
+
+与对抗重训练方法不同，在第三步里，\ **对抗分类法**\ 将\ :math:`D_{train}`\ 中的样本标注为类别0，将\ :math:`D_{adv}`\ 中的样本标注为类别1，在第四步里训练一个二分类对抗样本检测模型\ :math:`g`\ （比模型\ :math:`f`\ 更小）。因为检测模型并没有进行对抗训练，所以对对抗攻击（如\ :math:`L_2`\ 范数CW攻击）并不鲁棒。
+
+.. _fig_Metzen_detector:
+
+.. figure:: images/7.6_Metzen_detector.png
+   :width: 720px
+
+   基于级联分类器的对抗样本检测（AD表示对抗样本分类器）
+   :cite:`metzen2017detecting`
+
+
+
+**级联分类器**
+的训练步骤与对抗分类法类似，不同的是检测器的形式和训练方式。具体来说，级联分类器方法在神经网络的不同中间层，比如残差网络的每个残差块的输出部分，接上一个单独的检测器（0-1二分类器）。在训练级联检测器的时候，主模型\ :math:`f`\ 的参数是冻结的。为了应对动态多变的对抗攻击，比如专门针对检测器的白盒攻击，研究者进一步提出在训练检测器的同时使用BIM攻击动态生成对抗样本，也就是检测器是对抗训练的。此方法虽然比前两个检测方法鲁棒，但是依然无法防御更强的CW攻击。这主要是因为BIM对抗样本并不最有效的对抗训练样本，如果换成PGD攻击，相信防御效果会有所提升。
+
+实际上，基于开集（open-set）类别识别的\ **开集网络**\ （open-set
+networks）都可以用来识别对抗样本，即把对抗样本识别为一个未知类别。比如，Bendale等人
+:cite:`bendale2016towards`
+提出的开集网络使用OpenMax层代替传统的Softmax层，以此来识别无关类别样本、愚弄样本（fooling
+example）或者对抗样本。结合对抗训练的开集识别是值得探索的检测策略。
+
+异常分布检测
+^^^^^^^^^^^^
+
+异常分布检测通过分析对抗样本或对抗特征的分布特点并使用统计指标来检测对抗样本，也可以基于计算出来的统计指标训练一个简单的分类器（如线性回归模型、SVM模型）执行最终的分类任务。对于异常分布检测方法来说最关键的是\ *选择恰当的统计指标*\ 。此类方法是比较主流的对抗样本检测方法。
+
+**最大平均差异** 检测方法 :cite:`grosse2017statistical`
+使用最大平均差异（maximum mean
+discrepancy，MMD)指标来检测两个数据集（\ :math:`D_1`\ vs.\ :math:`D_2`\ ）是否来自于一个相同的数据分布，原假设（null
+hypothesis）为二者来自于相同分布。在假设已知\ :math:`D_1`\ 只包含正常样本的前提下，我们可以根据统计测试结果判定\ :math:`D_2`\ 是否为对抗样本集。为了应对数据的高维问题，该检测方法使用基于核的MMD测试
+:cite:`gretton2012kernel` ，具体定义如下：
+
+.. math:: MMD({\mathcal{K}},D_1,D_2) = \sup_{k \in {\mathcal{K}}}\big(\frac{1}{n}\sum_{i=1}^{n} k(D_{1}^{i}) - \frac{1}{m}\sum_{i=1}^{m}k(D_{2}^{i})\big)
+
+其中，上确界表示从核函数类\ :math:`{\mathcal{K}}`\ 中选择能最大化“干净-对抗”差异的核函数\ :math:`k(\cdot)`\ ，\ :math:`{\lvert D_1 \rvert}=n`\ 和\ :math:`{\lvert D_2 \rvert}=m`\ 表示两个数据集各自的样本数量。由于MMD无法直接计算，所以需要近似。研究者使用基于无偏MMD的渐近分布测试
+:cite:`gretton2012kernel` ，具体测试步骤如下：
+
+1. 在\ :math:`D_1`\ 和\ :math:`D_2`\ 上计算\ :math:`a=MMD({\mathcal{K}},D_1,D_2)`\ 。
+2. 对\ :math:`D_1`\ 和\ :math:`D_2`\ 中的样本顺序做随机打乱得到对应的\ :math:`D'_1`\ 和\ :math:`D'_2`\ 。
+3. 在\ :math:`D'_1`\ 和\ :math:`D'_2`\ 上计算\ :math:`b=MMD({\mathcal{K}},D'_1,D'_2)`\ 。
+4. 如果\ :math:`a < b`\ 则拒绝原假设，即\ :math:`D_1`\ 和\ :math:`D_2`\ 来自不同分布。
+5. 重复执行步骤1-4多次（1万次），计算原假设被拒绝的比例作为\ :math:`p`-值。
+
+在实验中，研究者采用了\ **高斯核函数**\ （Gaussian
+kernel，也称径向基RBF）计算MMD，并在三个小数据集MNIST、DREBIN和MicroRNA上示了10-100个样本即可对对抗样本进行高置信度的区分且对抗扰动越大区分度越高。需要注意的是，MMD是在两个样本集上计算的，而不是针对单个样本计算的，所以此方法无法检测单个样本。为了解决这个问题，研究者采用了前面介绍的二级分类法，此方法独立于MMD统计测试。但是，这种检测方法依然无法在CIFAR-10数据集上检测CW攻击。
+
+**核密度估计** 检测方法 :cite:`feinman2017detecting`
+使用核密度估计（Kernel Density
+Estimation，KDE）指标来检测对抗样本。与MMD不同，KDE方法作用在模型的逻辑输出（logits）上（MMD是作用在输入空间上的）。给定一个被预测为类别\ :math:`t`\ 的样本\ :math:`{\boldsymbol{x}}`\ ，其KDE值的计算公式如下：
+
+.. math:: KDE({\boldsymbol{x}}) = \frac{1}{|X_t|} \sum_{{\boldsymbol{s}} \in X_t} \exp(\frac{|{\boldsymbol{z}}({\boldsymbol{x}})-{\boldsymbol{z}}({\boldsymbol{s}})|^2}{\sigma^2})
+   :label: eq_kde
+
+其中，\ :math:`X_t`\ 是类别\ :math:`t`\ 的训练样本子集，\ :math:`{\boldsymbol{z}}`\ 表示模型最后一层的逻辑输出，\ :math:`\sigma`\ 是控制高斯核平滑度的带宽（bandwidth）超参，需要预先指定。基于KDE值，可以指定一个阈值\ :math:`\tau`\ ，\ :math:`KDE({\boldsymbol{x}}) < \tau`\ 判定\ :math:`{\boldsymbol{x}}`\ 为对抗样本，反之为正常样本，也可以直接在KDE值上训练一个简单的二分类器（如逻辑回归或SVM）作为对抗样本检测器。
+
+KDE方法的出发点是对抗样本在深层表征空间会偏离正常数据流形，导致相对较低的核密度。
+:numref:`fig_kde`
+展示了论文中列出的对抗样本在深度空间中的三种情况。从实际的实验结果来看，这三种情况都有可能存在，因为基于KDE训练的检测器在不同数据集上并不稳定，存在检测失败的可能。
+
+.. _fig_kde:
+
+.. figure:: images/7.7_kde_detection.png
+   :width: 900px
+
+   KDE方法对数据流形和决策边界的三种假设 :cite:`feinman2017detecting`
+   ，\ :math:`{\boldsymbol{x}}^{*}`\ 为对抗样本，+/-表示两个子流形，虚线表示决策边界。
+
+
+
+**局部本质维度**\ （Local Intrinsic Dimensionality，LID）
+:cite:`ma2018characterizing`
+是另一个可以用来检测对抗样本的指标，它衡量的是一个样本周围数据流形（由其邻居节点定义）的本质维度（也称本征维度）。直观来讲，干净样本分布在数据流行上，而对抗样本往往会跃迁到流形外的对抗子空间。给定模型\ :math:`f`\ 和样本\ :math:`{\boldsymbol{x}}`\ （正常或对抗样本），LID检测方法抽取深度神经网络每一个中间层的特征，然后使用下面的公式来估计\ :math:`LID({\boldsymbol{x}})`\ ：
+
+.. math:: \widehat{\textup{LID}}({\boldsymbol{x}}) = - \Bigg( \frac{1}{k}\sum_{i=1}^{k}\log \frac{r_i({\boldsymbol{x}})}{r_k({\boldsymbol{x}})}\Bigg)^{-1}
+   :label: eq_lid_estimator
+
+其中，\ :math:`r_i({\boldsymbol{x}})`\ 是\ :math:`{\boldsymbol{x}}`\ 到其第\ :math:`i`\ 个邻居样本的距离，\ :math:`k`\ 表示\ :math:`{\boldsymbol{x}}`\ 的\ :math:`k`-近邻样本。
+
+需要注意的是，\ :math:`LID({\boldsymbol{x}})`\ 的估计需要知道\ :math:`{\boldsymbol{x}}`\ 到其\ :math:`k`-近邻的距离，所以\ :math:`{\boldsymbol{x}}`\ 需要放在一批数据中去估计。基于正常和对抗样本的LID特征可以训练最终的对抗样本检测器，具体的步骤参考算法
+:numref:`algorithm_lid`
+。LID检测方法表现出了比KDE更优的检测结果，且可以在简单攻击（如FGSM）上训练后用以检测更复杂的攻击（如CW攻击）。
+LID检测在MNIST、CIFAR-10和SVHN数据集上对五种攻击（包括FGSM、两种BIM变体、JSMA和CW）的平均检测AUC为97.56%（MNIST）、91.90%（CIFAR-10）和95.51%（SVHN）。
+
+.. _algorithm_lid:
+
+.. figure:: images/4.1_lid.png
+   :width: 630px
+
+   训练LID对抗样本检测器
+
+
+
+与KDE不同，LID的计算并不是可微的（涉及到\ :math:`k`-近邻选择），所以通过简单的正则化（比如控制对抗样本的LID值变低）并不能得到更强的对抗攻击，无法攻破LID检测器。从这个角度来说，设计不可微且不易被近似的对抗样本检测方法似乎是构建更鲁棒的对抗样本检测器的一个可行思路，至少会在一定程度上增加再次被攻击的难度。
+值得一提的是，近期有个LID的改进工作 :cite:`lorenz2022unfolding`
+将对多种攻击的检测AUC提高到了接近100%（近乎完美的检测），当然这个方法的实际效果和鲁棒性还有待进一步确认。
+
+**马氏距离**\ （Mahalanobis
+distance，MD）是度量学习中一种常用的距离指标，由Mahalanobis在1936年提出
+:cite:`mahalanobis1936generalized`
+。马氏距离衡量的是一个数据点\ :math:`{\boldsymbol{x}}`\ 与一个分布\ :math:`Q`\ 之间的距离。假设分布\ :math:`Q`\ 的样本均值为\ :math:`\mu`\ ，样本分布的协方差矩阵为\ :math:`\Sigma`\ ，则样本\ :math:`{\boldsymbol{x}} \in Q`\ 的马氏距离定义为：
+
+.. math:: d_{M}({\boldsymbol{x}}) = \sqrt{({\boldsymbol{x}}-\mu)^{\top}\Sigma^{-1}({\boldsymbol{x}}-\mu)}
+
+相应地，两个样本\ :math:`{\boldsymbol{x}}_i`\ 与\ :math:`{\boldsymbol{x}}_2`\ 之间的马氏距离为：
+
+.. math:: d_{M}({\boldsymbol{x}}_i, {\boldsymbol{x}}_2) = \sqrt{({\boldsymbol{x}}_i-{\boldsymbol{x}}_2)^{\top}\Sigma^{-1}({\boldsymbol{x}}_i-{\boldsymbol{x}}_2)}
+
+马氏距离在协方差矩阵是单位向量时（各维度独立同分布）等于欧氏距离。实际上，马氏距离相当于欧式距离加一个白化转换（whitening
+transformation），把由多维随机变量组成的向量通过线性转换表示为一组不相关且方差为1的新变量。
+
+马氏距离可以用来检测对抗样本和分布外（Out-of-Distribution，OOD）样本
+:cite:`lee2018simple`
+。给定模型\ :math:`f`\ 和训练样本集合\ :math:`D`\ ，样本\ :math:`{\boldsymbol{x}}`\ 的马氏距离可以通过以下公式计算：
+
+.. math:: d_M({\boldsymbol{x}}) = \max_{c}\{ -(f^{L-2}({\boldsymbol{x}}) - \mu_c)\Sigma^{-1}(f^{L-2}({\boldsymbol{x}}) - \mu_c)\}
+
+其中，\ :math:`f^{L-2}`\ 表示深度神经网络的倒数第二层输出（暂且称其为深度特征），\ :math:`\mu_c`\ 为类别\ :math:`c`\ 样本的深度特征均值，\ :math:`\Sigma_c`\ 为类别\ :math:`c`\ 样本间的协方差矩阵，类别\ :math:`c`\ 可以选为马氏距离最小的类。均值和协方差矩阵的定义如下：
+
+.. math:: \mu_c &= \frac{1}{N_c}\sum_{{\boldsymbol{x}} \in X_c} f^{L-2}({\boldsymbol{x}}) \\\Sigma_c &= \frac{1}{N_c}\sum_{c}\sum_{{\boldsymbol{x}} \in X_c}(f^{L-2}({\boldsymbol{x}}) - \mu_c)^{\top}
+
+其中，\ :math:`X_c`\ 表示类别为\ :math:`c`\ 的训练样本子集，\ :math:`N_c`\ 表示类别\ :math:`c`\ 样本的数量（即\ :math:`N_c=|X_c|`\ ）。Lee等人
+:cite:`lee2018simple`
+提出在神经网络的所有中间层上计算马氏距离，并通过向样本\ :math:`{\boldsymbol{x}}`\ 中添加可最小化马氏距离的噪声的方式进一步提高不同类型样本的区分度。详细的检测器训练步骤见算法
+:numref:`algorithm_md`
+，其中加权置信度评的权重\ :math:`\alpha_l`\ 可以在一小部分认证数据集上训练逻辑回归模型得到。
+
+.. _algorithm_md:
+
+.. figure:: images/4.2_md.png
+   :width: 630px
+
+   基于马氏距离的对抗样本检测
+
+
+
+在CIFAR-10、CIFAR-100、SVHN数据集和ResNet、DenseNet模型上的检测结果表明，相比基于欧氏距离的KDE检测和LID检测有明显的性能提升，尤其是在面对一些弱攻击（如Deepfool）或者未知攻击的时候。
+基于ResNet模型的实验结果显示，马氏距离检测在三个数据集上的平均检测AUC分别达到了96.73%（CIFAR-10）、93.43%（CIFAR-100）、96.16%（SVHN）。虽然检测性能优秀，至于马氏距离为什么更适合做对抗样本检测仍需更多理解，此外，马氏距离能否提高其他检测方法也是一个值得探索的问题。
+
+预测不一致性
+^^^^^^^^^^^^
+
+由于对抗样本是基于目标模型的梯度信息生成的，所以会过度依赖目标模型信息，在发生随机变换或者添加随机噪声时，会产生较高的预测不一致性（甚至发生类别翻转）。这意味着，在推理阶段当对抗噪声和模型参数之间的强关联被打破时，模型的预测结果更容易发生改变。基于此推测，可在推理过程中引入一定的随机性，并根据模型的预测结果变化来判定输入样本是否为对抗样本。
+
+**贝叶斯不确定性**\ ：一个代表性的不确定性检测指标为\ **贝叶斯不确定性**\ （Bayesian
+uncertainty），由Feinman等人在其KDE的工作 :cite:`feinman2017detecting`
+中提出。基于贝叶斯不确定性的检测方法巧妙地使用了随机失活（dropout）
+:cite:`srivastava2014dropout`
+技术，在推理阶段保持随机失活开启（通常情况下随机失活在推理阶段是关闭的），同时对样本进行多次推理并计算模型预测结果的方差(:math:`\mathrm{Var}(p) = \mathbb{E}(p^2) - [\mathbb{E}(p)]^2`)。具体的计算公式如下：
+
+.. math:: U({\boldsymbol{x}}) = \frac{1}{T}\sum_{i=1}^{T} \hat{{\boldsymbol{y}}}_i^{\top}\hat{{\boldsymbol{y}}}_i - \Big(\frac{1}{T}\sum_{i-1}^{T}\hat{{\boldsymbol{y}}}_i\Big)^{\top}\Big(\frac{1}{T}\sum_{i-1}^{T}\hat{{\boldsymbol{y}}}_i\Big)
+
+其中，\ :math:`\hat{{\boldsymbol{y}}}_i`\ 表示在第\ :math:`i`\ 次推理时得到的模型输出概率向量。贝叶斯不确定性在贝叶斯模型（如高斯过程）中有广泛的研究，使用随机失活训练得到的深度神经网络可以被看作是\ **深度高斯过程**\ (deep
+Gaussian process)的一种近似 :cite:`gal2016theoretically`
+。在这里，随机失活开启状态的神经网络是一个随机化的模型，每一次前传都相当于从大网络中随机抽样一个小网络
+:cite:`hendrycks2016early` 。
+
+基于正常样本和对抗样本的贝叶斯不确定性特征可以训练一个逻辑回归模型（或者其他模型）进行对抗样本检测。在MNIST、CIFAR-10和SVHN数据集上的实验结果显示，推理不确定性可以检测一些经典的攻击方法如FGSM、JSMA和CW攻击，但是无法检测BIM攻击。贝叶斯不确定性与KDE有一定的互补性，二者的结合可以在MNIST和SVHN数据集上取得更好的检测结果（AUC高于90%），但是在CIFAR-10数据集上效果欠佳（AUC仅为85.54%）。但是，计算贝叶斯不确定性需要多次（如50次）推理，会严重降低推理效率，所以并不实用。
+
+**特征压缩**\ ：此检测方法先使用特征压缩技术对输入样本进行物理降维，然后根据模型在压缩前后的输出变化检测对抗样本
+:cite:`xu2017feature` 。这里，“特征压缩”（feature
+squeezing）是指压缩输入空间而非特征空间。“物理降维”指的是直接减少输入图像的表示比特位数，使用更少的比特数来表示图像，以达到输入维度压缩的目的。降低输入维度可以提高模型对微小输入扰动的鲁棒性，与此同时降低比特数还可以降低像素精度，对噪声也起到一定的阻断作用。一般RGB图像的颜色深度（color
+depth）为8比特，即使用8个比特来表示像素值（0-255），其可以被压缩到更少的比特数，而对于灰度图像（如MNIST）也可以通过二值滤波（binary
+filter）进一步压缩。给定原始比特位数8-bit，目标比特位数\ :math:`i`-bit（\ :math:`1 \leq i \leq 7`\ ），原始像素值\ :math:`v`\ 可以通过下面的整数舍入操作进行压缩：
+
+.. math:: v_s = \lfloor v * (2^i -1) \rfloor / (2^i -1)
+
+除了比特位压缩，研究者还探索了空间平滑技术，包括局部平滑技术\ *中值滤波*\ （median
+filtering）和非局部平滑技术\ *非局部均值滤波*\ （non-local
+means）。基于此，可以根据模型输出变化的\ :math:`L_1`\ 范数（\ :math:`{\lVert f({\boldsymbol{x}}) - f({\boldsymbol{x}}_s) \rVert}_1`\ ）来检测对抗样本。
+在MNIST、CIFAR-10和ImageNet上的实验结果显示，特征压缩方法可以直接提高模型的鲁棒性（模型对压缩后的对抗输入作出了正确预测），在三个数据集上都表现出了优异的效果。与此同时，特征压缩还可以跟对抗训练（当前最鲁棒的模型训练方法）结合，进一步提升鲁棒训练模型在更大对抗扰动下的鲁棒性。在检测方面，最优的特征压缩组合技术对FGSM、BIM、DeepFool、JSMA、CW攻击的检测AUC达到了99.44%（MNIST）、94.74%（CIFAR-10）和94.24%（ImageNet）。
+
+**随机输入变换**\ ：此类方法通过对输入样本进行随机变换，然后根据模型预测的不一致性检测对抗样本。比如，使用随机图像变换，并基于变换前后的逻辑（logits）输出来检测对抗样本
+:cite:`tian2018detecting`
+。研究者基于9种随机平移和5种随机旋转组合成45种随机变换，然后基于模型的逻辑输出训练了基于简单全连接网络的对抗样本检测器。在MNIST和CIFAR-10上的结果显示，该检测方法可以有效检测各种攻击强度的CW攻击。此外，研究者通过类似二级分类法的策略，在针对性攻击下也能较为准确地检测CW攻击，在FGSM和BIM攻击上检测效果更好。类似的方法正在被陆续地探索中，比如近期有研究者提出使用风格转换检测对抗样本
+:cite:`wang2022adversarial` 。
+
+除了随机变换，还可以向输入样本中添加随机噪声，然后基于模型的逻辑输出变化来计算\ **对数概率**\ （log-odds）指标，并以此来检测对抗样本
+:cite:`roth2019odds`
+。给定输入样本\ :math:`{\boldsymbol{x}}`\ ，此检测方法向\ :math:`{\boldsymbol{x}}`\ 添加随机噪声\ :math:`\eta \sim {\mathcal{N}}`\ （\ :math:`{\mathcal{N}}`\ 为高斯噪声）得到噪声样本\ :math:`{\boldsymbol{x}}+\eta`\ ，通过比较模型在\ :math:`{\boldsymbol{x}}`\ 上的逻辑输出\ :math:`z({\boldsymbol{x}})`\ 与在\ :math:`{\boldsymbol{x}}+\eta`\ 上的逻辑输出\ :math:`z({\boldsymbol{x}}+\eta)`\ 之间的差异来判别\ :math:`{\boldsymbol{x}}`\ 是否为对抗样本。
+这里的假设是：对于正常样本\ :math:`z({\boldsymbol{x}}) \approx z({\boldsymbol{x}}+\eta)`\ ，而对抗样本则会产生很大差异。通过设置恰当的阈值，该方法在CIFAR-10和ImageNet数据集上都展现了极高的检测准确率，比如在标准VGG、ResNet、WideResNet和Inception
+V3模型上检测PGD攻击的准确率高达99%以上，也能以较高的准确率检测未知攻击和针对性攻击。
+通过对数概率还可以对预测结果进行纠正，提高模型的对抗鲁棒性。
+后续有研究对此方法进行了针对性评估 :cite:`tramer2020adaptive`
+，发现其仍然可以被特定的针对性攻击绕过。具体的绕过策略是，在对抗扰动\ :math:`{\boldsymbol{x}}`\ （类别为\ :math:`y`\ ）的同时可以让\ :math:`z({\boldsymbol{x}}_{adv})`\ 无限接近一个其他类别\ :math:`y'\neq y`\ 的干净样本\ :math:`{\boldsymbol{x}}'`\ ，即\ :math:`\min {\lVert z({\boldsymbol{x}}_{adv}) - z({\boldsymbol{x}}') \rVert}`\ ，在此基础上加上EOT攻击技术就可以绕过基于对数概率的检测器。
+
+直观来讲，如果一个样本被攻击过，那么再生成对抗攻击时会呈现出特殊属性：（1）梯度更均匀，即对抗样本的所有输入维度都具有类似的梯度大小；（2）二次攻击更难，已经被攻击过一次的样本较难进行第二次攻击。基于此观察，研究者提出两个检测对抗样本的准则
+:cite:`hu2019new`
+：（a）\ *向输入样本*\ :math:`{\boldsymbol{x}}`\ *中添加随机噪声是否会导致模型的概率输出发生较大改变*\ ，如果“是”则为对抗样本（此方法与对数概率相同）；（b）\ *攻击输入样本*\ :math:`{\boldsymbol{x}}`\ *是否需要很多的扰动步数*\ ，如果“是”则为对抗样本。基于此组合方法，研究者展示了即便是白盒针对性攻击也难以绕过检测，因为这两个检测准则难以被同时绕过
+:cite:`hu2019new`
+。但后续的研究发现，同时绕过这两个检测准则的攻击还是存在的
+:cite:`tramer2020adaptive`
+。比如，给定干净样本\ :math:`{\boldsymbol{x}}`\ ，首先生成一个高置信度的对抗样本\ :math:`{\boldsymbol{x}}_{adv}`\ ，然后在\ :math:`{\boldsymbol{x}}`\ 和\ :math:`{\boldsymbol{x}}_{adv}`\ 之间基于二分查找，寻找对随机噪声具有高置信度同时离决策边界很近的对抗样本。
+总体来说，对输入进行随机变换或者向输入添加随机噪声会引入随机性，提高对对抗样本的检测效果，但仍存在被针对性攻击绕过的可能。
+
+重建不一致性
+^^^^^^^^^^^^
+
+基于重建不一致性的检测方法假设：\ *正常样本可以重建而对抗样本无法重建*\ 。原因是对抗样本已经跨过决策边界进入了另一个对抗类别，重建时会按照对抗类别进行重建。此方面的代表性工作是MagNet
+:cite:`meng2017magnet` 和APE-GAN :cite:`jin2019ape` 。
+
+**MagNet**
+在正常样本上训练一个自编码器（autoencoder），然后通过重建结果构建一个\ **检测器**\ 和一个\ **改良器**\ （reformer）。检测器通过重建错误或者模型在重建样本上的预测不一致性来检测对抗样本，而改良器将检测为“良性”的样本（包含正常样本和弱对抗样本）投影到离正常数据流形更近的位置，以达到进一步改良的目的。检测器所使用的重建错误定义为：
+
+.. math:: E({\boldsymbol{x}}) = {\lVert {\boldsymbol{x}}-AE({\boldsymbol{x}}) \rVert}_p
+
+其中，\ :math:`{\boldsymbol{x}}`\ 为要检测的测试样本，\ :math:`AE({\boldsymbol{x}})`\ 为自编码器重建的样本，\ :math:`{\lVert \cdot \rVert}_p`\ 为\ :math:`L_p`\ 范数，其中\ :math:`p=1,2`\ 。
+
+检测器还可以基于JS散度（Jensen-Shannon
+divergence）的预测不一致性\ :math:`JSD(f({\boldsymbol{x}})/\tau,f(AE({\boldsymbol{x}}))/\tau)`\ 进行检测，其中\ :math:`\tau`\ 为温度参数（\ :math:`\tau=10,40`\ ）。对抗样本检测可以基于预先定义的阈值进行。改良器可以使用已训练好的自编码器，使用重建样本\ :math:`AE({\boldsymbol{x}})`\ 代替原始样本以达到改良预测结果的目的。
+但是，后续研究发现，MagNet检测可以被类似EOT的攻击技术绕过
+:cite:`carlini2017magnet`
+。研究者构造了多个自编码器，并基于此生成迁移性更强的\ :math:`CW`\ 攻击，发现MagNet无法检测此类灰盒攻击。
+
+**APE-GAN**\ （adversarial perturbation elimination GAN）
+:cite:`jin2019ape`
+是一个类似MagNet的方法，其利用生成对抗网络来修复（并非检测）对抗样本，以此来提高模型的推理鲁棒性。与标准生成对抗网络不同，APE-GAN的生成器\ :math:`G(\cdot)`\ 是一个自编码器，输入对抗样本输出修复的样本，并在FGSM对抗样本上进行训练。但是此修复方法可以轻易地被白盒针对性攻击破坏掉，因为针对性攻击可以让对抗样本无法修复，即使重建器\ :math:`G(\cdot)`\ 发生严重的重建错误。
+这些研究结果说明，基于重建不一致性的检测或者修复方法面临一个很现实的挑战，那就是\ *对抗攻击可以生成既能攻击又无法被重建的对抗样本*\ 。
+
+.. _sec_adv-training:
+
+对抗训练
+~~~~~~~~
+
+
+对抗训练是已知最有效的能够提升模型自身对抗鲁棒性的防御方法。
+对抗训练的思想也比较直观：鉴于深度神经网络具有强大的学习能力，所以\ *让模型直接学习对抗样本就可以获得对抗鲁棒性*\ 。
+所以对抗训练在对抗样本（而不是普通样本）上训练模型。当然，很多对抗训练方法采用的是混合训练的方式，即同时在对抗样本和正常样本上训练模型。下面三个工作可以认为是对抗训练领域三个里程碑式的工作：
+
+-  2014年，Goodfellow等人首次提出对抗训练的概念
+   :cite:`goodfellow2014explaining` ，开启了对抗训练和鲁棒优化的大门。
+-  2018年，Madry等人提出基于PGD的对抗训练方法 :cite:`madry2018towards`
+   ，给对抗训练的性能带来巨大提升，使对抗训练成为主流对抗防御方法。
+-  2019年，Zhang等人提出基于KL散度的对抗训练方法TRADES
+   :cite:`zhang2019theoretically`
+   ，大幅提升了Madry等人提出的PGD对抗训练，极大地推动了对抗训练的研究热潮。
+
+实际上，早在2013年，Szegedy等人 :cite:`szegedy2013intriguing`
+在揭示对抗样本现象的同时就已经探索了对抗训练（但未正式的提出和深入探索）。他们采用了一种\ *交替“生成-训练”*\ 的方式，在训练过程中对神经网络的每一层（既包含输入层也包含中间层）生成对抗样本，然后将这些对抗样本加入原始训练集进行模型训练，发现深层对抗样本对鲁棒泛化更有用。Szegedy等人将对抗训练解释为是一种\ **正则化方法**\ ，并对其他正则化方法，如权重衰减和随机失活等，也进行了分析。可惜由于Szegedy等人使用的对抗样本生成算法L-BFGS的优化代价比较高，最终训练框架的实用性并不是很好。
+
+FGSM对抗训练
+^^^^^^^^^^^^
+
+基于快速对抗攻击方法FGSM的对抗训练方法由Goodfellow等人
+:cite:`goodfellow2014explaining`
+在2014年提出，其同时在干净样本和FGSM对抗样本上训练模型。具体的优化目标如下：
+
+.. math:: \begin{aligned}& \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \in D} \big[\alpha\mathcal{L}_{CE}(f({\boldsymbol{x}}), y) + (1-\alpha)\mathcal{L}_{CE}(f({\boldsymbol{x}}_{adv}), y) \big]  \\& {\boldsymbol{x}}_{adv} = {\boldsymbol{x}} + \epsilon\cdot sign(\nabla_{{\boldsymbol{x}}} \mathcal{L}_{CE}(f({\boldsymbol{x}}), y))\end{aligned}
+   :label: eq_at_goodfellow
+
+其中，\ :math:`\mathcal{L}_{CE}`\ 是交叉熵损失函数，\ :math:`{\boldsymbol{x}}_{adv}`\ 是\ :math:`{\boldsymbol{x}}`\ 的对抗样本，通过第二行的单步FGSM攻击生成；\ :math:`\alpha`\ 是调和两部分损失的权重系数（实验中设为0.5）。值得注意的是，Goodfellow等人并未使用中间层的对抗样本，因为他们发现中间层对抗样本并没有用。
+
+实际上，上式可以化简成min-max优化的标准形式 [2]_ ：
+
+.. math:: \min_{\theta} \max_{{\lVert {\boldsymbol{x}}_{adv} - {\boldsymbol{x}} \rVert}_{\infty} \leq \epsilon} \left[\alpha\mathcal{L}_{CE}(f({\boldsymbol{x}}),y) + (1-\alpha)\mathcal{L}_{CE} (f({\boldsymbol{x}}_{adv}), y) \right]
+   :label: eq_min-max-goodfellow
+
+其中，内部最大化是生成对抗样本\ :math:`{\boldsymbol{x}}_{adv}`\ 的过程，而外部最小化是在普通样本\ :math:`{\boldsymbol{x}}`\ 和对抗样本\ :math:`{\boldsymbol{x}}_{adv}`\ 上训练模型的过程，优化变量是模型参数\ :math:`\theta`\ 。FGSM对抗训练的优点是训练速度快，相比传统的模型训练只需要增加一次前传和后传，缺点是无法防御多步对抗攻击，如BIM、PGD攻击等。
+
+PGD对抗训练
+^^^^^^^^^^^
+
+2018年，Madry等人 :cite:`madry2018towards`
+提出基于PGD攻击的对抗训练方法。此方法遵循下面的min-max优化框架：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \sim D} \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}(f({\boldsymbol{x}}+{\boldsymbol{r}}),y)
+   :label: eq_madry
+
+其中，内部最大化问题的目标是生成更强的对抗样本，而外部最小化问题的目标是最小化模型在（内部最大化过程中生成的）对抗样本上的损失，求解上述鞍点问题的过程也就是对抗训练的过程。PGD对抗训练使用PGD攻击算法求解内部最大化问题，定义如下：
+
+.. math:: {\boldsymbol{x}}_{adv}^{t+1} = \text{Proj}_{{\boldsymbol{x}}+{\mathcal{S}}}\big({\boldsymbol{x}}^t + \alpha\cdot sign(\nabla_{{\boldsymbol{x}}^t})\mathcal{L}(\theta,{\boldsymbol{x}}^t,y)\big)
+   :label: eq_stD_bgd
+
+其中，\ :math:`\text{Proj}_{{\boldsymbol{x}}+{\mathcal{S}}}`\ 是一个投影操作，将对抗样本约束在以\ :math:`{\boldsymbol{x}}`\ 为中心的高维球\ :math:`{\boldsymbol{x}}+{\mathcal{S}}`\ 之内；\ :math:`{\boldsymbol{x}}^{t}`\ 和\ :math:`{\boldsymbol{x}}^{t+1}`\ 分别是第\ :math:`t`\ 步（总步数为\ :math:`T`\ ）对抗攻击产生的对抗样本；\ :math:`\alpha`\ 是单步步长，其大小要求能探索到\ :math:`\epsilon`-球以外的空间（即\ :math:`\alpha T > \epsilon`\ ）。
+
+PGD对抗训练也经常被称为\ *标准对抗训练*\ （standard adversarial
+training）或者\ *Madry对抗训练*\ （Madry adversarial
+training）。PGD算法实际上是求解有约束min-max问题的一阶最优算法，所以PGD攻击也可以被认为是最强的一阶攻击算法。关于PGD攻击算法，读者可以在章节
+:numref:`sec_white-box adversarial attacks` 找到详细的介绍。
+
+.. _fig_adv_train_decision_boundary:
+
+.. figure:: images/7.8_adv_train_decision_boundary.png
+   :width: 720px
+
+   对抗训练会得到鲁棒决策边界 :cite:`madry2018towards`
+
+
+
+PGD对抗训练所带来的显著鲁棒性提升让研究者们看到了训练对抗鲁棒模型的可能，后续出现了很多理解其工作原理的工作，以便进一步提升其鲁棒性。总结来说，PGD对抗训练及其变体具有以下特点：
+
+-  **鲁棒决策边界**:
+   PGD对抗训练可以让模型的决策边界更加鲁棒，即在输入样本周围一定范围内移动样本并不会跨过决策边界，如
+   :numref:`fig_adv_train_decision_boundary` 所示。
+-  **通用鲁棒性**\ ：PGD对抗训练的模型可以同时防御单步、多步以及不同范数的对抗攻击。
+-  **需要大容量模型**\ ：PGD对抗训练需要更大尤其是更宽的深度神经网络模型。
+-  **需要更多数据**\ ：PGD对抗训练对数据量需求更高，增加训练数据可以获得明显的鲁棒性提升。
+-  **激活截断**:
+   PGD对抗训练的模型内部会产生类似激活截断的效果，可有效抑制对抗噪声对部分神经元的激活，进而阻断其在层与层之间的传递。
+-  **鲁棒特征学习**:
+   PGD对抗训练可以让模型学习到更鲁棒、解释性更好的特征，而普通训练则会学习到对泛化更有用但不鲁棒也不好解释的特征。
+-  **准确率-鲁棒性权衡**:
+   模型的准确率（在干净样本上的准确率）和鲁棒性（在对抗样本上的准确率）之间存在冲突，二者不可兼得，在同一模型和训练条件下，鲁棒性提升会降低准确率，但是当模型或训练条件改进时，二者可以同时提升。
+
+对PGD对抗训练的改进方法有很多，可以通过设计更灵活的扰动步数、扰动步长、更好地协调内部最大化与外部最小化等方式进行提高。下面对一些改进算法进行快速的回顾，以帮助大家了解有哪些可能的改进方式。这里的介绍只覆盖了一小部分改进算法，读者可以通过查看引用PGD对抗训练工作的论文去做更详细的了解。
+
+基于PGD对抗训练的\ *集成学习*\ 和\ *课程表学习*\ 是两种比较直观的改进方式。例如，Cai等人
+:cite:`cai2018curriculum`
+提出基于攻击步数的\ *课程表对抗训练*\ ，同时为了防止遗忘提出多步混合的累积学习方式。Tramèr等人
+:cite:`tramer2018ensemble`
+提出结合多个模型的\ *集成对抗训练*\ 方法，由于训练中的对抗样本是集合了多个模型生成的，所以得到的模型一般对迁移攻击很鲁棒。而Yang等人
+:cite:`yang2020dverge`
+提出的DVERGE方法则通过在集成模型之间更好地分散对抗脆弱性来防御迁移攻击。
+
+此外，Ding等人 :cite:`ding2019mma`
+从边界最大化的角度分析了对抗训练，提出\ *最大边界对抗*\ （Max-Margin
+Adversarial，MMA）训练方法，通过探索能最大化样本到决策边界的距离的扰动（这意味着每个样本都应该设置不同的扰动上界）来更好地权衡准确率和鲁棒性。Wang等人
+:cite:`wang2019convergence`
+分析了PGD对抗训练的内部最大化和外部最小化之间的相互作用，发现内部最大化对最终的鲁棒性影响更大，但其在训练初期并不需要生成很强的对抗样本。基于此，Wang等人提出一个\ *一阶平稳条件*\ （first-order
+stationary
+condition，FOSC）来衡量内部最大化问题解的收敛性，并在训练的不同阶段通过控制对抗样本的收敛性不断变好（FOSC值不断变小）来进行\ *动态对抗训练*\ （dynamic
+adversaRial training，DART）。
+
+PGD对抗训练使用单一PGD攻击来解决内部最大化问题，可能会存在输入空间探索不足的问题。为了解决此问题，Dong等人
+:cite:`dong2020adversarial`
+提出基于分布的对抗训练方法\ *对抗分布训练*\ （Adversarial Distributional
+Training，ADT）。ADT通过向对抗噪声中添加高斯噪声并最大化输出概率的熵来生成覆盖性更好的对抗样本。为了解决PGD对抗训练的收敛性问题，Zhang等人
+:cite:`zhang2020attacks` 提出\ *友好对抗训练*\ （Friendly Adversarial
+Training，FAT）方法，通过一系列早停策略（如达到一定对抗损失即停止攻击）来生成更有利于模型训练的对抗样本，以此来稳定对抗训练。Bai等人
+:cite:`bai2020improving` 提出\ *通道激活抑制*\ （Channel-wise
+Activation Suppressing，CAS)对抗训练方法
+，将PGD对抗训练应用在深度神经网络的中间层来抑制对抗噪声对中间层的激活，进而提高中间层特征的对抗鲁棒性。此方法需要在要增强的中间层处外接一个辅助分类器来完成。
+
+TRADES对抗训练
+^^^^^^^^^^^^^^
+
+TRADES（TRadeoff-inspired Adversarial DEfense via Surrogate-loss
+minimization） :cite:`zhang2019theoretically`
+对抗训练方法由Zhang等人在2019年提出，其是对PGD对抗训练的一个重要改进，此方法赢得了NeurIPS
+2018对抗视觉挑战赛的对抗防御赛道第一名。TRADES使用KL散度代替交叉熵来作为对抗训练的损失函数，并同时在干净和对抗样本上训练模型。TRADES的优化目标如下：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \sim D}\left[ \underset{\text{提升准确率}}{\underbrace{\mathcal{L}_{CE}(f({\boldsymbol{x}}), y)}} + \lambda \cdot \underset{\text{提升鲁棒性}}{\underbrace{\max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}_{KL}(f({\boldsymbol{x}}), f({\boldsymbol{x}}+{\boldsymbol{r}}))}} \right]
+   :label: eq_trades
+
+其中，\ :math:`\mathcal{L}_{CE}`\ 是交叉熵损失函数，\ :math:`\mathcal{L}_{KL}`\ 是KL损失函数。上式中第一部分在干净样本\ :math:`{\boldsymbol{x}}`\ 上最小化交叉熵分类损失是为了提高模型的分类准确率，而第二部分生成对抗样本并在对抗样本\ :math:`{\boldsymbol{x}}_{adv}={\boldsymbol{x}}+{\boldsymbol{r}}`\ 上最小化KL散度可以被理解为是一种鲁棒性正则。
+
+Zhang等人提出\ *鲁棒分类错误*\ （robust classification
+error）可以被分解为\ *自然分类错误*\ （natural classification
+error）和\ *边界错误*\ （boundary error）两个部分，具体定义如下：
+
+.. math:: {\mathcal{R}}_{rob}(f) =  {\mathcal{R}}_{nat}(f) + {\mathcal{R}}_{bdy}(f)
+
+其中，TRADES对抗训练优化目标中的第一项和第二项分别对应自然错误和边界错误。基于上述分解，可以对对抗训练的“准确率-鲁棒性”权衡问题进行理论分析和更好地解决。此外，TRADES的内部最大化损失\ :math:`\mathcal{L}_{KL}(f({\boldsymbol{x}}), f({\boldsymbol{x}}+{\boldsymbol{r}}))`\ 可以继续化简为交叉熵损失函数，这是因为KL损失分解后的其中一项是常数项。再进一步，真实标签\ :math:`y`\ 和模型的预测分布\ :math:`f({\boldsymbol{x}})`\ 之间是有关联的，基于此可以对TRADES继续化简成类似PGD对抗训练的形式，感兴趣的读者可以尝试一下。
+
+下面，我们将介绍一些对TRADES方法的理解。基于KL散度的对抗损失会在训练的初期生成对模型“*更有针对性*”的对抗样本，因为其最大化对抗样本与干净样本之间的预测概率分布，对模型已经学到的预测分布产生反向作用，从而会阻碍模型的收敛。
+所以TRADES方法保留了在干净样本上定义的交叉熵损失函数，以此来加速收敛。相对来说，基于交叉熵损失函数的对抗训练的收敛性问题会轻一些，因为对抗损失是基于真实类别\ :math:`y`\ 定义的，所以在模型预测错误的样本上不会产生特别大的反向作用。比如，模型对样本\ :math:`{\boldsymbol{x}}`\ 的预测是错误的，那么攻击后得到的对抗样本\ :math:`{\boldsymbol{x}}_{adv}`\ 的预测也是错的，差别不大，模型继续向着正确的类别学习就好了。需要指出的是，虽然添加自然损失项\ :math:`\mathcal{L}_{CE}(f({\boldsymbol{x}}), y)`\ 可以提高收敛速度，但还是存在两个潜在的问题：（1）\ *收敛不稳定*\ ，导致训练过程对超参\ :math:`\lambda`\ 比较敏感；（2）在大规模数据集如ImageNet上\ *不稳定性会加剧*\ ，导致超参难调或鲁棒性能下降。
+
+样本区分对抗训练
+^^^^^^^^^^^^^^^^
+
+**错误区分对抗训练**\ （misclassification aware adversarial
+training，MART）方法 :cite:`wang2019improving`
+是一个有代表性的样本区分对抗训练方法。MART在对抗训练过程中对未正确分类的样本进行区别对待，增加对这些样本的学习力度和收敛性。此想法受启发于错误分类样本对最终的鲁棒性影响较大的观察。通过把样本分为\ *正确分类*\ 和\ *错误分类*\ 两类，MART将鲁棒风险分解为：
+
+.. math:: {\mathcal{R}}_{\text{rob}}(f) =  {\mathcal{R}}_{\text{rob}}^{+}(f) + {\mathcal{R}}_{\text{rob}}^{-}(f)
+
+其中，\ :math:`{\mathcal{R}}_{\text{rob}}^{+}(f)`\ 为模型已正确学习的样本对应的风险，\ :math:`{\mathcal{R}}_{\text{rob}}^{+}(f)`\ 为模型尚未正确学习的样本对应的风险。需要注意的是，正确学习与否是针对干净样本来说的，而非对抗样本。基于此，MART提出优化下列min-max优化问题来训练鲁棒的模型：
+
+.. math:: \begin{aligned}& \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \sim D} \left[\mathcal{L}_{BCE}(f({\boldsymbol{x}}_{adv}), y) + \lambda(1-{\boldsymbol{p}}_y({\boldsymbol{x}}))\mathcal{L}_{KL}(f({\boldsymbol{x}}), f({\boldsymbol{x}}_{adv}) \right] \\& {\boldsymbol{x}}_{adv} = \mathop{\mathrm{arg\,max}}_{{\lVert {\boldsymbol{x}}'-{\boldsymbol{x}} \rVert}_{\infty} \leq \epsilon} \mathcal{L}_{CE} (f({\boldsymbol{x}}'), y)\end{aligned}
+   :label: eq_mart
+
+其中，\ :math:`\mathcal{L}_{BCE}=-\log({\boldsymbol{p}}_y({\boldsymbol{x}}_{adv})) - \log((1-\max_{k\neq y}{\boldsymbol{p}}_{k}({\boldsymbol{x}}_{adv})))`\ 为\ *增强交叉熵损失*\ （Boosted
+Cross
+Entropy，BCE），\ :math:`{\boldsymbol{p}}_{k}({\boldsymbol{x}})`\ 表示模型对应类别\ :math:`k`\ 的概率输出。BCE损失通过拉高正确类别的概率同时压低最大错误类别的概率来增强学习，提高模型在未正确学习样本上的收敛性。但其对抗样本的生成方式依然采用了标准的PGD攻击，因为大量研究证明用PGD求解内部最大化问题已经可以带来最优的鲁棒性。也就是说MART实际上只提高了外部最小化的部分，同时为了促进收敛将内部最大化方法由KL损失换回了交叉熵损失。MART针对TRADES的收敛性问题改进了其外部最小化的部分，且改进的核心在于如何区别对待错误分类的训练样本。
+
+**几何区分样本重加权对抗训练** 方法（geometry-aware instance-reweighted
+adversarial training，GAIRAT） :cite:`zhang2020geometry`
+也对分对和分错的样本进行了区分对待，不过采用的方式与MART不同。GAIRAT提出\ *几何区分*\ （geometric
+aware）的概念，通过样本被成功攻击的步数来计算样本离决策边界的距离，并根据这个距离给每个样本设置一个权重，进行加权对抗训练。GAIRAT解决下面定义的min-max优化问题：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \sim D}\left[ \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \omega({\boldsymbol{x}},y)\mathcal{L}(f({\boldsymbol{x}}+{\boldsymbol{r}}),y) \right]
+   :label: eq_gairat
+
+其中，权重计算函数\ :math:`\omega({\boldsymbol{x}},y)`\ 定义如下:
+
+.. math:: \omega({\boldsymbol{x}},y) = (1+\tanh{\lambda + 5 \times(1-2\kappa({\boldsymbol{x}},y)/T)})/2
+
+其中，\ :math:`T`\ 表示使用PGD生成对抗样本的总步数，\ :math:`\kappa({\boldsymbol{x}},y)`\ 代表模型恰好误分类对抗样本时的步数。且对模型已经误分类的干净样本设置为一个固定的上限值比如1，当\ :math:`\omega({\boldsymbol{x}},y)\equiv 1`\ 时，GAIRAT退化为PGD对抗训练。
+
+数据增强对抗训练
+^^^^^^^^^^^^^^^^
+
+此类方法的主要思想是使用大量外部或者合成数据来提升对抗训练的性能，其中技术难点是如何选择增强数据和如何调和原始数据和增强数据之间的配比。此方向上两个经典的工作是同时发布在NeurIPS
+2019会议上的工作 :cite:`alayrac2019labels,carmon2019unlabeled` 。
+这两个工作技术路线基本一致，他们都使用外部数据来提升CIFAR-10上对抗训练模型的性能，这是因为CIFAR-10的鲁棒性指标是业界的标准。
+
+具体来说，他们从80 Million Tiny
+Images数据集中精心选择了100K和500K两个版本的额外数据集，并采用一定数据混合比例来提升模型在CIFAR-10数据集上的对抗鲁棒性。
+在原始数据集\ :math:`D`\ 的基础上，两个工作通过相似的数据选择策略选择了未标注的额外数据\ :math:`D_{ul}`\ ，然后在原始数据集和额外数据集上同时进行对抗训练：
+
+.. math:: \min_{\theta} \left[ \mathbb{E}_{({\boldsymbol{x}},y) \sim D} \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}(f({\boldsymbol{x}}+{\boldsymbol{r}}),y) + \mathbb{E}_{{\boldsymbol{x}}_{ul} \sim D_{ul}} \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}(f({\boldsymbol{x}}_{ul}+{\boldsymbol{r}}),\hat{y}) \right]
+
+其中，\ :math:`\hat{y}`\ 是未标注样本\ :math:`{\boldsymbol{x}}_{ul}`\ 的预测类别\ :math:`f({\boldsymbol{x}}_{ul})`\ 。
+
+对于此类方法来说，数据混合比例至关重要（和训练与微调大语言模型一样），外部数据必须要和原始数据进行\ *1：1混合配比*
+才能够提升鲁棒性，否则不但不会提升反而还会降低鲁棒性。
+这说明外部数据更多的是起到了一种正则化的作用，通过增加更多样的训练数据来学习更加平滑的决策边界，但是这种正则化无法脱离原始训练数据。此类方法存在两个缺陷：（1）不是所有的数据集都可以找到合适的外部数据来协助提升鲁棒性；（2）外部数据存在失效的可能性，比如80
+Million Tiny Images数据集由于存在不合规图片已经永久下线。
+
+当然，除了引入外部数据，我们可以使用数据增强方法基于已有训练数据进行扩充。
+比如，研究者结合TRADES对抗训练探索了三种数据增强方式，即Cutout、CutMix和MixUp，发现结合了\ *模型参数平均*\ （Model
+Weight Averaging，MWA） :cite:`izmailov2018averaging`
+的CutMix可以提高对抗训练的鲁棒性 :cite:`rebuffi2021data` 。
+研究者将数据增强所带来的收益归因于多样化的数据对\ *鲁棒过拟合*\ （robust
+overfitting）问题 :cite:`rice2020overfitting`
+的缓解。实际上，此前已有工作将数据增强、逻辑平滑、参数平均等技巧用以解决鲁棒过拟合问题
+:cite:`rice2020overfitting,chen2020robust`
+。基于此，研究者进一步提出结合生成模型\ *DDPM*\ （Denoising Diffusion
+Probabilistic Model） :cite:`ho2020denoising`
+与\ *CutMix*\ 数据增强，在不借助任何外部数据的情况下取得了更优的对抗鲁棒性
+:cite:`rebuffi2021fixing,gowal2021improving`
+。此外，基于多种数据增强技术的自监督鲁棒预训练
+:cite:`shafahi2019adversarial` 也可以看作是此类的方法。
+
+目前来看，基于大量增强数据和生成数据的对抗训练才能达到最优的鲁棒性。开源对抗鲁棒性排行榜RobustBench [3]_
+的统计结果显示，生成模型加CutMix再加上更宽的模型（WideResNet-70-16）可以在标准数据集CIFAR-10上取得66.11%的对抗鲁棒性和88.74%的干净准确率，而结合更先进的生成扩散模型可以将鲁棒性提升至70.69%
+:cite:`wang2023better`
+，大大超出此前的所有防御方法。相信在后续的研究中，数据增强和生成将会成为取得更优对抗鲁棒性的必备技巧。
+
+参数空间对抗训练
+^^^^^^^^^^^^^^^^
+
+对抗训练通过在对抗样本上训练模型使其\ *输入损失景观*\ （input loss
+landscape）变得平坦。前面的方法主要是通过改良训练算法或者增加训练数据来达到更平坦的损失景观，但是我们为什么直接以某种方式显示的让损失景观变平坦呢？
+基于此思想，\ **对抗权重扰动**\ （Adversarial Weight Perturbation，AWP）
+:cite:`wu2020adversarial`
+方法在对抗训练过程中通过显式地约束损失景观的平坦度来提高鲁棒性。AWP方法交替对输入样本和模型参数进行对抗扰动，在对抗训练框架下形成了一种\ *双扰动*\ 机制。AWP的优化框架定义如下：
+
+.. math:: \min_{\theta} \max_{{\boldsymbol{v}} \in {\mathcal{V}}}\mathbb{E}_{({\boldsymbol{x}},y) \sim D} \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}(f_{\theta + {\boldsymbol{v}}}({\boldsymbol{x}}+{\boldsymbol{r}}),y)
+
+其中，\ :math:`{\boldsymbol{v}} \in {\mathcal{V}}`\ 是对模型参数的对抗扰动，\ :math:`{\mathcal{V}}`\ 是可行的扰动区域；相应地\ :math:`{\boldsymbol{r}}`\ 是对输入样本的对抗扰动，\ :math:`{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon`\ 是其可行的扰动区域。借鉴输入扰动的大小限定，参数空间的扰动可以限定为：\ :math:`{\lVert {\boldsymbol{v}}_l \rVert} \leq \gamma{\lVert \theta_l \rVert}`\ ，其中\ :math:`l`\ 表示神经网络的某一层。这种按照缩放比例的上界限定主要是考虑不同层之间的权重差异较大，且权重具有隔层缩放不变性（前一层放大后一层缩小就等于没有改变）。在具体的训练步骤方面，AWP先使用PGD算法构造对抗样本\ :math:`{\boldsymbol{x}}_{adv} = {\boldsymbol{x}} + {\boldsymbol{r}}`\ ，然后使用对抗最大化技术对模型参数生成扰动\ :math:`{\boldsymbol{v}}`\ ，最后计算损失函数\ :math:`\mathcal{L}(f_{\theta + {\boldsymbol{v}}}({\boldsymbol{x}}+{\boldsymbol{r}}),y)`\ 对于扰动后的参数\ :math:`\theta+{\boldsymbol{v}}`\ 的梯度并更新模型参数\ :math:`\theta`\ 。
+
+实验表明，AWP确实会带来更平坦的损失景观和更好的鲁棒性，验证了显式约束损失景观的重要性。AWP还可以和已有对抗训练方法，如PGD对抗训练、TRADES等相结合，进一步提升他们的鲁棒性。然而，AWP对抗训练是一个min-max-max三层优化框架，会在普通对抗训练的基础上增加了更多计算开销。
+
+对抗训练的加速
+^^^^^^^^^^^^^^
+
+对抗训练比普通训练多了一个内部最大化过程，需要多次反向传播，大大增加了计算开销。对抗训练的效率问题制约着其在大数据集上的应用，也难以与大规模预训练方法结合训练对抗鲁棒模型。近年来，对抗训练加速方面的研究工作已有不少，但在提升效率的同时都会或多或少会牺牲一部分鲁棒性。现有方法大都通过两种思想来加速对抗训练：（1）提高对抗梯度的计算效率；（2）减少内部最大化的步数。
+
+直观来讲，对抗梯度（对抗损失到输入样本的梯度）的计算需要沿着整个神经网络进行反向传播直至输入层，是其主要的效率瓶颈。为了解决此问题，对抗梯度加速计算方法通过巧妙地复用模型参数更新的梯度（模型梯度）来估计对抗梯度（输入梯度），从而达到避免每次计算对抗梯度都需要一次单独的、完整的反向传播的问题。此外，对抗训练（如PGD对抗训练）往往需要多步优化方法来解内部最大化问题，所以如果能够在更少的步数内有效解决此问题也可以达到加速的目的。而减少内部最大化的步数也就自然而然地成为一种经典的对抗训练加速方法。下面我们将对四种经典的加速方法进行详细的介绍。
+
+**Free对抗训练**\ ：此方法 :cite:`shafahi2019adversarial`
+通过重使用模型更新（外部最小化）的梯度信息来近似对抗梯度（内部最大化），以此来降低内部最大化所带来的计算开销。具体来说，Free对抗训练提出了两个巧妙的加速技巧。首先，损失到输入的梯度与损失到神经网络第一个隐层的梯度是关联的，也就是说，我们可以\ *在正常梯度后传的基础上多传一层，从第一个隐层传到输入层就可以同时得到损失到模型参数和输入的梯度*\ 。其次，上述的技巧对一次模型梯度后传只会得到一个对抗梯度，也就是只能完成一步攻击。那么如何解决多步攻击的问题呢？可以巧妙地利用模型更新跟对抗攻击的步数比例（即1：1，一次模型更新完成一步攻击）在\ :math:`m`\ 次模型更新的同时完成\ :math:`m`\ 步的攻击。所以我们需要修改模型的训练策略，在一个训练周期中，传统的训练方法在一批数据上更新一次模型然后换到下一批数据，而Free对抗训练在同一批数据上更新模型\ :math:`m`\ 次（并同时生成\ :math:`m`\ 步对抗攻击），然后再换到下一批数据。如此一来，通过调整模型的训练策略，我们可以既完成模型的正常训练又能大幅提高对抗梯度的计算效率。
+
+Free对抗训练的详细训练步骤可参考算法 :numref:`algorithm_free` 。
+其首先将其训练的总周期数除以\ :math:`m`\ ，以保证总体的训练迭代次数和普通对抗训练一致。在训练中，对于每一个批次的数据，循环\ :math:`m`\ 次，每一次反向传播一次，得到参数\ :math:`\theta`\ 的梯度\ :math:`\nabla_{\theta}`\ 和对于输入\ :math:`{\boldsymbol{x}}`\ 的梯度\ :math:`\nabla_{{\boldsymbol{x}}}`\ ，最后分别将二者更新到模型参数上和样本\ :math:`{\boldsymbol{x}}`\ 上，达到同时训练模型和构造对抗样本的目的。
+
+Free对抗训练在
+CIFAR-10等较小的数据集上能以极小的额外成本实现与10步PGD（PGD-10）对抗训练相当的鲁棒性，并且可以达到7-30倍的训练加速。Free对抗训练是较早利用模型更新过程中的梯度信息来加速对抗训练的工作，不过由于Free对抗训练需要对传统的模型训练步骤进行较大的改变，且改变后的训练策略在不同学习任务下的性能不确定，这在一定程度上阻碍了该算法的广泛应用。
+
+.. _algorithm_free:
+
+.. figure:: images/4.3_free.png
+   :width: 630px
+
+   Free对抗训练（Free-:math:`m`\ ）
+
+
+
+**YOPO对抗训练**\ ：与Free对抗训练类似，YOPO加速方法
+:cite:`zhang2019you`
+巧妙地复用模型参数梯度信息来估计对抗梯度信息，但与Free不同的是，YOPO并不需要修改模型的整体训练策略。根据链式法则，损失到输入的梯度可以进行如下的分解：
+
+.. math:: \nabla_{{\boldsymbol{x}}}\mathcal{L}({\boldsymbol{x}},y) = \nabla_{f^1}\mathcal{L}(f({\boldsymbol{x}}),y)\nabla_{{\boldsymbol{x}}}f^1({\boldsymbol{x}})
+
+其中，\ :math:`f^1`\ 表示神经网络的第一层（第一个隐藏层）。上述分解表明损失对输入的梯度等于损失对模型第一层的梯度乘以第一层对输入的梯度。所以一个\ :math:`m \times n`\ 的PGD对抗训练（PGD-:math:`m \times n`\ ）可以被分解为\ :math:`m`\ 次损失对第一层的梯度\ :math:`\nabla_{f^1}\mathcal{L}(f({\boldsymbol{x}}),y)`\ 乘以\ :math:`n`\ 次第一层到输入的梯度\ :math:`\nabla_{{\boldsymbol{x}}}f^1({\boldsymbol{x}})`\ 。通过如此分解，可以将计算消耗降低为原来的\ :math:`\frac{m}{mn}=\frac{1}{n}`\ （这里假设\ :math:`\nabla_{{\boldsymbol{x}}}f^1`\ 的计算消耗可以忽略不计）。由于原论文中的计算过程比较复杂，我们在此进行了化简，化简后的训练步骤参考算法
+:numref:`algorithm_yopo`
+。YOPO可达到跟PGD对抗训练类似的性能，并能带来4-5倍的训练加速。
+
+.. _algorithm_yopo:
+
+.. figure:: images/4.4_yopo.png
+   :width: 630px
+
+   YOPO对抗训练（YOPO-:math:`m`-:math:`n`\ ）
+
+
+
+**Fast对抗训练**\ ：与上述基于梯度的加速策略不同，Fast对抗训练
+:cite:`wong2019fast`
+提出通过缩减对抗扰动步数并结合一些常用的训练加速技巧来加速对抗训练。
+首先，Fast对抗训练在内部最大化过程中使用\ *单步PGD*\ ，以此来降低多步对抗训练的计算成本。值得一提的是，单步对抗训练长期以来被认为是无效的（因为其无法防御多步攻击）。对此，研究发现问题在于单步训练在\ :math:`\epsilon`-球面附近的过拟合，随机对抗噪声初始化可以有效缓解此问题。基于此，Fast对抗训练还使用了很大的噪声（如\ :math:`\epsilon=10/255`\ ）去做初始化。
+在此基础上，继续结合常用训练加速技巧，包括\ *周期学习率调整*\ （cyclic
+learning rate） :cite:`smith2018super`
+、\ *混合精度训练*\ （mixed-precision training）
+:cite:`micikevicius2018mixed` 和\ *早停*\ （early
+stopping），进一步提高对抗训练的效率。此外，在大规模、高分辨率数据集ImageNet上，Fast将训练分为三个阶段，分别使用不同的分辨率进行训练。
+
+Fast算法对对抗训练的效率提升是显著的，其可以在12个小时内完成在ImageNet数据集上的训练（\ :math:`\epsilon=2/255`\ ），而在CIFAR-10数据集上则可以在6分钟之内完成（\ :math:`\epsilon=8/255`\ ）。此效率与Free对抗训练相比也有5-6倍的加速。虽然加速效果显著，但Fast对抗训练依赖精细的超参数调整（比如学习率），并不能容易得扩展到其他数据集上。例如，在新数据集上寻找最优的动态学习率调整策略对Fast来说是一个巨大的挑战，大部分情况下需要基于多次重训练探索得到，无形之中反而增加了计算消耗。此外，Fast对抗训练与标准的对抗训练方法相比，鲁棒性有一定程度的下降（虽然比其他加速方法已经好很多）。抛开这些不足，Fast对抗训练的提出对大规模高效对抗训练起到了极大的推动作用。
+
+**周期迁移对抗训练**\ ：此加速方法基于一个观察：在对抗训练过程中，两个相邻周期（epoch）的模型之间存在较高的对抗迁移性，即前一个周期生成的对抗样本在之后的周期里依然具有对抗性。基于这一特性，研究者提出了\ **基于迁移对抗样本的对抗训练**\ （Adversarial
+Training with Transferable Adversarial
+Examples，ATTA）方法，利用\ *周期可迁移对抗样本*\ 来累积对抗扰动，减少后续周期中生成对抗样本所需的扰动步数，从而达到加速训练的目的。ATTA算法在上一个训练周期里存下生成的对抗噪声以及随机剪裁或补齐的偏移量，然后在下一个训练周期中利用存下的对抗噪声进行攻击初始化，如此往复，直到模型训练结束。实验表明，ATTA可以在MNIST、CIFAR-10等小数据集上对PGD对抗训练达到12-14倍的加速，且能带来小幅的鲁棒性提升。虽然ATTA方法减少了对抗样本的构造时间，但是其需要存储大量的中间样本，带来了额外的数据I/O开销。此外，ATTA方法对数据增强比较敏感，由于两个周期之间存在增强随机性，所以需要针对数据增强做噪声对齐，也就很难应对复杂的数据增强算法，如Mixup和Cutout等。
+
+大规模对抗训练
+^^^^^^^^^^^^^^
+
+作为一种双层优化方法，对抗训练需要消耗高于普通训练数倍的算力。粗略估计，在ImageNet数据集上进行对抗训练需要消耗相当于小数据集CIFAR-10的1000倍算力，给开展相关实验带来巨大挑战。此外，ImageNet上的普通训练本身就比在CIFAR-10等小分辨率数据集上更加难收敛，带来进一步的挑战。这些挑战制约了对抗训练在大规模数据集上的研究，导致相关研究相对较少。由于大规模对抗训练可以提供鲁棒的预训练模型，大大推动领域的发展，所以我们在这里简单介绍几个在大规模对抗训练方面的研究工作。
+
+实际上，早在2016年Kurakin等人 :cite:`Kurakin17one-step`
+就在此方面进行了一定的研究。他们发现对抗训练中干净样本和对抗样本最好是进行1：1的配比（一半干净样本一半对抗样本），每个样本的扰动上限\ :math:`\epsilon`\ 最好是在一定范围内随机指定（而非固定不变）。经过对应的改进，Kurakin等人在ImageNet数据集上使用FGSM对抗训练成功地训练了一个Inception
+v3模型。但是我们知道，单步对抗训练所带来的鲁棒性是有限的。此外，前面介绍的对抗训练加速方法（如Fast）也基本都在ImageNet数据集上进行了验证，因为加速的主要目的是让大规模对抗训练成为可能。但是由于加速本身往往让精确的对抗梯度计算变为近似，所以鲁棒性往往达不到标准（未加速）对抗训练的水平。
+目前，在ImageNet上的标准对抗训练工作主要包括\ *特征去噪对抗训练*\ （Feature
+Denoising Adversarial Training，FDAT） :cite:`xie2019feature`
+、\ *局部线性正则化训练*\ （Local Linearity Regularization，LLR）
+:cite:`qin2019adversarial` 、\ *平滑对抗训练*\ （Smooth Adversarial
+Training，SAT） :cite:`xie2020smooth` 等。
+
+**特征去噪对抗训练**\ ：特征去噪的概念与输入去噪类似，不过是在特征空间进行，通过一些过滤操作将对抗噪声在特征空间中移除掉。在FDAT工作中，研究者测试了四种去噪操作（在残差网络的残差块之后添加），包括\ *非局部均值*\ （non-local
+mean）、\ *双边滤波器*\ （bilateral filter）、\ *均值滤波器*\ （mean
+filter）和\ *中值滤波器*\ （median
+filter）。其中，非局部均值去噪定义如下：
+
+.. math:: \hat{f^l_{i}} = \frac{1}{{\mathcal{C}}(f^l)}\sum_{\forall j \in {\mathcal{S}}} \omega(f^l_i,f^l_j)\cdot ft_j
+
+其中，\ :math:`f^l`\ 表示神经网络第\ :math:`l`\ 层的特征输出；\ :math:`\omega`\ 是与特征\ :math:`f^l_i`\ 和\ :math:`f^l_j`\ 相关的权重函数；特征\ :math:`f^l_i`\ 和\ :math:`f^l_j`\ 对应特征图上的两个位置；\ :math:`{\mathcal{C}}(f^l)`\ 是一个归一化函数；\ :math:`{\mathcal{S}}`\ 表示整个特征空间（所有维度集合）。上式是对\ :math:`i`-维特征做全局的加权特征融合。研究发现，基于softmax加权平均的非局部均值操作可以带来最优的鲁棒性，加权函数定义如下：
+
+.. math:: \omega(f^l_i,f^l_j) = \exp\left(\frac{1}{\sqrt{d}}\Phi_1(f^l_i),\Phi_2(f^l_j)\right)
+
+其中，\ :math:`\Phi_1`\ 和\ :math:`\Phi_2`\ 是特征的两个嵌入版本（通过两个\ :math:`1 \times 1`\ 的卷积操作获得）；\ :math:`d`\ 是通道个数；\ :math:`{\mathcal{C}}(f^l)= \sum_{\forall j \in {\mathcal{S}}} \omega(f^l_i,f^l_j)`\ ；\ :math:`\omega(f^l_i,f^l_j)/{\mathcal{C}}(f^l_i)`\ 则为softmax函数。
+
+通过进一步将特征去噪与PGD对抗训练结合，FDAT对抗训练方法将ImageNet上的PGD-10鲁棒性从27.9%提高到了55.7%，在防御2000步的PGD攻击（PGD-2k）时也取得了42.6%的鲁棒性。
+
+**局部线性正则化**\ ：此对抗训练方法（LLR）通过显式地约束训练样本周围的损失景观使其更线性化，以此来避免对抗训练中存在的梯度阻断（gradient
+obfuscation）问题 :cite:`qin2019adversarial`
+。LLR对抗训练与常规对抗训练算法不同，定义如下：
+
+.. math:: \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \in D} \left[ \mathcal{L}_{CE}(f({\boldsymbol{x}}),y) + \underset{LLR}{\underbrace{\lambda\gamma(\epsilon,{\boldsymbol{x}}) + \mu|{\boldsymbol{r}}_{LLR}^{\top}\nabla_{{\boldsymbol{x}}}\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)|}}\right]
+
+其中，\ :math:`\gamma(\epsilon,{\boldsymbol{x}})=|\mathcal{L}_{CE}(f({\boldsymbol{x}}+{\boldsymbol{r}}_{LLR}),y) - \mathcal{L}_{CE}(f({\boldsymbol{x}}),y) -{\boldsymbol{r}}_{LLR}^{\top}\nabla_{{\boldsymbol{x}}}\mathcal{L}_{CE}(f({\boldsymbol{x}}),y) |`\ 基于损失在样本\ :math:`{\boldsymbol{x}}`\ 附近的泰勒展开定义了\ :math:`{\boldsymbol{x}}`\ 周围损失景观的线性程度；\ :math:`{\boldsymbol{r}}_{LLR}=\mathop{\mathrm{arg\,max}}_{{\lVert {\boldsymbol{r}} \rVert}_p \leq \epsilon} |\mathcal{L}_{CE}(f({\boldsymbol{x}}+{\boldsymbol{r}}_{LLR}),y) - \mathcal{L}_{CE}(f({\boldsymbol{x}}),y) -{\boldsymbol{r}}_{LLR}^{\top}\nabla_{{\boldsymbol{x}}}\mathcal{L}_{CE}(f({\boldsymbol{x}}),y) |`\ 是\ :math:`{\boldsymbol{x}}`\ 周围最坏情况的扰动（即对抗扰动）；\ :math:`\lambda`\ 和\ :math:`\mu`\ 是两个超参数。其中，涉及到\ :math:`{\boldsymbol{r}}_{LLR}`\ 的部分仍然需要PGD攻击算法求解，但是需要的步数比PGD对抗训练更少（比如两步PGD），为了帮助线性正则化，激活函数也由ReLU替换成了softplus函数（\ :math:`\log(1 + \exp(x))`\ ）。LLR对抗训练在ImageNet上对无目标PGD攻击的鲁棒性达到了47%（\ :math:`\epsilon=4/255`\ ），而此鲁棒性也在AutoAttack
+:cite:`croce2020autoattack` 的评估实验中也得到了确认。
+
+**平滑对抗训练**\ ：此外，研究发现普遍使用的ReLU激活函数并不利于对抗鲁棒性
+:cite:`xie2020smooth`
+，而训练更鲁棒的神经网络需要更平滑的激活函数。基于此，研究者提出了\ *平滑对抗训练*\ （Smooth
+Adversarial
+Training，SAT）方法，对ReLU激活函数进行平滑近似，即将ReLU替换为softplus
+:cite:`nair2010rectified` 、SILU :cite:`ramachandran2017searching`
+、GELU （Gaussian error linear unit） :cite:`hendrycks2016gaussian`
+和ELU（exponential linear unit） :cite:`clevert2015fast`
+。其中，SILU取得了最优的鲁棒性，其定义如下：
+
+.. math:: SILU(x) = x\cdot\sigma(x)
+
+通过简单的激活函数替换，SAT几乎以“零代价”提高了对抗鲁棒性，而且对小模型和大模型都适用，在ImageNet上训练大模型EfficientNet-L1
+:cite:`tan2019efficientnet`
+取得了58.6%的鲁棒性。值得注意的是这里的对抗训练使用的是单步的Fast对抗训练，扰动上限为\ :math:`\epsilon=4/255`\ 。
+
+对抗蒸馏
+~~~~~~~~
+
+**知识蒸馏**
+是一种广泛使用的性能提升技术，其主要思想是借助教师模型（一般是大模型）来提升学生模型（一般是小模型）的泛化性能
+:cite:`hinton2015distilling`
+，往往优于从头训练的学生模型。知识蒸馏技术已被应用于对抗防御，一方面用来提升模型的对抗鲁棒性，另一方面用来更好地进行准确率-鲁棒性权衡。此外，对抗训练往往需要更大的模型，这制约了其在资源受限场景下的应用，因此如何使用鲁棒预训练的大模型蒸馏得到鲁棒的小模型也是一个研究热点。下面简单介绍两个基于知识蒸馏的对抗防御方法。
+
+对抗鲁棒蒸馏
+^^^^^^^^^^^^
+
+在对抗训练领域，研究者发现当一个模型具有鲁棒性时，仅仅利用自然样本进行蒸馏便可训练出具有一定鲁棒性的学生模型
+:cite:`goldblum2020adversarially` 。 **对抗鲁棒蒸馏** (adversarially
+robust distillation， ARD)方法 :cite:`goldblum2020adversarially`
+便是基于此观察，将教师模型的对抗鲁棒性迁移到学生模型中，以此来提升学生模型的鲁棒性。ARD优化框架定义如下：
+
+.. math:: \begin{aligned}& \min_{\theta_{S}} \mathbb{E}_{({\boldsymbol{x}},y) \in D}\left[(1-\alpha)\mathcal{L}_{CE}(S^{\tau}({\boldsymbol{x}}),y) + \alpha\tau^{2} \mathcal{L}_{KL}(S^{\tau}({\boldsymbol{x}}_{adv}),T^{\tau}({\boldsymbol{x}}))\right] \\& {\boldsymbol{x}}_{adv} = \mathop{\mathrm{arg\,max}}\limits_{{\lVert {\boldsymbol{x}}'-{\boldsymbol{x}} \rVert}_p\leq\epsilon} \mathcal{L}_{CE}(S({\boldsymbol{x}}'),T({\boldsymbol{x}}))\end{aligned}
+   :label: eq_ard
+
+其中，\ :math:`T({\boldsymbol{x}})`\ 和\ :math:`S({\boldsymbol{x}})`\ 分别为教师和学生模型；\ :math:`{\boldsymbol{x}}_{adv}`\ 为\ :math:`{\boldsymbol{x}}`\ 的对抗样本，\ :math:`\tau`\ 为蒸馏温度，\ :math:`\alpha`\ 为平衡准确率和鲁棒性的超参数。
+
+上式中，第一个损失项是在干净样本上定义的分类损失项，第二项为鲁棒性蒸馏损失项。其中在内部最大化过程中，ARD依然使用PGD算法配合交叉熵损失函数\ :math:`\mathcal{L}_{CE}`\ 来生成对抗样本。相比较从头训练，ARD方法不仅可以使学生网络具有高精度的自然准确率还会有较好的鲁棒性。
+
+鲁棒软标签对抗蒸馏
+^^^^^^^^^^^^^^^^^^
+
+实际上，所有对抗训练方法都可以看做是对抗性蒸馏算法，比如PGD对抗训练、TRADES、MART等都可以看作是一种\ *自蒸馏*\ （单模型相当于自己蒸自己）的训练方式。通过从蒸馏的角度比较分析现有对抗训练和蒸馏方法，研究者发现\ *鲁棒软标签*\ 的使用可以提升鲁棒性，并基于此提出了\ **鲁棒软标签对抗蒸馏**\ （Robust
+Soft Label Adversarial Distillation，RSLAD）方法
+:cite:`zi2021revisiting`
+。RSLAD使用鲁棒教师模型的概率输出来提高学生模型的鲁棒性，优化框架定义如下：
+
+.. math:: \begin{aligned}& \min_{\theta_S} \mathbb{E}_{({\boldsymbol{x}},y) \in D} \left[ (1-\alpha) \mathcal{L}_{KL}(S({\boldsymbol{x}}),T({\boldsymbol{x}})) +\alpha \mathcal{L}_{KL}(S({\boldsymbol{x}}_{adv}),T({\boldsymbol{x}})) \right] \\& {\boldsymbol{x}}_{adv} = \mathop{\mathrm{arg\,max}}_{{\lVert {\boldsymbol{x}}'-{\boldsymbol{x}} \rVert}_p\leq\epsilon} \mathcal{L}_{KL}(S({\boldsymbol{x}}'),T({\boldsymbol{x}}))\end{aligned}
+   :label: eq_rsad
+
+其中，
+:math:`T({\boldsymbol{x}})`\ 和\ :math:`S({\boldsymbol{x}})`\ 分别是教师和学生模型；算法通过固定\ :math:`\tau=1`\ 取消了蒸馏温度超参。
+
+与ARD不同，RSLAD使用KL散度损失来生成对抗样本，相当于将ARD基于硬标签的交叉熵损失替换成了基于软标签的KL散度。类似地，RSLAD的外部最小化也将两个损失项（分类损失和蒸馏损失）全部替换成了KL散度。
+实验表明，使用RSLAD可以使得学生模型获得良好的鲁棒性和泛化力。
+此外，\ **内省对抗蒸馏**\ （Introspective Adversarial
+Distillation，IAD）方法 :cite:`zhu2021reliable`
+允许学生模型有选择性地信任教师模型输出的软标签。
+:numref:`fig_adv_distill`
+从对抗鲁棒性蒸馏的角度分析比较了不同算法所使用的监督信息（软标签还是硬标签），以及自然样本和对抗样本在整个蒸馏框架中的不同参与方式。
+
+总体来说，对抗蒸馏方法需要一个鲁棒预训练的大教师模型，可惜的是受制于对抗训练的效率瓶颈，目前领域内可用的鲁棒大模型很少，这阻碍了对抗蒸馏技术的进一步发展。
+
+.. _fig_adv_distill:
+
+.. figure:: images/7.9_adv_distill.png
+   :width: 900px
+
+   蒸馏视角下的对抗训练算法TRADES、MART以及鲁棒性蒸馏算法ARD、IAD和RSLAD
+   :cite:`zi2021revisiting`
+
+
+
+.. _sec_other-adv-defenses:
+
+输入防御
+~~~~~~~~
+
+
+除了前面介绍的几种主流防御方法以外，近年来也陆续提出了一些输入空间的防御方法，包括输入去噪、输入压缩、输入变换、输入修复等。下面将介绍这几种输入空间的防御方法。
+
+输入去噪
+^^^^^^^^
+
+输入去噪将对抗噪声视为一种特殊的噪声，尝试使用去噪方法将其从对抗样本中移除，以还原干净的样本。此方面一个代表性的工作是\ **高层表征去噪**\ （High-level
+Representation Guided Denoiser, HGD）方法 :cite:`liao2018defense`
+。HGD通过最小化对抗样本与自然样本之间的去噪输出差异来移除对抗噪声。
+在去噪模型选择方面，HGD使用U-net结构 :cite:`ronneberger2015u`
+改进了自编码器，并提出了专用的\ *去噪U-net模型*\ （DUNET）。在损失函数方面，HGD使用模型在第\ :math:`l`\ 层的特征输出差异作为损失函数：\ :math:`\mathcal{L}=\norm{f^l({\boldsymbol{x}}_{\text{rec}})-f^l({\boldsymbol{x}})}`\ ，其中\ :math:`{\boldsymbol{x}}_{\text{rec}}`\ 是重建样本。根据第\ :math:`l`\ 层的不同选择，又可以分为\ *像素指导去噪*\ （pixel
+guided denoiser）、\ *特征指导去噪*\ （feature guided
+denoiser）、\ *逻辑指导去噪*\ （logits guided denoiser）以及
+*类别标签指导去噪*\ （class label guided
+denoiser），其中后三种去噪损失中的监督信息来自于模型深层的高级表征，所以统称为HGD。在这四种去噪方法中，\ *逻辑指导去噪*\ 可以更好地权衡自然准确率和对抗鲁棒性。
+
+输入压缩
+^^^^^^^^
+
+输入压缩的思想是通过压缩技术将对抗噪声破坏掉。
+**JPEG压缩**\ 是一种常用的图像数据压缩技术，可以移除图像局部区域内的高频信息，从而去除对抗噪声
+:cite:`das2017keeping`
+。JPEG压缩防御的特点为：（1）\ *计算快*\ ，不需要单独训练去噪模型；（2）\ *不可微*\ ，可以阻止基于反向传播的针对性对抗攻击。
+当然，我们也可以训练一个端到端的图像压缩模型来执行压缩操作，代表性的方法为\ **ComDefend**
+:cite:`jia2019comdefend`
+。ComDefend压缩模型主要由两部分组成：（1）压缩卷积神经网络（ComCNN）和（2）重建卷积神经网络(RecCNN)。
+其中，ComCNN用于获得输入图像的结构化信息并去除对抗噪声，而RecCNN则用于重建原始图像。ComDefend防御的特点是：(1）可以保持较高的自然准确率和不错的鲁棒性；（2）可以与其他防御方法结合，进一提高模型的鲁棒性。
+
+输入变换
+^^^^^^^^
+
+由于图像分类模型往往对自然噪声、随机噪声以及一些输入变换鲁棒，因此可以利用这种先天的鲁棒性来破坏掉对抗噪声的攻击性。比如，基于\ **像素偏转**\ （pixel
+deflection）的防御方法 :cite:`prakash2018deflecting`
+通过重新分配像素值，强制输入图像匹配自然图像的统计规律，从而可以利用模型自身的鲁棒性来抵御对抗攻击。具体的操作步骤为：
+
+1. 生成输入图像的\ *类激活图*\ （Class Activation Map，CAM）。
+2. 从图像中采样一个像素位置\ :math:`({\boldsymbol{x}}_1,{\boldsymbol{x}}_2)`\ ，并获得该像素的归一化激活图值。
+3. 从均匀分布
+   :math:`{\mathcal{U}}(0, 1)`\ 中随机采样一个值，如果归一化激活图值低于采样的随机值，则进行像素偏转。
+
+重复上述操作\ :math:`K`\ 次，可以得到一个破坏了对抗噪声的图像。
+
+此外，可以通过以下步骤对破坏了对抗噪声的图像进行恢复：(1）将图像转换为\ :math:`YC_{b}C_{r}`\ 格式；(2）使用离散小波变换将图像投影到小波域中；(3）使用BayesShrink
+:cite:`chang2000adaptive`
+对小波进行软阈值处理；(4）计算收缩小波系数的逆小波变换；(5）将图像转回RGB格式。像素偏转防御方法对简单的对抗攻击比较有效，但不能防御更强大的对抗攻击。
+
+除了随机偏转，还可以通过随机大小调整、随机填充等其他随机操作完成对对抗噪声的破坏
+:cite:`xie2018mitigating`
+。比如，\ *随机大小调整*\ 将输入图像调整为随机大小，而\ *随机填充*\ 则以随机方式在输入图像周围填充零。
+实验表明，这些随机化操作都有一定的防御效果。这些变换方法都比较简单、容易实现、效率高、且可以组合使用。比如，先将输入图像\ :math:`{\boldsymbol{x}}`\ 由大小\ :math:`W\times H \times3`\ 缩放至\ :math:`W'\times H'\times 3`\ ，同时保证缩放后的尺寸在一个合理的范围内；然后，将缩放后的图像随机补零，使其尺寸达到\ :math:`W''\times H''\times3`\ ；最后，使用变换后的图像进行推理。
+但是，此类防御方法一般对基于EOT的针对性攻击并不鲁棒。
+
+输入修复
+^^^^^^^^
+
+此类防御方法借助生成模型或者编辑模型对输入图像进行全图或者部分修复，从而在破坏掉对抗噪声的前提下，保持图像内容不变。比如，\ **Defense-GAN**
+:cite:`samangouei2018defense`
+方法基于生成对抗网络生成自然图像来替代对抗样本（实际上是替代所有测试样本，因为并不确定哪些是对抗样本），从而使模型免受对抗噪声的干扰。
+其首先训练一个生成器\ :math:`G`\ ，以随机向量为输入，输出自然样本；然后在推理阶段通过采样不同的随机向量生成一批“自然”样本，通过寻找与测试样本最近的生成样本进行推理。得到的生成器可服务于相同任务上的任意分类模型，且可以与其他防御方法相结合。但是此方法需要在原始训练数据集上单独训练一个生成对抗网络，而且模型的最终性能取决于生成对抗网络生成的数据与原数据的接近程度，所以具有很大程度的不可控性。
+
+为了避免全图替换所带来的性能下降，我们还可以对图像做局部修改。通过
+图像修复（image inpainting）模型只对输入图像的关键区域进行重建和去噪
+:cite:`gupta2019ciidefence` 。
+其中，关键修复区域可以基于\ *类激活图*\ （CAM）进行排名和选择，此方法被命名为\ **CIIDefence**\ （Class-specific
+Image Inpainting
+Defence）。在图像修复之前，CIIDefence还进行了小波去噪操作，因为修复操作容易导致模型的注意力向非修复区域转移，这些区域也同样需要防御。
+为了进一步阻断反向传播，CIIDefence将小波去噪和图像修复组合成一个不可微的层。值得注意的是，这里图像修复模型也是一个生成对抗网络。实验表明，CIIDefence也可以正确识别经过不同攻击算法产生的对抗样本，还可以有效的防止BPDA
+:cite:`athalye2018obfuscated` 等先进的针对性攻击方法。
+与此同时，其缺点也十分明显：（1）步骤繁琐，需要多步才能完成，存在效率问题；（2）需要精准选择修复区域，依然存在不可控性；（3）对图像的大小有着一定的要求，不适合低分辨率的图像。
+
+.. _sec_poisoning defense:
+
+投毒防御
+--------
+
+
+**“数据有问题，算法来补救”**\ 。应对数据投毒最直接的一种防御方法就是鲁棒训练，即提高训练算法自身的鲁棒性，使其能够在训练过程中检测并抛弃毒化样本，从而避免模型被攻击。可惜的是此方面的研究工作并不是很多。很多时候，我们并不知道数据是否被投毒，也无法估计被投毒的比例，亦或哪些样本被投毒，所以很难设计高效的鲁棒训练方法。但随着大规模预训练的流行，此类的鲁棒训练算法将会变得格外重要。
+
+干净样本选择
+~~~~~~~~~~~~
+
+投毒数据是有问题数据的一种，其他的\ *问题数据*\ 包括噪声标签（标签存在错误）、污染数据（一个数据集里出现了别的数据集的样本）等。研究者研究了这三类数据在模型训练过程各种的损失下降规律，得出结论：\ *“好”的数据往往学得更快，训练损失下降更快*
+:cite:`shen2019learning`
+。因此，可以根据这个观察在训练过程中自动选择“干净样本”，让模型只在“干净样本”上学习。这可以通过一种\ **修剪损失**\ （trimmed
+loss）来完成，对应的优化问题如下：
+
+.. math:: \mathop{\mathrm{arg\,min}}_{\theta \in \mathfrak{B}} \min_{S: |S|=\lfloor\alpha n\rfloor} \sum_{({\boldsymbol{x}},y) \in S} \mathcal{L}({\boldsymbol{x}},y)
+   :label: eq_trimmed_loss
+
+其中，\ :math:`\mathfrak{B}`\ 表示模型的\ *紧致参数空间*\ （compact
+parameter
+space），比原参数空间要小，\ :math:`S`\ 是内层最小化问题寻找到的样本子集，也就是训练损失最小的\ :math:`\lfloor\alpha n\rfloor`\ 个样本，\ :math:`\alpha`\ 是比例，\ :math:`n`\ 是原训练集样本数量。可以看出这是一个min-min双层优化问题，内部最小化问题寻找一部分损失最小的样本子集，然后在这个样本子集上训练得到干净的模型。
+此方法采取的是类似一种“核心集”选择的策略，如果丢弃的样本足够多，则有很高置信度保持数据的纯净度，因为毕竟有问题的数据只占少部分。实验证明，此方法在处理上述三类问题数据时取得了不错的效果，其中数据投毒部分测试的是简单的后门攻击BadNets
+:cite:`chan2022baddet` 。
+
+深度划分聚合
+~~~~~~~~~~~~
+
+此外，由于投毒样本往往只占训练数据的一小部分，那么这些样本就可以通过合理的\ *数据划分*\ （data
+partition）隔离出来。也就是说，如果我们将训练数据集划分成一定数量的子集，那么通过巧妙设计子集的大小就可以让划分得到的子集大部分都是干净子集（即不包括任何投毒样本）。那么我们在干净子集上训练得到的模型就都是干净模型。在确保大部分模型是干净模型的情况下，我们就可以采用投票的策略让个别投毒模型的决策给投掉。\ **深度划分聚合**\ （Deep
+Partition Aggregation，DPA）就是基于数据划分的一种防御方法。
+
+具体地，令
+:math:`{\mathcal{S}}_L:=\{({\boldsymbol{x}},c)|{\boldsymbol{x}} \in {\mathcal{S}},c\in {\mathbb{N}} \}`
+为有类标的样本集，\ :math:`{\mathcal{S}}`\ 为无类标的样本空间。模型的训练数据集可表示为：\ :math:`{\mathcal{T}}\in {\mathcal{P}}({\mathcal{S}}_L)`\ ，其中
+:math:`{\mathcal{P}}({\mathcal{S}}_L)` 是集合 :math:`{\mathcal{S}}_L`
+的幂集。对于 :math:`{\boldsymbol{t}}\in {\mathcal{S}}_L`\ ，令
+:math:`\boldsymbol{sample}({\boldsymbol{t}})\in {\mathcal{S}}_L`
+为数据样本，\ :math:`\boldsymbol{label}({\boldsymbol{t}})\in {\mathbb{N}}`\ 为标签。一个分类模型被定义为由有标签的训练集和无（待定）标签的数据集共同确定的函数：\ :math:`f:{\mathcal{P}}({\mathcal{S}}_L) \times {\mathcal{S}}\to {\mathbb{N}}`\ 。令
+:math:`f(\cdot)` 表示（不鲁棒的）基分类模型，\ :math:`g(\cdot)`
+表示鲁棒的分类模型。 DPA算法需要一个哈希函数
+:math:`h:{\mathcal{S}}_L\to {\mathbb{N}}`\ 和超参数
+:math:`k\in {\mathbb{N}}`\ 表示用于集成的基本分类器个数。在训练阶段，DPA首先用哈希函数将训练集
+:math:`{\mathcal{T}}`\ 划分为 :math:`k`\ 个子集，分别为
+:math:`P_1,\cdots,P_k\in {\mathcal{T}}`\ ：
+
+.. math:: P_i:=\{{\boldsymbol{t}}\in {\mathcal{T}}|h({\boldsymbol{t}})\equiv i \ (\text{mod} \ k)\}
+
+在选择哈希函数\ :math:`h(\cdot)`\ 时，最好可以使各子集的大小一致。对于图像数据，\ :math:`h({\boldsymbol{t}})`\ 为图像\ :math:`{\boldsymbol{t}}`\ 的像素值之和。基于子集划分，我们可以在每个子集训练一个基分类器，定义如下：
+
+.. math:: f_i({\boldsymbol{x}}):=f(P_i,{\boldsymbol{x}})
+
+在推理阶段，我们可以用每个基分类器进行预测，并统计有多少个基分类器将输入样本分类为\ :math:`c`\ ：
+
+.. math:: n_c({\boldsymbol{x}}):=|\{ i\in[k]|f_i({\boldsymbol{x}})=c  \}|
+
+最终，DPA选择大部分基分类器都同意的类别作为其鲁棒预测类别：
+
+.. math:: g_{\text{dpa}}({\mathcal{T}},{\boldsymbol{x}}):= \mathop{\mathrm{arg\,max}}\limits_{c} n_c({\boldsymbol{x}})
+
+**反后门学习**\ ：近期的研究工作系统研究了十种后门投毒攻击，发现了跟之前的工作
+:cite:`shen2019learning`
+不太一样的结论：\ *后门投毒样本往往被学习得更快而不是更慢*
+:cite:`2021Anti`
+。这主要是因为后门攻击需要在触发器样式和后门类别之间建立强关联，而这种强关联使得后门样本损失下降得更快。此前的研究因为涉及到噪声和污染数据，所以得到的结论有所不同。
+基于此观察，研究者提出一个鲁棒的训练算法“**反后门学习**”（Anti-Backdoor
+Learning，ABL），在训练过程中检测和隔离有毒样本，然后通过反学习技术进一步将这些样本从模型中反学习掉。
+ABL方法是一个经典的后门防御算法，将会在后续章节
+:numref:`sec_backdoor_removal`
+进行详细的介绍，这里简单描述一下它的主要思想。
+
+ABL将模型训练分为两个阶段，在第一阶段通过\ *局部梯度上升*\ （Local
+Gradient
+Ascent，LGA）技术检测和隔离投毒样本，在第二个阶段通过\ *全局梯度上升*\ （Global
+Gradient
+Ascent，GGA）技术对隔离出来的投毒样本进行反学习。局部梯度上升通过约束训练样本的损失下限来阻止干净样本产生过低的训练损失，而后门样本由于其强关联性会突破这个限制，依然产生更低的损失。所以局部梯度上升相当于一个筛子，将后门样本过滤出来。第二阶段的全局梯度上升通过最大化模型在所检测投毒样本子集上的损失来\ **反学习**\ 掉后门触发器。这最后一步反学习是有必要的，因为当投毒样本被检测出来的时候也就意味着模型已经学习到了后门（因为否则就无法知道某个样本是不是后门样本）。
+
+有效毒药检测
+~~~~~~~~~~~~
+
+实际上，攻击者在投毒时往往都会多投毒一些样本来保证成功率。基于此观察，研究者提出了\ **有效毒药**\ （effective
+poisons） :cite:`yang2022not`
+的概念，用来指代起到关键投毒作用的一个有毒样本子集。研究发现，有效毒药并不是决策边界附近的投毒样本，也不是（比同类样本）具有更高损失的投毒样本，但它们都会触发独特的梯度轨迹，而且不同的攻击算法的梯度轨迹不一样。
+在训练过程中，随着有效毒药和目标类别之间梯度相似度的提高，有效毒药的梯度信息也会变得明显有别于干净样本。因此，在训练的早期，可以在梯度空间中把有效毒药的梯度孤立出来，如借助K-medoids聚类算法，成为防御投毒攻击的主要突破口。
+
+虽然投毒样本跟干净样本必然存在一定的不同之处，但是精心设计的投毒样本可以模仿干净样本，绕过现有的鲁棒训练算法的检测。所以，现有的投毒攻击算法和鲁棒训练算法都存在很大的改进空间。此外，数据投毒是一种实现起来充满挑战的攻击，需要通过将有毒数据上传到互联网上来间接攻击，而且还要绕过数据收集器的过滤器。在这种复杂的设定下，想要真正弄清楚数据投毒和防御的实际风险和有效性并不容易。想做此方面研究的读者，可以先考虑如何做一个容易实施的数据投毒攻击。
+
+.. _sec_backdoor defense:
+
+后门防御
+--------
+
+
+高效地防御多种后门攻击是一个极具挑战性的任务。一方面，不同后门攻击方法的工作机理可能并不相同，想要把握它们的共性具有一定的难度；另一方面设计后门防御策略需要同时考虑多种攻击，通用性比较难实现。目前针对后门攻击的防御策略主要有三种：（1）\ **后门模型检测**\ 、（2）\ **后门样本检测**\ 和（3）\ **后门触移除**\ 。目前，这三类防御方法紧密相关又相对独立，各自完成一个子任务。本节将对这三类方法展开介绍。此外，本节还将介绍联邦后门防御方法。
+
+.. _sec_backdoor_model_detection:
+
+后门模型检测
+~~~~~~~~~~~~
+
+
+后门模型检测的目标是判断一个给定模型是否包含后门触发器，可以根据模型在某种情况下展现出来的\ *后门行为*\ 来判断。所以后门模型检测就等于后门行为检测。
+
+神经净化
+^^^^^^^^
+
+神经净化（Neural Cleanse，NC） :cite:`wang2019neural`
+是一种通过逆向后门触发器来检测后门模型的方法。该方法假设防御者知晓模型的所有信息，包括模型参数、模型结构等等；此外，防御者还拥有一些可以在该模型下进行正常预测的输入样本。
+该方法的核心出发点是：\ *相较于正常类别，改变后门类别所需要的扰动往往更少*\ 。因此，NC对所有输出类别进行最小像素规模的\ *标签扰动*\ ，结合\ *离群点检测*\ 方法识别潜在的后门类别，然后利用逆向工程技术重建后门触发器。
+
+具体地，在后门模型检测阶段，NC方法将后门触发器的注入定义为：
+
+.. math:: & {\mathcal{A}}({\boldsymbol{x}},{\boldsymbol{m}},\Delta) = {\boldsymbol{x}}^{'} \\& {\boldsymbol{x}}_{i,j,c}^{'} = (1-{\boldsymbol{m}}_{i,j}) \cdot {\boldsymbol{x}}_{i,j,c} + {\boldsymbol{m}}_{i,j} \cdot \Delta_{i,j,c}
+   :label: eq_nc_optimize
+
+其中，\ :math:`{\mathcal{A}}(\cdot,\cdot,\cdot)`\ 表示将后门触发器\ :math:`\Delta`\ 通过掩码\ :math:`{\boldsymbol{m}}`\ 注入到原始图片\ :math:`{\boldsymbol{x}}`\ 中的算法（\ :math:`\Delta, {\boldsymbol{x}} \in {\mathbb{R}}^{h \times w \times c}`\ ，\ :math:`h, w, c`\ 分别表示图片的高度、宽度和通道数)。掩码\ :math:`{\boldsymbol{m}} \in {\mathbb{R}}^{h \times w}`\ ，表示对单一像素位置处的不同通道使用相同的掩码。注意，\ :math:`{\boldsymbol{m}}_{i,j} \in [0, 1]`\ ，若\ :math:`{\boldsymbol{m}}_{i,j}=1`\ ，则表示将\ :math:`{\boldsymbol{x}}`\ 中对应位置的像素替换为\ :math:`\Delta`\ 中对应的像素，若\ :math:`{\boldsymbol{m}}_{i,j}=0`\ ，则保持\ :math:`{\boldsymbol{x}}`\ 中像素不变。这里，\ :math:`{\boldsymbol{m}}`\ 的连续性定义将有利于后续对\ :math:`\Delta`\ 的优化。
+对后门触发器\ :math:`\Delta`\ 的重建可以使用\ *有目标对抗攻击*\ 方法，即生成\ :math:`\Delta`\ 以使得\ :math:`{\boldsymbol{x}}`\ 被模型\ :math:`f`\ 预测为目标类别\ :math:`y_t`\ 。此外，假设实际中的后门触发器尺寸较小（这是一个不那么合理的假设），还应该对重建后门触发器的大小进行限制。综合两种优化目标，我们可以得到
+
+.. math:: \mathop{\mathrm{arg\,min}}_{{\boldsymbol{m}}, \Delta} \; \mathbb{E}_{{\boldsymbol{x}}\in X} \left[ \mathcal{L}_{CE}(y_t, f({\mathcal{A}}({\boldsymbol{x}},{\boldsymbol{m}},\Delta))) + \lambda \cdot {\lVert {\boldsymbol{m}} \rVert}_1\right]
+   :label: eq_detect_object
+
+其中，\ :math:`\mathcal{L}_{CE}(\cdot)`\ 表示交叉熵分类损失函；\ :math:`{\lVert {\boldsymbol{m}} \rVert}_1`\ 表示掩码的\ :math:`L_1`\ 范数以鼓励\ :math:`{\boldsymbol{m}}`\ 的稀疏性，生成更小的后门触发器；\ :math:`\lambda`\ 为超参数；\ :math:`X`\ 表示所有正确分类的样本集。可见，该目标函数在所有正确分类的样本上，通过最小化包含后门触发器的样本与目标类别的分类损失，同时限制后门触发器的大小来重建\ *尺寸小*\ 且满足\ *错误分类*\ 的后门触发器。该方法对每个类别轮流作为\ :math:`y_t`\ ，来重建后门触发器。
+
+基于投毒类别更易于进行有目标攻击的假设，可以根据重建的触发器的样式和大小筛选出\ *后门类别*\ 。定义逆向得到的每个类别对应的潜在触发器的\ :math:`L_1`\ 范数为\ :math:`L=\{L^1, L^2, ..., L^C\}`\ ，其中\ :math:`C`\ 表示所有类别的数量。那么，可利用\ *中位绝对偏差*\ （Median
+Absolute Deviation，MAD）指标 :cite:`hampel1974influence`
+来衡量离群点，即：
+
+.. math:: \tilde{L} &= \text{median}(L) \\MAD &= \text{median}({\lVert L^i - \tilde{L} \rVert}_1)
+   :label: eq_MAD_one
+
+其中，\ :math:`\text{median}(\cdot)`\ 表示取中位数。在得到MAD后，一个类别的异常分数可定义为：
+
+.. math:: I_i = \frac{{\lVert L^i - \tilde{L} \rVert}_1}{MAD}
+   :label: eq_MAD_two
+
+那么对于所有类别，我们可以得到\ :math:`I = \{I_1, I_2, ..., I_n\}`\ 来表示每个类别的异常指标。在假设\ :math:`I`\ 为标准正态分布\ :math:`\mathcal{N}(0, 1)`\ 的前提下，我们需要使用
+
+.. math:: I_i = \frac{1}{\Phi^{-1}(\frac{3}{4})} \cdot I_i \approx 1.4826 \cdot I_i
+   :label: eq_MAD_three
+
+将其异常指标放大到与正态分布样本相同的尺度上，作为标准正态分布的\ *一致估计量*\ （consistent
+estimator），其中\ :math:`\Phi`\ 表示标准正态分布的累积分布函数(CDF)。因此，当\ :math:`I_i > 1.96\sigma`\ 时有大于95%的概率此类别为离群点，由于为标准正态分布，所以\ :math:`I_i > 1.96`\ 。实际上，NC方法直接使用\ :math:`I_i > 2`\ 作为阈值条件来检测后门类别。
+
+上述检测过程需要对每一个类别进行后门触发器的重建，在类别数量很大时会产生很大的计算开销。对此，可降低式
+:eq:`eq_detect_object`
+的优化迭代次数，先得到一个较为粗糙的重建后门触发器，然后对所有类别进行初筛来降低怀疑为投毒类别的数目。
+
+深度检查
+^^^^^^^^
+
+深度检查（DeepInspect） :cite:`chen2019deepinspect`
+是一个针对Trojan攻击的防御方法，其建立了一种针对模型先验知识较少情况下的后门防御机制。相较于神经净化方法，DeepInspect仅需要模型的类别概率输出，无需训练数据集，因此实用性更高。为了解决没有输入数据的问题，该方法使用\ *模型逆向*\ （model
+inversion） :cite:`fredrikson2015model`
+技术，根据模型的所有输出类别重建了\ *替代数据集*\ 。
+然后，基于替代数据集训练一个\ *条件生成器*\ （conditional
+generator），以便快速生成不同类别的后门触发器。
+最后，该方法根据重建的后门触发器对所有的类别进行异常检测。如果发现后门类别，则使用对抗训练对模型进行修复。DeepInspect方法的检测步骤如下：
+
+**（1）替代数据集生成：**
+利用模型的反传梯度信息对全零初始化的输入进行优化，使当前输入的预测类别向指定目标靠近，目标函数为：
+
+.. math:: c({\boldsymbol{x}}) = 1-f({\boldsymbol{x}},y_t)+\text{AuxInfo}({\boldsymbol{x}})
+
+其中，\ :math:`{\boldsymbol{x}}`\ 为全零初始化的模型输入，\ :math:`f(\cdot)`\ 为输入\ :math:`{\boldsymbol{x}}`\ 预测为类别\ :math:`y_t`\ 的概率，\ :math:`\text{AuxInfo}({\boldsymbol{x}})`\ 表示针对输入\ :math:`{\boldsymbol{x}}`\ 可利用的其他辅助信息。通过最小化\ :math:`c({\boldsymbol{x}})`\ 以及计算\ :math:`c({\boldsymbol{x}})`\ 关于输入\ :math:`{\boldsymbol{x}}`\ 的梯度信息，并对\ :math:`{\boldsymbol{x}}`\ 进行迭代更新以降低\ :math:`c({\boldsymbol{x}})`\ 。模型逆向方法可使得\ :math:`{\boldsymbol{x}}`\ 被模型\ :math:`f`\ 预测为\ :math:`y_t`\ 类别的概率变大。由此，可针对不同类别生成替代数据集，并用于下一阶段条件生成器的训练。
+
+**（2）后门触发器重建：**
+使用模型\ :math:`f`\ 作为判别器\ :math:`{\mathcal{D}}`\ ，使用\ :math:`{\mathcal{G}}`\ 表示条件生成器，以噪声\ :math:`{\boldsymbol{z}}`\ 和类别\ :math:`y_t`\ 为输出，生成后门触发器\ :math:`\Delta`\ ，即\ :math:`\Delta={\mathcal{G}}({\boldsymbol{z}}, y_t)`\ 。为了能够让\ :math:`{\mathcal{G}}`\ 学习到后门触发器的分布，生成器\ :math:`{\mathcal{G}}`\ 生成的后门触发器应使得判别器\ :math:`{\mathcal{D}}`\ 发生错误的分类，即：
+
+.. math:: {\mathcal{D}}({\boldsymbol{x}} + {\mathcal{G}}({\boldsymbol{z}}, y_t)) = y_t
+
+这里的\ :math:`{\boldsymbol{x}}`\ 来自于上一阶段生成的替代数据集。
+因此，我们使用负对数似然损失（Negative Loss Likelihood,
+NLL）来衡量生成后门触发器的质量：
+
+.. math:: \mathcal{L}_{\Delta} = \mathbb{E}_{{\boldsymbol{x}}}[\mathcal{L}_{NLL}({\mathcal{D}}({\boldsymbol{x}}+\mathbf{g}{\mathcal{G}}({\boldsymbol{z}},y_t)), t)]
+
+此外，还要让后门样本\ :math:`{\boldsymbol{x}}+{\mathcal{G}}({\boldsymbol{z}},y_t)`\ 与原始输入\ :math:`{\boldsymbol{x}}`\ 无法区分，即增加对抗损失：
+
+.. math:: \mathcal{L}_{GAN} = \mathbb{E}_{{\boldsymbol{x}}}[\mathcal{L}_{MSE}({\mathcal{D}}_{prob}({\boldsymbol{x}}+{\mathcal{G}}({\boldsymbol{z}},y_t)), 1)]
+
+其中，\ :math:`\mathcal{L}_{MSE}`\ 表示\ **均方误差**\ （MSE），\ :math:`1`\ 代表原始输入\ :math:`{\boldsymbol{x}}`\ 在理想情况下的概率输出。
+
+除以上损失外，还应该对后门触发器的大小进行限制，因为这里同样假设大部分触发器的尺寸很小。DeepInspect使用\ :math:`{\lVert \rVert}_1`\ 对生成的后门触发器大小进行限制，即：
+
+.. math:: \mathcal{L}_{pert} = \mathbb{E}_{{\boldsymbol{x}}}\left[\max(0, {\lVert {\mathcal{G}}({\boldsymbol{z}},y_t) \rVert}_1 - \gamma)\right]
+
+其中，\ :math:`\gamma`\ 控制重建后门触发器\ :math:`L_1`\ 范数约束强度，当\ :math:`{\lVert {\mathcal{G}}({\boldsymbol{z}},y_t) \rVert}_1`\ 大于\ :math:`\gamma`\ 时，\ :math:`\mathcal{L}_{pert}={\mathcal{G}}({\boldsymbol{z}},y_t)||_1 - \gamma`\ ，否则\ :math:`\mathcal{L}_{pert}=0`\ 。
+
+综合以上三个损失，我们得到最终用于训练生成器\ :math:`{\mathcal{G}}`\ 的损失函数：
+
+.. math:: \mathcal{L} = \mathcal{L}_{\Delta} + \lambda_1 \mathcal{L}_{GAN} + \lambda_2 \mathcal{L}_{pert}
+
+其中，超参数\ :math:`\lambda_1`\ 和\ :math:`\lambda_2`\ 用来调节不同损失项的权重。通过调整超参数，可以保证由生成器\ :math:`{\mathcal{G}}`\ 生成的后门触发器具有95%以上的攻击成功率。
+
+**(3)
+异常检测：**\ 与NC方法类似，DeepInspect基于投毒类别的\ *重建后门触发器小于其他类别*\ 这一特点，使用\ *双中值绝对偏差*\ （Double
+Median Absolute
+Deviation，DMAD）来作为检测标准。NC中的MAD方法适用于围绕中位数的对抗分布，而对于左偏、右偏等其他类型的非对称分布而言，效果会发生降低，而利用DMAD则可解决这个问题。定义各类别重建后门触发器的噪声规模大小为\ :math:`S=\{S_1, S_2, ..., S_t, ..., S_C\}`\ ，其中\ :math:`C`\ 为类别总数，那么可以得到整体的中位数为\ :math:`\tilde{S} = \text{median}(S)`\ 。根据\ :math:`S`\ 中每个值与\ :math:`\tilde{S}`\ 的大小关系，可将\ :math:`S`\ 划分为左右两部分：
+
+.. math:: \begin{split}S^{l} = \{S_i | S_i \in S \ \ \&\ \  S_i\leq \tilde{S}\} \\S^{r} = \{S_i | S_i \in S \ \ \&\ \  S_i\geq \tilde{S}\}.\end{split}
+
+这里同样假设所测试的后门触发器普遍较小，因此DeepInspect只使用\ :math:`S^{l}`\ 来进行检测，根据式
+:eq:`eq_MAD_one` 、 :eq:`eq_MAD_two` 、
+:eq:`eq_MAD_three`
+对\ :math:`S^{l}`\ 进行计算，并与\ :math:`1.96\sigma`\ 进行比较来得到离群点，确定为后门类别。
+
+通过以上三个步骤，DeepInspect方法实现了比NC方法更有效的后门触发器重建，且不需要借助额外数据。相较于NC，DeepInspect在更加苛刻的环境下实现了后门攻击的有效检测，更易于在实际应用场景中的使用。此外，通过重建后门触发器，DeepInspect方法同样可以在替代数据集以及叠加了重建后门触发器后的“修补”数据集上，对模型进行微调，提升模型抵御后门攻击的能力。
+
+基于非凸优化和正则的后门检查
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+研究发现，当使用不同尺寸、形状和位置的后门触发器来进行后门攻击时，前面介绍的NC方法可能会失效
+:cite:`guo2019tabor` 。
+研究者认为，其主要原因在于后门子空间中存在多个后门样本，而基于触发器逆向的NC方法可能会搜索到与原始后门触发器无关的后门样本。
+为此，研究者提出了\ **基于非凸优化和正则的木马后门检查**\ （Trojan
+Backdoor Inspection based on Non-convex Optimization and
+Regularization，TABOR）方法，通过多个训练正则项来改善原始NC方法的优化目标。下面将对增加的正则化项进行详细介绍。
+
+在利用优化器（式 :eq:`eq_nc_optimize`
+）重建后门触发器的过程中，会出现\ *稀疏触发器*\ 、\ *过大触发器*\ 、\ *遮挡触发器*\ 、\ *叠加触发器*\ 等问题。稀疏触发器在整个图像区域中比较分散，无法聚拢到某一个特定的位置；而过大触发器在图像区域中所占的面积过大，远大于正常后门触发器的尺寸；遮挡触发器是指触发器会遮挡图像中的主要物体；叠加触发器是指重建触发器与原始触发器存在叠加的情况。因此，需要对重建后门触发器的面积大小以及聚拢程度进行限制。
+
+针对\ **过大触发器**\ ，TABOR定义如下正则化项来惩罚面积过大：
+
+.. math:: R_1({\boldsymbol{m}}, \Delta) = \lambda_1 \cdot R_{elastic}(vec({\boldsymbol{m}})) + \lambda_2 \cdot R_{elastic}(vec((1-{\boldsymbol{m}}) \odot \Delta))
+   :label: eq_TABOR_reg_1
+
+其中，\ :math:`vec(\cdot)`\ 表示将矩阵转换为向量；\ :math:`R_{elastic}(\cdot)`\ 表示向量的\ :math:`L_1`\ 和\ :math:`L_2`\ 范数之和；\ :math:`\lambda_1`\ 和\ :math:`\lambda_2`\ 为超参数。这里的\ :math:`{\boldsymbol{m}}`\ 表示后门触发器的掩码，\ :math:`\Delta`\ 表示重建的后门触发器。上式在对掩码\ :math:`{\boldsymbol{m}}`\ 中非零项进行惩罚的同时，也对掩码0值区域的重建后门触发器的非零项进行惩罚，从而解决过大的问题，缩小后门子空间中后门样本的数量。
+
+针对\ **稀疏触发器**\ ，TABOR定义如下正则化项来惩罚稀疏性：
+
+.. math:: R_2(v, \Delta) &= \lambda_3 \cdot s({\boldsymbol{m}}) + \lambda_4 \cdot s((1-{\boldsymbol{m}}) \odot \Delta) \\s({\boldsymbol{m}}) &= \sum_{i,j}({\boldsymbol{m}}_{i,j}-{\boldsymbol{m}}_{i,j+1})^2 + \sum_{i,j}({\boldsymbol{m}}_{i,j}-{\boldsymbol{m}}_{i+1,j})^2
+
+其中，\ :math:`\lambda_3`\ 、\ :math:`\lambda_4`\ 为超参，\ :math:`s(\cdot)`\ 为平滑度量函数，用来表示零或者非零值的密度，\ :math:`{\boldsymbol{m}}_{i,j}`\ 表示第\ :math:`i`\ 行第\ :math:`j`\ 列的元素。可以看到，当重建的后门触发器越稀疏时，其\ :math:`R_2`\ 值会更高。因此，TABOR使用该正则项进一步缩小搜索空间。
+
+针对\ **遮挡触发器**\ ，TABOR定义如下正则化项来避免遮盖主要物体：
+
+.. math:: R_3 = \lambda_5 \cdot \mathcal{L}(f({\boldsymbol{x}} \odot (1-{\boldsymbol{m}})), y)
+
+其中，\ :math:`y`\ 表示\ :math:`{\boldsymbol{x}}`\ 预测的正确类别；\ :math:`{\boldsymbol{x}}\odot(1-{\boldsymbol{m}})`\ 表示触发器位置以外的像素；\ :math:`\lambda_5`\ 为超参数。如果\ :math:`{\boldsymbol{x}}`\ 在去除了触发器区域像素后仍能正确分类，则表示后门触发器的位置远离模型决策所依赖的关键区域，从而实现不遮盖主要物体的目的。
+
+针对\ **叠加触发器**\ ，TABOR从特征重要性的角度入手，要求重建的后门触发器可以满足攻击模型的目的，从而去除不重要的部分，使得重建后的后门触发器更加精简、准确。该正则项定义为：
+
+.. math:: R_4 = \lambda_6 \cdot \mathcal{L}(f({\boldsymbol{m}} \odot \Delta), y_t)
+
+其中，\ :math:`y_t`\ 为攻击目标类别；\ :math:`\lambda_6`\ 为超参数。基于此，TABOR可在较为重要的区域里重建后门触发器。
+
+将以上四个正则化项加入到NC方法的目标函数（式 :eq:`eq_nc_optimize`
+）后即可生成更加准确的后门触发器。当然，最后还需要通过异常检测来找到后门类别和后门触发器。相较于NC所使用\ :math:`L_1`\ 距离筛选法，TABOR给出了更加精确、具体的度量定义：
+
+.. math:: \begin{aligned}A({\boldsymbol{m}}_t, \Delta_t) &= \log(\frac{{\lVert vec(f^{(t)}) \rVert}_1}{d^2}) + \log (\frac{s(f^{(t)})}{d\cdot(d-1)}) \\&- \log(acc_{att}) - \log(acc_{crop}) - \log(acc_{exp})\end{aligned}
+
+其中，\ :math:`{\boldsymbol{m}}_t`\ 和\ :math:`\Delta_t`\ 可构成类别\ :math:`y_t`\ 的后门触发器，即\ :math:`{\boldsymbol{m}}_t \odot \Delta_t`\ ；\ :math:`acc_{att}`\ 表示将重建后门触发器注入到干净样本中后导致的错误分类率；\ :math:`acc_{crop}`\ 为在从污染图像中裁剪出相应的后门触发器后得到的预测准确率；\ :math:`acc_{exp}`\ 表示仅将污染图像中的基于可解释性得到的重要特征输入模型后得到的预测准确率。对于前两项，定义\ :math:`f_{i,j}^{(t)}=\mathbb{1}({\boldsymbol{m}}_t \odot \Delta_t)_{i,j}>0`\ ，通过\ :math:`{\lVert vec(f^{(t)}) \rVert}_1`\ 以及\ :math:`s(f^{(t)})`\ 来实现稀疏度量和平滑性度量；\ :math:`d`\ 表示图像的维度，用来归一化。
+在得到每个类别重建触发器的度量指标后，可利用MAD（式
+:eq:`eq_MAD_one` 、 :eq:`eq_MAD_two` 和
+:eq:`eq_MAD_three` ）进行异常检测。
+
+针对过多的超参数（\ :math:`\{\lambda_1, \lambda_2, \lambda_3, \lambda_4, \lambda_5, \lambda_6\}`\ ），TABOR设计了一种\ *超参增强机制*\ ，缓解超参对触发器重建性能的影响。在优化的初始阶段，将超参数初始化为较小的值，也就是说在此阶段中正则化项对于目标函数的贡献接近0；之后会将当前重建的后门触发器注入到干净样本中以获得污染样本，并将污染样本输入到模型中获取错误分类率。\ *只有当错误分类率达到一个确定的阈值时*\ ，才会将超参数乘上固定的扩大因子\ :math:`\gamma`\ ；否则，将会除以\ :math:`\gamma`\ 。以上操作会重复进行，直到正则化项的值趋于稳定，即\ :math:`|R_t^{k-1} - R_t^{k}| < \epsilon`\ ，其中\ :math:`R_t^k`\ 表示在第\ :math:`k`\ 次迭代中第\ :math:`t`\ 个正则项的值；\ :math:`\epsilon`\ 为一个较小的常数。
+
+TABOR在NC方法框架下，增加了多种正则化项来解决其在后门触发器重建过程中存在的问题。此外，还从多个角度设计了更加全面的度量标准，以获得更好的异常检测性能。结果显示，TABOR方法相较于NC方法在后门触发器重建及检测上取得了更好的效果。
+
+数据受限下的检测
+^^^^^^^^^^^^^^^^
+
+这里介绍在\ *数据受限*\ （data-limited）及\ *无数据*\ （data-free）条件下的两个后门类别检测方法：\ **DL-TND**\ （TrojanNet
+detector）和\ **DF-TND**\ 。其中，DL-TND在每个类别仅有一张图像的条件下，针对每个类别分别计算其非目标通用对抗噪声（untargeted
+universal adversarial noise）和单一图像的有目标对抗噪声（targeted
+adversarial
+noise），并比较两种噪声之间的差异，从而识别后门类别。DF-TND不使用原始图像，而利用随机图像作为检测数据，它通过最大化中间层神经元激活来获取扰动图像，然后根据随机图像与扰动图像在输出概率上的差异来检测后门类别。下面将分别对DL-TND和DF-TND进行详细介绍。
+
+类似于式 :eq:`eq_nc_optimize`
+，DL-TND定义添加了后门触发器的图片为：
+
+.. math:: \hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta) = (1-{\boldsymbol{m}}) \cdot {\boldsymbol{x}} + {\boldsymbol{m}} \cdot \delta
+
+其中，\ :math:`0 \leq \Delta \leq 255`\ 为触发器噪声，\ :math:`{\boldsymbol{m}} \in\{0,1\}`\ 为定义了添加位置的二值掩码。
+在数据限制下，可针对每个类别获取一张照片，因此DL-TND使用\ :math:`D_k`\ 表示类别\ :math:`k`\ 的图片集合，\ :math:`D_{k-}`\ 表示不同于类别\ :math:`k`\ 的其他图片集合。
+
+首先，DL-TND利用\ :math:`D_{k-}`\ 数据集获取\ *非目标通用对抗噪声*\ ，即在\ :math:`D_{k-}`\ 中增加噪声\ :math:`{\boldsymbol{u}}^{(k)}`\ 使得模型发生错误分类。与此同时，\ :math:`{\boldsymbol{u}}^{k}`\ 不会影响\ :math:`D_k`\ 在模型上的分类。通过模拟后门触发器只干扰\ :math:`D_{k-}`\ 样本的特性，来进行噪声模拟。形式化定义如下：
+
+.. math:: \mathop{\mathrm{arg\,min}}_{{\boldsymbol{m}}, \Delta} \ \ \mathcal{L}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k-}) + \hat{\mathcal{L}}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k}) + \lambda {\lVert {\boldsymbol{m}} \rVert}_1
+
+其中，\ :math:`\lambda`\ 为超参数，\ :math:`{\lVert {\boldsymbol{m}} \rVert}_1`\ 用来保证稀疏性。公式中的前两项损失分别定义为：
+
+.. math:: \begin{aligned}\mathcal{L}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k-}) = \sum_{{\boldsymbol{x}}_i \in D_{k-}} \max\{f_{y_i}(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)) - \max_{t \neq y_i}f_t(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)), -\tau\} \\\hat{\mathcal{L}}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k}) = \sum_{{\boldsymbol{x}}_i \in D_{k}} \max\{\max_{t \neq y_i}f_t(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)) - f_{y_i}(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)), -\tau\}\end{aligned}
+   :label: eq_cw_format
+
+其中，\ :math:`y_i`\ 为\ :math:`{\boldsymbol{x}}_i`\ 的真实类别，\ :math:`f_t(\cdot)`\ 表示类别\ :math:`t`\ 的预测值，\ :math:`\tau \geq 0`\ 为超参，用来界定攻击的最低置信程度。
+
+式 :eq:`eq_cw_format` 参考了CW攻击 :cite:`carlini2017cw`
+的非目标攻击形式，使得\ :math:`D_{K-}`\ 发生非目标错误分类而不影响\ :math:`D_k`\ 的正确分类。
+此时，DL-TND会对每个图像\ :math:`{\boldsymbol{x}}_i \in D_{k-}`\ 分别计算\ *目标对抗噪声*\ ，使得\ :math:`\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)`\ 会被模型错分类为\ :math:`k`\ 。DL-TND认为目标攻击与非目标通用攻击一样，偏向使用\ *后门捷径*\ （backdoor
+shortcut）来生成对抗噪声。目标攻击定义如下：
+
+.. math:: \mathop{\mathrm{arg\,min}}_{{\boldsymbol{m}}, \Delta} \ \ \mathcal{L}^{'}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k-}) + \lambda{\lVert {\boldsymbol{m}} \rVert}_1
+
+其中，第一项同样采用CW攻击形式，定义为：
+
+.. math:: \mathcal{L}^{'}_{atk}(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta); D_{k-}) = \sum_{{\boldsymbol{x}}_i \in D_{k-}} \max\{\max_{t \neq k}f_t(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)) - f_{k}(\hat{{\boldsymbol{x}}}_i({\boldsymbol{m}}, \Delta)), -\tau\}
+
+通过上式可针对每个类别\ :math:`k`\ 和对应的图像\ :math:`{\boldsymbol{x}}_i`\ 生成噪声\ :math:`{\boldsymbol{s}}^{k,i} = ({\boldsymbol{m}}^{k,i}, \Delta^{k,i})`\ 。
+因此，根据相似性假设，当某个类别中存在后门触发器时，\ :math:`{\boldsymbol{u}}^{k}`\ 和\ :math:`{\boldsymbol{s}}^{k,i}`\ 应该具有高度的相似性。DL-TND叠加两种噪声后，在模型中间层的特征上计算余弦相似度。对于\ :math:`{\boldsymbol{x}}_i \in D_{k-1}`\ 分别执行上述步骤，可以得到相似度得分向量\ :math:`{\boldsymbol{v}}_{\text{sim}}^{k}`\ 。
+最后，可通过MAD或者人为设定的阈值进行后门类别检测。
+
+在无数据的情况下，可通过最大化随机输入\ :math:`{\boldsymbol{x}}`\ 在模型中间层的神经元激活来生成噪声，其优化目标定义为：
+
+.. math:: \mathop{\mathrm{arg\,max}}_{{\boldsymbol{m}}, \Delta, {\boldsymbol{w}}} \sum_{i=1}^{d}[{\boldsymbol{w}}_i r_i(\hat{{\boldsymbol{x}}}({\boldsymbol{m}}, \Delta))] - \lambda {\lVert {\boldsymbol{m}} \rVert}_1
+
+其中，\ :math:`r_i(\cdot)`\ 表示第\ :math:`i`\ 维的神经元激活值，\ :math:`0 \leq {\boldsymbol{w}} \leq 1`\ 且\ :math:`\sum_i {\boldsymbol{w}} = 1`\ ，用来调整不同神经元的重要性，\ :math:`d`\ 表示模型中间层的维度。上式对于\ :math:`n`\ 个随机输入可以优化得到\ :math:`n`\ 个掩码和触发器对\ :math:`\{p^{(i)} = ({\boldsymbol{m}}^{(i)}, \Delta^{(i)})\}_{i=1}^{n}`\ 。
+
+最后，基于\ :math:`\{p^{(i)}\}_{i=1}^{n}`\ ，通过比较随机输入与其后门版本在模型输出上的差异来检测后门类别：
+
+.. math:: R_k = \frac{1}{N} \sum_{i}^{N}[f_k(\hat{{\boldsymbol{x}}_i}(p^{(i)})) - f_k({\boldsymbol{x}}_i)]
+
+根据上式可计算每个类别输出差值，进而可基于预先设定的阈值来进行检测，\ :math:`R_k`\ 值越大表示后门风险越大。
+
+.. _sec_backdoor_sample_detection:
+
+后门样本检测
+~~~~~~~~~~~~
+
+
+后门样本检测的目标是识别训练数据集或者测试数据集中的后门样本，其中对训练样本的检测可以帮助防御者清洗训练数据，而对测试样本的检测可以在模型部署阶段发现并拒绝后门攻击行为。下面介绍几种经典的后门样本检测方法。
+
+频谱指纹
+^^^^^^^^
+
+为了检测训练数据中可能存在的后门样本，研究者提出了\ **频谱指纹**\ （Spectral
+Signature, SS）方法 :cite:`tran2018spectral`
+。该方法观察到后门样本和干净样本在深度特征的协方差矩阵上存在差异，故可以通过这种差异来检测和过滤后门样本。
+算法 :numref:`algorithm_SS`
+中给出了SS方法的检测流程。具体来说，给定训练样本\ :math:`D`\ ，首先训练得到神经网络\ :math:`f`\ 。然后，按照类别遍历，并提取每个样本的特征向量并计算每类样本的特征均值。接下来，对深度特征的\ *协方差矩阵*\ 进行奇异值分解，并使用该分解计算每个样本的异常值分数。根据异常检测规则，移除数据集中异常值高于\ :math:`1.5\epsilon`\ 的样本（后门样本），最终返回一个干净的训练数据集\ :math:`D_{clean}`\ 。
+
+.. _algorithm_SS:
+
+.. figure:: images/4.5_ss.png
+   :width: 630px
+
+   频谱指纹（SS）检测算法
+
+
+
+激活聚类
+^^^^^^^^
+
+激活聚类（Activation Clustering，AC） :cite:`chen2018detecting`
+检测方法的主要思想是：\ *后门特征和干净特征之间存在差异，且这种差异在深度特征空间中会更加显著*\ 。因此，可以基于聚类方法来自动分离后门特征，进而检测后门样本。
+算法 :numref:`algorithm_AC`
+中给出了AC方法的检测流程。该方法首先在后门训练数据集\ :math:`D`\ 上训练模型\ :math:`f`\ ，然后对所有训练样本\ :math:`{\boldsymbol{x}}_{i} \in D`\ 提取其特征激活（默认选取模型最后一个隐藏层的输出），得到一个包含所有特征激活的集合\ :math:`A`\ 。然后对得到的特征激活进行降维，并利用聚类方法对训练数据集进行聚类分析。实验表明，通过分析最后一层隐藏层的激活分布就能够有效检测后门数据。
+
+.. _algorithm_AC:
+
+.. figure:: images/4.6_ac.png
+   :width: 630px
+
+   激活聚类（AC）检测算法
+
+
+
+值得注意的是，AC方法假定训练数据中一定存在后门样本，所以在激活聚类时默认将整个数据集划分为两个数据簇。AC方法提出了三个后门数据簇的判别依据：（1）\ *重新训练分类*\ ；（2）\ *聚类簇的相对大小*\ ；（3）\ *轮廓的分数*\ 。实验表明，比较聚类簇数据规模的相对大小可以作为一个简单有效的评判依据。
+
+认知蒸馏
+^^^^^^^^
+
+后门样本会误导模型去识别任务无关的后门触发器样式，这使得模型的认识逻辑发生错误，模型在后门样本上的注意力区域发生偏移。但事实并非如此，我们发现模型在后门样本上依然会关注一部分有意义的区域。这就需要一种技术可以精准地剖离模型的核心认知逻辑，去除不重要的甚至是噪声的注意力，从而可以暴露模型真正关注的地方。\ **认知蒸馏**\ （Cognitive
+Distillation，CD）检测方法就是基于此思想提出的。给定一个输入样本（训练样本或测试样本），CD方法提取模型保持输出不变所需要的最少输入信息。研究者将决定模型输出的最小输入模式称为\ **认知模式**\ （cognitive
+pattern），它揭示了模型推理结果背后所隐藏的决定性因素。
+
+具体来说，认知蒸馏方法通过解决一个最小化问题来从一个输入样本\ :math:`{\boldsymbol{x}}`\ 中蒸馏出其认知模式，对应的优化问题定义如下：
+
+.. math:: \mathop{\mathrm{arg\,min}}_{{\boldsymbol{m}}} {\lVert f_{\theta}({\boldsymbol{x}}) - f_{\theta}({\boldsymbol{x}}_{cp}) \rVert}_1 + \alpha {\lVert {\boldsymbol{m}} \rVert}_1 + \beta \cdot TV({\boldsymbol{m}})
+   :label: eq_cd
+
+.. math:: {\boldsymbol{x}}_{cp} = {\boldsymbol{x}} \odot {\boldsymbol{m}} + (1-{\boldsymbol{m}}) \odot \delta
+   :label: eq_cp
+
+其中，\ :math:`{\boldsymbol{m}}`\ 是输入掩码，\ :math:`f_{\theta}`\ 是模型的逻辑或者概率输出，\ :math:`{\boldsymbol{x}}_{cp}`\ 是认知模式，\ :math:`\delta \in [0,1]^c`\ 是一个\ :math:`c`-维的随机向量，\ :math:`\odot`\ 是元素对应乘积操作，\ :math:`TV(\cdot)`\ 是总变差（TV）损失，控制掩码的平滑程度（从而得到局部平滑的关键区域），\ :math:`\beta`\ 为平衡TV损失的超参数。
+
+.. _fig_cd:
+
+.. figure:: images/9.1_cd.png
+   :width: 900px
+
+   在干净或者后门图像上通过认知蒸馏方法提取出来的认知模式
+   :cite:`huang2023distilling`
+
+
+
+:numref:`fig_cd`
+展示了认知蒸馏算法在干净图像以及11种后门图像上抽取到的掩码和模式。可以看到，模型在被添加了后门触发器的图片上的认知机理大都由后门触发器决定，触发器对应的位置对模型的输入起到了关键的作用。此外还发现，有些全图的触发器，如Blend、CL、FC、DFST等，只是部分在起作用，而并不需要全图大小的触发器。基于此发现，研究者对已有攻击的触发器进行了进一步简化，发现简化后的触发器跟原触发器攻击效果相似，有的甚至还变强了。
+
+基于式 :eq:`eq_cd`
+优化得到的掩码\ :math:`{\boldsymbol{m}}`\ ，研究者构建了一个后门样本检测器，将检测掩码过小的样本检测为后门样本。检测原理基于
+:numref:`fig_cd`
+中的发现：\ *后门样本的认知模式往往更简单，即模型基于过于简单的模式对样本进行了结果预测*\ 。研究结果表明，认知蒸馏方法可以将训练集中后门样本的平均检测AUC从此前最优的84.62%提升到96.45%，将测试集中后门样本的平均检测AUC从此前最优的82.51%提升到了94.90%。
+
+后门数据只是问题数据的一种，其他的问题数据包括投毒样本、损坏样本、对抗样本等，都会误导模型产生错误的推理逻辑。如果能够准确且唯一地确定模型的主要推理依据，那么就可以判断模型的决策是否存在问题。如果能进一步对有问题的推理逻辑进行共性建模，那么就可以构建服务于模型推理阶段的问题数据过滤和纠正器。
+对大模型来说，它们的训练代价极高，难以通过重训练或者微调的方式来保证全面的鲁棒性，所以迫切地需要检测类的防御方法来保障其安全稳定运行。例如，OpenAI、谷歌等公司在发布生成式大模型（如ChatGPT）时，都会启动一系列检测模型，以此来防范各类推理阶段的攻击，避免模型被诱导生成有害内容。
+
+.. _sec_backdoor_removal:
+
+后门移除防御
+~~~~~~~~~~~~
+
+
+后门检测之后仍需要使用后门移除方法将后门从模型中清除掉，以完成模型的终极净化。如此，后门移除的目标主要有两个：（1）\ *从后门模型中移除掉后门*\ ；（2）\ *保持模型的正常性能不下降*\ 。后门移除对后门防御至关重要，在实际应用场景中可以起到重要的作用，所以后门防御的大部分工作都是围绕后门移除进行的。现有的后门移除方法大致可以分为两类：（a）\ **训练中移除**\ ，在模型的训练过程中检测出潜在的后门样本，并阻止模型对这些样本的学习；（b）\ **训练后移除**\ ，从后门模型中移除掉已经被植入的后门触发器，以还原模型的纯净功能。
+
+训练中移除
+^^^^^^^^^^
+
+**反后门学习**\ ：如何从被污染的数据中学习一个干净的模型是一个挑战的问题。\ **反后门学习**\ （Anti-Backdoor
+Learning，ABL）框架 :cite:`2021Anti`
+的提出就是为了解决这一挑战问题。ABL通过鲁棒的训练方法让模型可以在被后门毒化的数据集上正常训练，最终得到一个干净无后门的模型。
+
+具体而言，ABL方法首先揭示了两个后门攻击固有的弱点：（1）\ *后门样本比干净样本被模型学得更快*\ ，而且后门攻击越强，模型在后门样本上的收敛速度就越快；（2）\ *后门触发器与后门标签之间存在强关联*\ 。显然，被部分毒化的数据集既包含干净数据子集（\ :math:`D_c`\ ）也包含后门数据子集（\ :math:`D_b`\ ）。那么，我们可以将基于毒化数据集的模型训练看作是两个学习任务平行进行，即定义在\ :math:`D_c`\ 上的\ *干净任务*\ （clean
+task）和定义在\ :math:`D_b`\ 上的\ *后门任务*\ （backdoor
+task）。对于图像分类任务来说，在毒化数据集上的模型训练等于优化以下目标：
+
+.. math:: \begin{aligned}\mathcal{L} =\mathbb{E}_{({\boldsymbol{x}},y)\sim D_c}[\mathcal{L}_{CE}(f({\boldsymbol{x}},y))]+\mathbb{E}_{({\boldsymbol{x}},y)\sim D_b}[\mathcal{L}_{CE}(f({\boldsymbol{x}},y))]\end{aligned}
+   :label: eq_anti
+
+其中，\ :math:`\mathcal{L}_{CE}(\cdot)`\ 表示交叉熵损失函数。
+
+然而，由于在训练过程中我们无法得到毒化部分数据\ :math:`D_b`\ ，所以无法直接求解式
+:eq:`eq_anti`
+，也就无法阻挡模型对后门数据的学习。为此，ABL将训练过程划分为\ *后门隔离*\ （backdoor
+isolation）和\ *后门反学习*\ （backdoor
+unlearning）两个阶段。两个阶段分别使用不同的损失函数，定义如下：
+
+.. math:: \mathcal{L}_{ABL}^t=\begin{cases}\mathcal{L}_{LGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim D}[ sign(\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)-\gamma) \cdot \mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] & 0 \leq t \leq T_{te} \\\mathcal{L}_{GGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_c}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)]-\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_b}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] & T_{te} \leq t \leq T\end{cases}
+   :label: eq_ABL
+
+其中，\ :math:`t\in [0,T-1]`\ 为当前的迭代次数，\ :math:`sign(\cdot)`\ 表示符号函数，\ :math:`\mathcal{L}_{LGA}`\ 为第一阶段损失函数，\ :math:`\mathcal{L}_{GGA}`\ 为第二阶段损失函数。上式包含两个关键的技术：\ *局部梯度上升*\ （Local
+Gradient Ascent，LGA）和\ *全局梯度上升*\ （Global Gradient
+Ascent，GGA)。
+
+**局部梯度上升**\ （LGA）可以巧妙地应对后门攻击的第一个弱点，即后门数据学得更快（训练损失下降的极快）。LGA通过将训练样本的损失控制在一个阈值\ :math:`\gamma`\ 附近，从而让后门样本穿过这个阈值而普通样本无法穿过。具体来说，当样本的损失低于\ :math:`\gamma`\ 时，LGA会增加其损失到\ :math:`\gamma`\ ；否则，其损失值保持不变。同时，在该阶段会根据样本的损失值将训练集划分为两部分，损失值较低的被分到（潜在）后门数据集\ :math:`\widehat{D_b}`\ ，其余的被分到干净数据集\ :math:`\widehat{D_c}`\ ，划分（检测）比率\ :math:`p=|\widehat{D_b}| / |D|`\ 可以被设定于低于数据真正的中毒率（比如训练数据的1%）。
+
+**全局梯度上升**\ （GGA）针对后门攻击的第二个弱点，即后门攻击触发器与后门类别存在强关联。实际上，当后门触发器被检测出来的时候，它已经被植入到模型当中了，所以需要额外的步骤将其从模型中移除。全局梯度上升可以做到这一点，它的目标是借助第一阶段隔离得到的少量潜在后门样本\ :math:`\widehat{D_b}`\ ，对后门模型进行反学习（unlearning），通过最大化模型在数据\ :math:`\widehat{D_b}`\ 上的损失，让模型主动遗忘这些样本。
+
+ABL是一个比较通用的鲁棒训练算法，在训练数据是干净的情况下也可以使用，用来移除一些过于简单的特征关联。ABL算法为工业界提供了在不可信或者第三方数据上训练良性模型的新思路，可帮助公司、研究机构或政府机构等训练干净、无后门的人工智能模型。此外，ABL鲁棒训练方法有助于构建更加安全可信的训练平台，为深度模型的安全应用提供有力保障。
+
+训练后移除
+^^^^^^^^^^
+
+一般来说，后门模型的修复可以基于重建的后门触发器进行，因为只有掌握了后门触发器才能明确知道需要从模型中移除什么。但是触发器重建通常比较耗时且精准性欠佳，所以现有的训练后移除方法大都不基于触发器重建进行，而是假设防御者有少量的干净数据用以模型净化。这些少量的干净数据可以用来对模型进行微调、蒸馏等操作，以修复模型。
+
+**精细剪枝方法**\ （Fine-Pruning，FP） :cite:`Liu2018FinePruningDA`
+是一个经典的、基于神经元剪枝的后门移除方法，其整合了剪枝和微调两个技术。剪枝是一种模型压缩技术，可以用来从后门模型中裁剪掉与触发器关联的后门神经元，从而达到模型净化的效果。因为后门神经元只能被后门数据激活，所以在干净数据上休眠的神经元就极有可能是后门神经元，需要进行剪枝。剪枝后的模型会发生一定程度的性能下降，所以需要在少量干净数据（也称为“防御数据”上进行微调，恢复其在干净样本上的性能。精细剪枝方法简单易用，经常作为基线方法来比较。当然，精细剪枝方法的防御性能并没有很好，尤其是在面对一些复杂的攻击时，往往只能将攻击成功率从接近100%降低到80%左右。
+
+**模式连通修复**\ ：模型的损失景观存在一定的\ *模式连通性*\ ，即模型从一套参数（比如包含后门的参数，有后门但干净准确率高）到另一套参数（比如干净模型参数，无后门但干净准确率低）往往遵循特定的轨迹，那么在这个轨迹上进行合理的选择就可以得到一套无后门且性能下降不多的参数。基于此性质，研究者提出了\ **模式连通修复**\ （Mode
+Connectivity Repair，MCR）方法。
+
+具体来说，MCR首先选取\ *两个后门模型*\ 作为\ *端点模型*\ ，然后利用\ *模式连接*\ 将两个端点模型的权重连接起来，并在少量干净样本上优化此路径，最终得到一条包含最小损失权重的路径。该路径上的最小损失点（通常是中心点）对应的模型参数不包含后门触发器且干净准确率得到了保持。连接两个后门模型是一种\ *模型参数混合*\ （model
+mixup）的思想（类比于mixup数据增强），不过这里混合路径是优化得到的，可以巧妙地避开两个后门模型的缺点（也就是后门），同时最大化二者的优点（也就是干净准确率）。
+
+MCR方法主要探索了\ *多边形连通路径*\ （polygonal
+chain）和\ *贝兹曲线连通路径*\ （Bézier
+curve）两种模式，其中连通函数定义为\ :math:`\phi_{\theta}(t)`\ 。具体来说，假定两个端点模型的权重分别表示为\ :math:`\omega_{1}`\ 和\ :math:`\omega_{2}`\ ，连接路径的弯曲程度定义为\ :math:`\theta`\ ，多边形连通函数定义为：
+
+.. math:: \phi_{\theta}(t)=\left\{\begin{array}{cc}2\left(t \theta+(0.5-t) \omega_{1}\right), & 0 \leq t \leq 0.5 \\2\left((t-0.5) \omega_{2}+(1-t) \theta\right), & 0.5 \leq t \leq 1\end{array}\right.
+
+Bezier曲线为有效控制连接路径的平滑度提供了方便的参数化形式。给定端点参数为\ :math:`\omega_{1}`\ 和\ :math:`\omega_{2}`\ ，二次贝兹曲线定义为：
+
+.. math:: \phi_{\theta}(t)=(1-t)^{2} \omega_{1}+2 t(1-t) \theta+t^{2} \omega_{2}, \;\; 0 \leq t \leq 1
+
+需要注意的是，对于后门模型修复，上述路径优化仅需要将端点模型替换为后门模型即可。实验表明，通过少量干净样本优化此连通路径，并选择最小损失路径对应的参数作为模型的鲁棒参数，可以有效从模型中移除后门，同时保证较少的准确率损失。
+
+**神经注意力蒸馏**\ ：既然有少量干净数据，那么除了剪枝微调以外，也可以用知识蒸馏方法来缓解模型中的后门，而且蒸馏往往比微调更高效。
+基于此想法，\ **神经注意力蒸馏**\ （Neural Attention Distillation,
+NAD）方法 :cite:`li2021neural`
+应运而生。知识蒸馏涉及两个模型（即教师模型和学生模型），因此基于知识蒸馏的后门防御就需要合理的选择教师模型（学生模型即是要净化的后门模型）。
+
+NAD方法利用在防御数据上微调过后的模型作为教师模型，因为防御数据是干净的，所以此步微调已经移除了教师模型中的部分（不是全部）后门。然后，NAD利用教师模型引导学生模型（未经过任何微调的原始后门模型）在防御数据上再次进行蒸馏式微调，使学生模型的中间层注意力与教师模型的中间层注意力一致，从而在学生后门模型中移除后门触发器。NAD的整体流程如
+:numref:`fig_NAD`
+所示，该方法的核心在于寻找合适的注意力表征来保证蒸馏防御的有效性。
+
+.. _fig_NAD:
+
+.. figure:: images/9.2_nad.png
+   :width: 900px
+
+   基于微调的后门移除与NAD后门移除 :cite:`li2021neural`
+
+
+
+对于注意力表征，假定模型第\ :math:`l`\ 层的输出特征表示为\ :math:`f^{l} \in {\mathbb{R}}^{C\times H \times W}`\ ，注意力表征函数\ :math:`A: {\mathbb{R}}^{C\times H \times W} \rightarrow {\mathbb{R}}^{H \times W}`\ 的目标是将模型输出的三维特征\ :math:`f^{l}`\ 沿通道维度进行融合。具体来说，算子\ :math:`A`\ 有三种选择：
+
+.. math:: A_{sum}\left(f^{l}\right)=\sum_{i=1}^{C}\left|f_{i}^{l}\right| ; A_{sum}^{p}\left(f^{l}\right)=\sum_{i=1}^{C}\left|f_{i}^{l}\right|^{p} ; A_{mean}^{p}\left(f^{l}\right)=\frac{1}{c} \sum_{i=1}^{C}\left|f_{i}^{l}\right|^{p}
+
+其中，\ :math:`f_i^l`\ 表示第\ :math:`i`\ 个通道的激活图；\ :math:`A_{sum}`\ 对应整个激活区域，既包括良性也包括后门神经元的激活区域；\ :math:`A_{sum}^p`\ 是\ :math:`A_{sum}`\ 的一个幂次变换，目标是放大后门神经元和良性神经元之间的差异；\ :math:`A_{mean}^{p}`\ 计算所有激活区域的平均值，目的是将后门神经元的激活中心与良性神经元的激活中心（均值）对齐。
+
+为了实现注意力的有效蒸馏和后门移除，NAD将教师和学生模型之间的第\ :math:`l`\ 层的蒸馏损失定义为：
+
+.. math:: \mathcal{L}_{NAD}\left(f_T^{l}, f_S^{l}\right)=\left\|\frac{A\left(f_T^{l}\right)}{\left\|A\left(f_T^{l}\right)\right\|_{2}}-\frac{A\left(f_S^{l}\right)}{\left\|A\left(f_S^{l}\right)\right\|_{2}}\right\|_{2},
+
+其中，\ :math:`\left\|\cdot\right\|_2`\ 表示\ :math:`L_2`\ 范数，用来衡量教师和学生注意力之间的距离。
+
+NAD方法的整体优化损失函数由失交叉熵损失（\ :math:`\mathcal{L}_{CE}`\ ）和神经注意力蒸馏损失（\ :math:`\mathcal{L}_{NAD}`\ ）两部分组成：
+
+.. math:: \mathcal{L}=\mathbb{E}_{({\boldsymbol{x}}, y) \sim D_c}\left[\mathcal{L}_{CE}\left(f_S({\boldsymbol{x}}), y\right)+\beta \cdot \sum_{l=1}^{K} \mathcal{L}_{NAD}\left(f_T^{l}({\boldsymbol{x}}), f_S^{l}({\boldsymbol{x}})\right)\right]
+
+其中，\ :math:`\mathcal{L}_{CE}`\ 衡量学生模型的分类误差，\ :math:`D_c`\ 是用来干净防御数据集，\ :math:`l`\ 代表残差网络层的索引，\ :math:`\beta`\ 是用来控制蒸馏强度的超参数。
+
+NAD方法开启了基于知识蒸馏的后门防御研究，但此方法面对新攻击时还存在一定的局限性，毕竟以轻度微调过的后门模型作为教师模型并未完全发挥知识蒸馏的潜力。相信选择更优的教师模型（比如外部干净模型）会大大提高此类方法的有效性。
+
+**对抗神经元剪枝**\ ：从后门模型中准确检测并隔离出后门神经元是后门防御领域的一个挑战性问题。\ **对抗神经元剪枝**\ （Adversarial
+Neural Perturbation, ANP）方法 :cite:`wu2021adversarial`
+提出一种基于对抗神经元扰动的后门神经元定位和剪枝方法。ANP研究发现，后门神经元（即后门模型中与后门功能相关的神经元）在参数空间的对抗扰动下更容易崩溃，从而导致后门模型在干净样本上预测后门标签。基于此发现，ANP通过剪枝一些对对抗噪声敏感的神经元来净化后门模型。实验表明，即使只借助1%的干净样本，ANP也能有效地去除模型后门，且不会显著影响模型的原始性能。
+
+ANP方法主要包含三个步骤：\ *参数对抗扰动*\ 、\ *剪枝掩码优化*\ 和\ *后门神经元裁剪*\ 。给定一个训练完成的模型\ :math:`f`\ ，对应的模型权重表示为\ :math:`w`\ ，干净训练样本子集表示为\ :math:`D_{c}`\ 以及交叉熵损失函数表示为\ :math:`\mathcal{L}_{CE}`\ 。针对模型参数空间的对抗扰动可定义如下：
+
+.. math:: \max_{\delta, \xi \in [-\epsilon, \epsilon]}\mathbb{E}_{D_{c}} \mathcal{L}_{CE} \left((1+\delta) \odot {\boldsymbol{w}}, (1+\xi) \odot b \right)
+
+其中，\ :math:`\epsilon`\ 用于控制对抗扰动的大小，\ :math:`\delta`\ 和\ :math:`\xi`\ 分别代表添加在权重\ :math:`{\boldsymbol{w}}`\ 和偏置项\ :math:`b`\ 上的对抗噪声。
+
+为了实现精准剪枝，ANP定义了一个模型参数空间上的连续掩码\ :math:`{\boldsymbol{m}} \in [0,1]^{n}`\ ，初始化值为1，并且使用\ *投影梯度下降法*\ （即PGD对抗攻击）对\ :math:`{\boldsymbol{m}}`\ 进行更新。为了减小神经元裁剪对模型干净准确率的负面影响，ANP在参数扰动的同时也在干净样本上使用交叉熵对模型进行微调。为此，ANP定义了以下优化目标函数：
+
+.. math:: \min_{{\boldsymbol{m}} \in[0,1]^{n}} \mathbb{E}_{D_c}\left[\alpha \mathcal{L}_{CE}({\boldsymbol{m}} \odot {\boldsymbol{w}}, b)+(1-\alpha) \max _{\delta, \boldsymbol{\xi} \in[-\epsilon, \epsilon]^{n}} \mathcal{L}_{CE}(({\boldsymbol{m}}+\boldsymbol{\delta}) \odot {\boldsymbol{w}},(1+\boldsymbol{\xi}) \odot b)\right]
+
+其中，\ :math:`\alpha \in [0,1]`\ 为平衡系数。当\ :math:`\alpha`\ 接近1时，更关注裁剪后的模型在干净数据上的准确率，而当\ :math:`\alpha`\ 接近0时，更关注后门的移除效果。
+
+需要注意的是，上式优化得到的掩码\ :math:`{\boldsymbol{m}}`\ 记录了神经元在对抗噪声下的敏感程度。为了有效移除模型中的后门神经元，可以对优化得到的\ :math:`{\boldsymbol{m}}`\ ，基于预先设定的裁剪阈值\ :math:`T`\ ，将所有小于阈值的神经元的权重置为0。
+实验表明，ANP在多种后门攻击上都取得了最佳的防御效果。但是，ANP对于特征空间的后门攻击方法仍然存在一定的局限性。后续的研究工作解决了这一局限性，提出了\ **重构神经元剪枝**\ （Reconstructive
+Neural Pruning，RNP）方法 :cite:`li2023reconstructive`
+。RNP通过两个步骤完成后门神经元的裁剪：（1）\ *通过模型“反学习”来暴露后门神经元*\ ，即在少量干净样本上最大化模型的分类错误，从而将模型的“干净功能”移除，方便更好的暴漏后门神经元；（2）\ *通过模型“重学习”来定位后门神经元*\ ，即在同样的干净样本上最小化模型的分类错误，并借助一个神经元掩码来定位在“反学习-重学习”的过程中变化比较小的神经元，这些神经元为后门神经元（因为这个过程主要改变干净神经元，再次过程中保持休眠的就是后门神经元）。实验表明，RNP方法可以很好的防御各类后门攻击方法。
+
+神经元裁剪是一种高效的后门防御方法，有必要持续探索更先进的裁剪方法，对关键的后门神经元进行精准定位和移除。在大模型时代，神经元裁剪类的后门防御方法将变得更加重要。因为，由于计算资源的限制，我们很多时候无法去微调或者蒸馏大模型，只能通过更加高效的裁剪（也称为“编辑”）技术来完成高效防御。
+
+联邦后门防御
+~~~~~~~~~~~~
+
+近年来，面对后门攻击的严重影响，研究者提出了很多防御方法，包括防御联邦侯梦攻击的防御方法。这里简单对两类防御方法进行介绍：异常更新检测和鲁棒更新聚合。这里的介绍并未包含防御拜占庭攻击（Byzantine
+attack） [4]_ 的鲁棒聚合方法，如AUROR :cite:`2016AUROR` 、Krum
+:cite:`blanchard2017machine` 、Coordinate-wise Median
+:cite:`2018Byzantine` 等
+
+异常更新检测
+^^^^^^^^^^^^
+
+由于联邦学习后门攻击需要将包含后门的梯度更新上传到服务器，所以可以在服务器端使用异常检测技术检测参与方上传的梯度信息，然后将检测为包含后门的梯度更新排除在外，不参与全局模型的更新。一个有代表性的防御方法为\ **FoolsGold**
+:cite:`fung2018mitigating`
+。此方法基于这样的猜想：\ *当一组攻击者训练全局模型时，他们可能会在整个训练过程中提供具有相同后门目标的更新，从而在一定程度上呈现出类似的行为*\ 。
+然而，这种相似性不会出现在正常参与者中，因为每个用户的私有训练数据集都是不同的，且彼此之间不共享。因此，可以通过梯度更新将攻击者和非攻击者区分开来。在检测到攻击后，FoolsGold会维持非攻击用户的学习率，同时降低攻击者的学习率以减轻后门攻击。
+
+我们还可以通过训练一个异常更新检测模型来检测各参与方上传的梯度更新。\ **谱异常检测**
+:cite:`li2020learning`
+就是这样一个防御方法。此方法遵循的思想是：\ *在低维嵌入空间中，良性更新和后门攻击更新的嵌入之间存在显著差异*\ 。
+近似低维嵌入的一种实用方法是使用“编码器-解码器”结构构建模型，其中编码器获取原始更新并返回低维嵌入，解码器接受嵌入并输出重建输出，并产生重建错误。
+在编码器-解码器模型经过良性更新训练后，它可以用于识别后门更新，因为后门更新会比良性更新产生更高的重建错误。但是这种防御方法无法应对多触发后门攻击。
+
+鲁棒模型聚合
+^^^^^^^^^^^^
+
+与异常更新检测方法不同，鲁棒模型聚合方法旨在在训练过程中直接减轻后门攻击的影响，也就是让参数聚合方法直接对后门攻击鲁棒。
+攻击者在后门注入式往往需要增强他们上传的参数更新，以此来抵消其他良性参数所带来的“稀释”效应。基于此观察，\ **范数裁剪**\ （Norm
+Clipping） :cite:`2019Can`
+方法基于预先设置的范数阈值来对客户端上传的参数更新进行裁剪，所有超过范数（\ :math:`L_2`\ 范数）阈值的梯度都会被裁剪。与此同时，受差分隐私的启发，范数裁剪在裁剪后的参数上继续添加高斯噪声，进一步消除后门参数。
+然而，这种鲁棒聚合方法处理不了那些不会对模型权重产生大幅改动的攻击，而这样的攻击很容易就能做到。此方法也会对全局模型的普通性能产生一定影响，因为范数裁剪也会影响正常的参数更新，而且添加的高斯噪声会在一定程度上阻碍全局模型的正常收敛，而收敛问题一直是联邦学习的一个大问题。
+
+另一种提高模型聚合鲁棒性的方式是发动所有的参与方来协助检测后门，周期性的让参与方主动检查并反馈全局模型中是否存在可疑后门，这种方法称为\ **基于反馈的联邦学习**\ （BaFFle）
+:cite:`andreina2021baffle` 。
+具体来说，BaFFle方法在每一轮联邦迭代中都增加一个验证过程，每个被选中的参与者都要在其私有数据上计算一个验证函数来验证当前的全局模型是否包含后门，并向服务器报告检查结果。
+然后，服务器根据所有用户的反馈确定是否接受或拒绝当前的全局模型。验证函数会在特定类别上比较当前全局模型与之前接受的全局模型的误分类率。如果误分类率有显著差异，那么服务器将拒绝当前全局模型，并发出警报。与异常更新检测不同，BaFFle机制可以与其他安全聚合方法结合使用，进一步提升联邦学习的安全性。
+
+.. _sec_differential privacy:
+
+差分隐私
+--------
+
+
+**差分隐私** :cite:`dwork2006calibrating`
+的概念由Cynthia等人在2006年首次提出。随后大量研究者将机器学习与差分隐私技术结合起来用于模型隐私保护，目的是在保证模型准确性的同时最大限度地保证模型的推理隐私性。差分隐私通过添加噪声，使得差别只有一条记录的\ *相邻数据集*\ 经过模型推理获得相同结果的概率非常接近，即抹除单个样本在模型中的区分度，从而保护模型隐私。
+
+差分隐私可通过对模型参数添加随机噪声，使模型对细微差异化的查询不再敏感，从而让攻击者无法判断获得更多信息，有效增加成员推理攻击、模型抽取攻击以及数据抽取攻击的难度。根据添加噪声的位置不同，基于差分隐私的防御方法可进一步分为：输出扰动、目标函数扰动和梯度扰动。
+
+输出扰动
+~~~~~~~~
+
+该方法将随机噪声添加到逻辑回归的输出中，并通过敏感度来衡量模型的防御能力
+:cite:`chaudhuri2008privacy` 。其中，敏感度的定义如下：
+
+.. math:: \begin{aligned}S(f) = \max\limits_{{\boldsymbol{a}},{\boldsymbol{a}}'} \left| f({\boldsymbol{x}}_1,\cdots,{\boldsymbol{x}}_{n-1},{\boldsymbol{x}}_{n} = {\boldsymbol{a}}) - f({\boldsymbol{x}}_1,\cdots,{\boldsymbol{x}}_{n-1},{\boldsymbol{x}}_{n} = {\boldsymbol{a}}') \right|\end{aligned}
+   :label: eq_chapter7_sensitivity
+
+其中，\ :math:`{\boldsymbol{a}}`\ 和为\ :math:`{\boldsymbol{a}}`\ 为两个不同的样本。上述敏感度的定义可理解为，当且仅当输入数据中任意一个样本发生改变时，其输出结果变化的最大值。
+
+后续研究 :cite:`zhang2017efficient` 提出在\ *强凸函数*\ （strongly
+convex
+function）的情况下，通过选择合适的学习率，可以有效提高在添加输出扰动时的梯度下降效率。此外，有研究进一步讨论比较了在输出扰动和在目标函数扰动的区别，并提出输出扰动方法在\ *凸函数*\ （convex
+function）情况下更为有效，但可能无法推广到非平滑条件下
+:cite:`wang2017differentially` 。
+
+目标函数扰动
+~~~~~~~~~~~~
+
+此方法通过添加\ *正则化常量*\ :math:`\lambda`\ 对目标函数进行扰动
+:cite:`chaudhuri2008privacy`
+。正则化是一种防止模型过拟合的常用技术，但是在该方法中，正则化用来降低模型对输入变化的敏感度，从而达到保护模型隐私的目的。目标函数扰动方法的形式化定义如下：
+
+.. math:: \begin{aligned}y' = \mathop{\mathrm{arg\,min}}\limits_{\theta} \frac{1}{2} \lambda \theta^{\top} \theta + \frac{{\boldsymbol{b}}^{\top} \theta}{n} + \frac{1}{n} \sum^{n}_{i=1} \log(1+e^{-y_{i} \theta^{\top} {\boldsymbol{x}}_{i}})\end{aligned}
+
+其中，\ :math:`{\boldsymbol{b}}`\ 为随机向量，\ :math:`\lambda`\ 为正则化常数。此工作还揭示了正则化和隐私保护之间的关系，即正则化常数越大，逻辑回归函数的敏感度就越低，为保持其隐私性所需要添加的噪声也就越少。也就是说，正规化不仅可以防止过度拟合，还有助于保护隐私。
+
+梯度扰动
+~~~~~~~~
+
+*差分隐私随机梯度下降*\ （Differentially Private SGD，
+DP-SGD）和\ *差分隐私批量随机梯度下降*\ （Differentially Private
+Mini-batch SGD）是两个经典的梯度扰动差分隐私方法，由Song等人在2013年提出
+:cite:`song2013stochastic`
+。这两个方法最初是用来保护数据隐私，但它们同样适用于保护模型隐私。该方法在原来梯度的基础上添加随机噪声，适用于\ *凸目标函数*\ 。基于单点（single-point）数据的DP-SGD通过以下方式更新模型参数：
+
+.. math:: \begin{aligned}\theta_{t+1} = \theta_{t} - \eta_{t}(\lambda \theta_{t} + \nabla \mathcal{L}(\theta_{t},x_t,y_t) + {\boldsymbol{z}}_t)\end{aligned}
+
+其中，\ :math:`\theta`\ 为模型参数，\ :math:`\eta`\ 为步长，\ :math:`{\boldsymbol{z}}_t \in {\mathbb{R}}^d`\ 为从密度分布\ :math:`\rho({\boldsymbol{z}})=e^{\frac{\alpha}{2}{\lVert {\boldsymbol{z}} \rVert}}`\ 中独立采样的\ :math:`d`\ 维随机噪声向量。在单点DP-SGD的基础上增加批量大小就会得到批量DP-SGD算法：
+
+.. math:: \begin{aligned}\theta_{t+1} = \theta_{t} - \eta_{t}(\lambda \theta_{t} + \frac{1}{b} \sum\limits_{({\boldsymbol{x}}_i,y_i) \in B_t} \mathcal{L}(\theta_{t},{\boldsymbol{x}}_i,y_i) + \frac{1}{b} {\boldsymbol{z}}_t)\end{aligned}
+
+其中，\ :math:`B_t`\ 为样本批，\ :math:`b`\ 为批大小，\ :math:`\mathcal{L}`\ 为分类损失函数如交叉熵。实验表明，适度增加批量可以显著提高性能。
+
+2016年，Abadi等人 :cite:`abadi2016deep`
+将差分隐私引入深度学习领域，提出了一个改进版的DP-SGD算法来处理非凸目标函数。该方法在梯度中添加噪声，在合适的隐私预算内训练深度神经网络。差分隐私随机梯度下降计算过程如下：
+
+.. math:: \begin{aligned}&g_t({\boldsymbol{x}}_i) \gets \nabla_{\theta_{t}} \mathcal{L}(\theta_y,{\boldsymbol{x}}_i)\\&\bar{g}_t({\boldsymbol{x}}_i) = g_t({\boldsymbol{x}}_i) / \max(1,\frac{{\Vert g_t({\boldsymbol{x}}_i) \Vert}^2}{C})\\&\tilde{g}_t({\boldsymbol{x}}_i) = \frac{1}{L} (\sum\limits_i \bar{g}_t({\boldsymbol{x}}_i) + \mathcal{N}(0,\sigma^2 C^2))\\&\theta_{t+1} = \theta_{t} + \eta_t \tilde{g}_t({\boldsymbol{x}}_i)\end{aligned}
+   :label: eq_chapter7_dpsgd
+
+其中，\ :math:`{\boldsymbol{x}}`\ 为输入样本，\ :math:`\theta`\ 为模型参数，\ :math:`\mathcal{L}(\theta)=\sum_{i}\mathcal{L}(\theta,{\boldsymbol{x}}_{i})`\ 为损失函数，\ :math:`\bar{g}_t({\boldsymbol{x}}_i)`\ 为范数裁剪（norm
+clipping）后的梯度，\ :math:`C`\ 为梯度范数边界，\ :math:`\tilde{g}_t({\boldsymbol{x}}_i)`\ 为加入噪声的梯度，\ :math:`\sigma`\ 为参数噪声。式
+:eq:`eq_chapter7_dpsgd`
+利用差分隐私向梯度中增加噪声实现梯度扰动，随后计算全局的隐私预算，实现了在一定的隐私预算下保护模型隐私。
+
+.. _sec_model_sourcing:
+
+模型溯源
+--------
+
+
+当模型泄露已经发生时，模型所有者需要通过\ *溯源技术*\ 证明窃取者所拥有的模型来自于防御者，即\ *两个模型是同源的*\ 且\ *窃取模型是受害者模型的衍生品*\ ，以此帮助模型拥有者在知识产权诉讼过程中掌握主动权。目前领域内还没有工作能同时达到这两个目标。现有模型溯源方面的方法大致可以分为两类：\ *模型水印*\ 和\ *模型指纹*\ 。二者工作原理不同，对应的优缺点也不同。下面将详细介绍这两类方法。
+
+模型水印
+~~~~~~~~
+
+向模型中嵌入\ *所有者印记*\ （如公司logo）是一种最直接的模型版权保护方法，这样就可以通过验证所嵌入的印记来确定模型归属。基于此想法，
+研究者提出\ **模型水印**\ （Model
+Watermarking）的概念，将数字水印（digital
+watermarking）的概念从多媒体数据版权保护推广到深度神经网络模型知识产权保护。但是，人工智能模型与多媒体数据有很大差异，需要特殊的水印嵌入和提取方式。
+
+一般地，模型水印可分为\ *水印嵌入*\ （watermark
+embedding）和\ *水印提取*\ （watermark
+extraction）两个步骤。如何设计高效、鲁棒的模型水印嵌入和提取方法是模型水印技术的关键。在水印嵌入阶段，模型所有者可以向需要保护的模型参数\ :math:`\theta`\ 中嵌入水印信息\ :math:`wm`\ ，形式化表示如下：
+
+.. math:: \begin{aligned}\theta_{pro} = \lambda \cdot \theta + (1-\lambda) \cdot (\mathop{\mathrm{arg\,min}}\limits_{\theta} \mathcal{L}_{\text{wm}}(f_{\theta_{pro} }(\theta), \text{wm}))\end{aligned}
+
+其中，\ :math:`\theta_{pro}`\ 为嵌入水印后（即受保护）的模型参数，\ :math:`\mathcal{L}_{\text{wm}}`\ 是引导水印嵌入的损失函数，\ :math:`f_{\theta_{pro}}(\cdot)`\ 是水印嵌入矩阵的函数。在水印提取阶段，模型所有者可以通过提取可疑模型中的水印\ :math:`\text{wm}'`\ 来验证模型的所有权，形式化表示如下：
+
+.. math:: \begin{aligned}\text{Verify} = \frac{1}{N}\Sigma _{i=1}^{N}\delta(\text{wm}_i,\text{wm}'_i)\end{aligned}
+
+其中，\ :math:`\delta(\cdot,\cdot)`\ 是一个相似度函数，衡量提取水印和原始水印的相似程度，二者越相似验证结果的置信度就越高；\ :math:`\text{wm}_i`\ 为第\ :math:`i`\ 个水印，一个模型可以嵌入多个水印。
+
+目前，基于模型水印的人工智能模型版权保护方法可以根据适用的场景分为\ *白盒水印*\ 和\ *黑盒水印*\ 两大类。其中，白盒和黑盒的判断依据是在水印验证阶段，模型所有者（即防御者）是否需要访问模型的参数，即白盒水印的验证需要访问模型参数，而黑盒水印的验证只需要查询模型的API。
+
+白盒水印
+^^^^^^^^
+
+白盒水印场景假设模型所有者可以得到可疑模型的参数。在这种场景下嵌入水印时，模型所有者可以将一串\ *水印字符串*\ 以正则化的方式直接嵌入到模型内部。在水印提取过程中，模型所有者可以直接基于可疑模型的参数尝试提取水印字符串。一旦提取成功，模型所有者便可计算\ *真实水印*\ :math:`\text{wm}\in\{0,1\}^N`\ 与\ *提取水印*\ :math:`\text{wm}'\in\{0,1\}^N`\ 之间的误码率（Bit
+Error Rate, BER）来验证模型版权。其流程如 :numref:`fig_watermark_w`
+所示。
+
+.. _fig_watermark_w:
+
+.. figure:: images/10.7_white_box_watermark.png
+   :width: 540px
+
+   白盒水印方法
+
+
+
+一个经典的白盒水印方法叫\ **模型水印** :cite:`uchida2017embedding`
+，此方法需要在训练过程中向\ *模型参数矩阵*\ 中嵌入一串由0和1组成的水印编码。具体来说，模型所有者首先计算模型权重的均值\ :math:`\theta`\ 并给定嵌入矩阵\ :math:`X`\ ，然后通过嵌入正则化算法将\ :math:`T`\ 比特的水印信息\ :math:`{\boldsymbol{b}} \in \{0,1\}^T`\ 嵌入到模型的参数矩阵中，这种白盒水印嵌入的目标函数是：
+
+.. math:: \begin{aligned}&\mathcal{L} = \mathcal{L}_{0}(f({\boldsymbol{x}}),y) + \lambda {\mathcal{R}}(\theta, {\boldsymbol{b}})\\&{\mathcal{R}}(\theta, {\boldsymbol{b}}) = -\sum^{T}_{j=1} ({\boldsymbol{b}}_j \log({\boldsymbol{z}}_j) + (1-{\boldsymbol{b}}_j) \log(1-{\boldsymbol{z}}_j) )\\&{\boldsymbol{z}}_j=\sigma(\sum_{i} X_{ji} \cdot \theta_{i})\end{aligned}
+   :label: eq_chapter7_uchida2017_1
+
+其中，\ :math:`\mathcal{L}_{0}`\ 是原始任务损失函数；\ :math:`{\mathcal{R}}`\ 是对参数\ :math:`\theta`\ 嵌入水印的正则化项；\ :math:`X`\ 是嵌入矩阵，为固定参数；\ :math:`\theta`\ 是嵌入目标，为可学习参数；\ :math:`\sigma(\cdot)`\ 为sigmoid函数。需要注意的是，式
+:eq:`eq_chapter7_uchida2017_1`
+中除了\ :math:`\mathcal{L}_{0}`\ 项包含模型的输出\ :math:`f({\boldsymbol{x}})`\ ，其他项都是直接在\ *模型参数*\ 上定义的，并不涉及输入在模型中的前传操作。上式的目的是，在保证模型性能不受影响的前提下（由\ :math:`\mathcal{L}_{0}`\ 来保证），通过正则化将水印\ :math:`{\boldsymbol{b}}_j`\ 嵌入到嵌入矩阵\ :math:`X`\ （嵌入为1不嵌入为0）指定的模型参数位置中。
+
+在水印验证的过程中，需要对可疑模型进行白盒访问，从可疑模型的参数矩阵中提取\ :math:`T`\ 比特的水印信息\ :math:`{\boldsymbol{b}}'`\ ，提取位置依然是嵌入矩阵\ :math:`X`\ 定义的位置。提取过程可形式化表示为：
+
+.. math:: \begin{aligned}&{\boldsymbol{b}}'_{j} = s(\sum_{i} X_{ji} \cdot \theta_{i})\\&s(x) = \left\{\begin{array}{rcl}1   &   & x \geq 0\\0   &   & \text{else}\\\end{array} \right.\end{aligned}
+   :label: eq_chapter7_uchida2017_2
+
+其中，\ :math:`s(\cdot)`\ 是单位阶跃函数（unit step function）。
+最后，通过比对水印便可验证模型版权。
+
+除了将水印嵌入到模型的参数中，还可以将其嵌入到激活空间中。比如，\ **深度符号**\ （DeepSigns）方法
+:cite:`darvish2019deepsigns`
+，其可将水印嵌入到模型激活层的概率密度函数（Probability Density
+Function, PDF）的动态统计信息中。
+相比在参数空间嵌入水印，激活空间水印需要借助特定的数据来定义嵌入水印，无形中增加了一层保险，同时可以在模型的大量不活跃激活空间中轻松嵌入多个水印。而且，激活水印相比参数空间水印对水印移除攻击更鲁棒一些，因为模型参数的改变很容易导致参数水印无法提取。另外，在激活空间植入水印的方式属于一种特殊的后门攻击。
+
+黑盒水印
+^^^^^^^^
+
+在黑盒水印的场景下，模型所有者（即验证者）不可访问可疑模型的内部参数，但是可以通过查询模型并观察其输出进行版权验证。黑盒水印方法通常遵循后门攻击的思路，通过让模型学习特定“输入-输出”关联关系的方式达到嵌入水印的目的。具体来说，在水印嵌入过程中，模型所有者通过构造特定“输入-输出”（如“触发器-特定类别”数据）的后门数据集，在训练的过程中将后门数据学习到模型中。在水印提取时，模型所有者只需向可疑模型查询添加后门触发器的样本（即后门样本），并计算模型在后门样本上预测为后门类别的准确率（Trigger
+Set Accuracy, TSA）来验证模型版权。大致流程如
+:numref:`fig_watermark_b` 所示。
+
+.. _fig_watermark_b:
+
+.. figure:: images/10.8_blackbox_watermark.png
+   :width: 630px
+
+   黑盒水印方法
+
+
+
+相较于白盒水印，黑盒水印的灵活度更高，适用场景更广泛，具有明显的落地应用优势。根据黑盒水印嵌入的阶段，又可以进一步将黑盒水印大致分为\ *训练阶段水印嵌入*\ 和\ *推理阶段水印嵌入*\ 。
+
+**训练阶段水印嵌入**\ ：在模型训练阶段，可以通过修改训练过程的方式在模型中嵌入后门水印
+:cite:`zhang2018protecting,adi2018turning`
+，引入特殊的输入输出关联关系。在水印提取的过程中，模型所有者可以根据模型在后门水印数据上的预测标签来验证模型的归属，即如果待检测模型在后门数据上输出后门类别则证明其为所有者训练的模型。
+基于此想法，研究者选取部分数据加入后门触发器（如公司logo），生成触发器数据集（trigger
+dataset）\ :math:`D_{\text{wm}}`\ ，并将触发器数据对应的标签修改为后门标签（一个预先指定的错误标签），使得触发器数据具备“水印-后门类别”的对应。然后，将触发器数据集混入原始训练集，并在混合后的数据集上训练模型。模型会在训练过程中学习到数据集\ :math:`D_{\text{train}}\cup D_{\text{wm}}`\ 中的水印触发器与后门类别之间的对应关系，完成水印嵌入。
+
+对基于后门的水印方法来说，最重要的是如何构建有效的触发器数据集。为此，研究者提出了三种水印（触发数据集）生成算法：（1）在原始图像上嵌入\ *有意义的内容*\ （\ :math:`\text{wm}_{\text{content}}`\ ）；（2）在原始图像上添加\ *无意义噪声*\ （\ :math:`\text{wm}_{\text{noise}}`\ ）；（3）直接使用\ *无关图像*\ （\ :math:`\text{wm}_{\text{unrelated}}`\ ）。这三种不同的构建方案可以
+让模型所有者根据不同的需求生成不同类型的水印。
+
+**零比特水印** 方法 :cite:`le2020adversarial`
+利用决策边界附近的对抗样本构建触发数据集，并将这些对抗样本分为被分类器正确分类的\ *有效对抗样本*\ 和被分类器错误分类的\ *无效对抗样本*\ 。此方法通过微调来修改决策边界，使无效对抗样本变为有效对抗样本。如此，如若模型被窃取，模型所有者可使用触发数据集检验可疑模型的决策边界，进而确认模型版权。这种水印方法并不需要向模型参数中嵌入比特水印，但却会大量修改模型的参数。
+
+在上述模型水印方法中，水印学习和原任务往往相互独立，所以攻击者可以在不影响模型原始性能的情况下轻易移除水印。为此，研究者提出\ **纠缠水印嵌入**\ (Entangled
+Watermarking Embeddings, EWE)方法 :cite:`jia2021entangled`
+，使水印数据和原任务数据可以激活相同的神经元，从而无法在不影响模型性能的情况下将水印移除。该方法采用\ *软最近邻损失函数*\ （Soft
+Nearest Neighbor Loss, SNNL） :cite:`frosst2019analyzing`
+来衡量模型在水印数据和原任务数据上所学特征之间的纠缠，使得模型同时学习水印和原任务两种数据分布。SNNL损失函数的定义如下：
+
+.. math:: \begin{aligned}\text{SNNL}(X,Y,T) = -\frac{1}{N} \sum_{i=1}^{N} \log \left( \frac{\sum\limits_{ \mathop{j \neq i}\limits_{y_i=y_j}} e^{-\lVert ({\boldsymbol{z}}_i-{\boldsymbol{z}}_j) \rVert^{2}/T}}{\sum\limits_{ k \neq i} e^{-\lVert ({\boldsymbol{z}}_i-{\boldsymbol{z}}_k) \rVert^{2}/T}} \right)\end{aligned}
+   :label: eq_chapter7_snnl
+
+其中，\ :math:`\boldsymbol{z}_i`\ 、\ :math:`\boldsymbol{z}_j`\ 和\ :math:`\boldsymbol{z}_k`\ 分别为样本\ :math:`\boldsymbol{x}_i`\ 、\ :math:`\boldsymbol{x}_j`\ 和\ :math:`\boldsymbol{x}_k`\ 的逻辑值，\ :math:`T`\ 为温度超参数。
+EWE方法有效的提高了模型水印技术在面对“模型窃取+水印擦除”攻击时的鲁棒性。
+
+**推理阶段水印嵌入**\ ：推理阶段嵌入水印的思想比较巧妙，模型所有者在模型部署使用过程中，在返回给用户的输出中加入包含触发器的预测信息，\ *让攻击者窃取出一个具有水印的模型*\ 。
+**神经网络动态对抗水印**\ （Dynamic Adversarial Watermarking of Neural
+Networks, DAWN） :cite:`szyller2021dawn` 就是这样一个方法。
+DAWN方法不会干涉模型的训练过程，而是在推理阶段为来自API接口的查询请求动态嵌入水印，所以DAWN可以识别通过API窃取的模型。具体来说，攻击者\ :math:`A`\ 给定输入样本\ :math:`{\boldsymbol{x}}`\ ，DAWN会根据用户查询次数动态返回正确预测\ :math:`f({\boldsymbol{x}})`\ 或错误预测（触发数据集）\ :math:`f_b({\boldsymbol{x}})`\ ，且\ :math:`f({\boldsymbol{x}}) \neq f_b({\boldsymbol{x}})`\ 。因此，攻击者在窃取模型时会被误导，自己主动向替代模型\ :math:`f'({\boldsymbol{x}})`\ 中植入后门关联关系\ :math:`({\boldsymbol{x}}_b,f_b({\boldsymbol{x}}_b))`\ 。
+
+在水印提取阶段，模型所有者可以利用触发数据集\ :math:`D_b=(X_b, f_b(X_b))`\ 来验证模型版权，即\ :math:`f'({\boldsymbol{x}}_b) = f_b({\boldsymbol{x}}_b) \neq f({\boldsymbol{x}}_b)`\ 。此过程可形式化为：
+
+.. math:: \begin{aligned}S(X_b, f_b, f') = \frac{1}{\left| X_b \right|} \sum\limits_{{\boldsymbol{x}} \in X_b} \mathbb{1}(f'({\boldsymbol{x}}_b) \neq f_b({\boldsymbol{x}}_b))\end{aligned}
+
+其中，\ :math:`S(X_b, f_b, f')`\ 计算触发数据集中后门和可疑模型不同结果的比例，\ :math:`f'({\boldsymbol{x}}_b)`\ 为可疑模型返回的预测结果。与训练阶段水印嵌入不同，在DAWN方法中向替代模型中嵌入水印的是攻击者自己，而不是模型所有者。
+
+此前模型水印方面的研究工作大多关注图像分类模型，而研究工作
+:cite:`zhang2020model,zhang2021deep`
+为底层（low-level）计算机视觉模型提出了一个通用的模型水印框架。该方法在模型后处理过程中加入\ *水印模块*\ ，向受害者模型的输出\ :math:`f({\boldsymbol{x}})`\ 中嵌入一个\ *不可见水印*\ ，使得攻击者只能获得水印版本的输出\ :math:`f'({\boldsymbol{x}})`\ 。在水印嵌入过程中，如果攻击者利用带有水印的输出\ :math:`({\boldsymbol{x}}, f'({\boldsymbol{x}}))`\ 窃取模型，则水印将被攻击者自己嵌入到替代模型中。在水印提取过程中，模型所有者可以利用相应的水印提取模块，从可疑模型的输出中提取水印，从而验证模型版权。
+
+模型指纹
+~~~~~~~~
+
+前文介绍的模型水印方法是一种\ *侵入式*\ 的模型版权保护方案，因为它需要往模型中植入信息；而模型指纹（Model
+Fingerprint）是另外一类\ *非侵入式*\ 的模型版权保护方法。
+与生物学上的指纹唯一性类似，深度神经网络模型同样具有独一无二的指纹（属性或特征）。模型所有者通过提取模型指纹，使其与其他模型区分开来，从而验证模型的版权。与侵入式的模型水印不同，模型指纹不会干预模型的训练过程也不会修改模型的参数，因此不会影响受保护模型的功能和性能，也不会引入新的风险。
+
+模型指纹分为\ *指纹生成*\ （fingerprint
+generation）和\ *指纹验证*\ （fingerprint
+verification）两个阶段。在指纹生成阶段，模型所有者基于模型的独有特性提取得到指纹。在指纹验证阶段，模型所有者将指纹样本（可以区别两个模型特性的样本）通过调用可疑模型的API接口，计算受害者模型和可疑模型在一个样本子集上的输出匹配率，从而验证模型版权。
+
+决策边界指纹
+^^^^^^^^^^^^
+
+**IPGuard** 方法 :cite:`cao2021ipguard`
+首次提出模型指纹方法，其通过受害者模型的\ *决策边界指纹*\ 来验证模型版权。以分类器为例，不同的分类器有不同的决策边界，故模型所有者可以选择决策边界附近的数据点作为指纹数据点（如
+:numref:`fig_fingerprint_IPGuard`
+所示），从而对可疑模型模型进行指纹验证。
+
+.. _fig_fingerprint_IPGuard:
+
+.. figure:: images/10.9_decision_boundary.png
+   :width: 450px
+
+   IPGuard使用边界上的数据点生成模型指纹 :cite:`cao2021ipguard`
+
+
+
+因此，对该方法来说，最重要的是寻找决策边界附近的\ *指纹数据点*\ ，即分类器无法确定标签的数据点。
+
+为了更快速的寻找到指纹数据点，IPGuard将查找分类器决策边界附近的指纹数据点转为下式中的优化问题：
+
+.. math:: \begin{aligned}CB &= \{ {\boldsymbol{x}}|\exists i,j, i \neq j \, \text{and} \, g_i({\boldsymbol{x}})=g_j({\boldsymbol{x}}) \geq \max\limits_{t \neq i,j} g_t({\boldsymbol{x}})\}\\&= \{ {\boldsymbol{x}}|\exists i,j, i \neq j \, \text{and} \, z_i({\boldsymbol{x}})=z_j({\boldsymbol{x}}) \geq \max\limits_{t \neq i,j} z_t({\boldsymbol{x}})\}\end{aligned}
+   :label: eq_chapter7_ipguard_CB
+
+.. math:: \begin{aligned}\min\limits_{{\boldsymbol{x}}} ReLU(z_i({\boldsymbol{x}})-z_j({\boldsymbol{x}})+k) + ReLU(\max\limits_{t \neq i,j} z_t({\boldsymbol{x}})-z_i({\boldsymbol{x}}))\end{aligned}
+   :label: eq_chapter7_ipguard_loss
+
+在式 :eq:`eq_chapter7_ipguard_CB`
+中，\ :math:`CB`\ 为分类器决策边界，\ :math:`g_i({\boldsymbol{x}})=\frac{\exp(z_i({\boldsymbol{x}}))}{\sum^{C}_{j=1} \exp(z_i({\boldsymbol{x}}))}`\ 为样本\ :math:`{\boldsymbol{x}}`\ 被分类为标签\ :math:`i`\ 的概率，\ :math:`z({\boldsymbol{x}})`\ 为倒数第二层神经元的输出（即逻辑输出）。式
+:eq:`eq_chapter7_ipguard_loss`
+的目的是寻找决策边界附近的\ *指纹数据点*\ ，其中\ :math:`k`\ 为数据点到决策边界的距离。如果\ :math:`z_i({\boldsymbol{x}})=z_j({\boldsymbol{x}})`\ ，则意味着数据点\ :math:`{\boldsymbol{x}}`\ 恰好在决策边界上。此外，当分类器由于数据分布随时间变化而定期更新时，模型指纹也需要定期更新。
+
+另一个基于决策边界的模型指纹方法叫\ **可授予对抗样本**\ （Conferrable
+Adversarial Examples，CAE）方法 :cite:`lukas2019deep` 。
+可授予对抗样本是指\ *只在源模型和窃取模型之间迁移*\ 的对抗样本，相比之下，普通对抗样本往往可以迁移到任意模型。该方法将可授予对抗样本\ :math:`{\boldsymbol{x}}`\ 作为模型指纹，使得替代模型\ :math:`f'`\ 与受害者模型\ :math:`f`\ 返回相同输出，即\ :math:`\mathop{\mathrm{arg\,max}}(f'({\boldsymbol{x}})) =\mathop{\mathrm{arg\,max}}(f({\boldsymbol{x}})))`\ ，同时使得参考模型\ :math:`f_R`\ 与受害者模型\ :math:`f`\ 返回\ *不同输出*\ :math:`\mathop{\mathrm{arg\,max}}(f_R(x)) =y\neq\mathop{\mathrm{arg\,max}}(f({\boldsymbol{x}}))`\ ，从而验证模型版权。其中，可授予对抗样本的定义如
+:numref:`fig_fingerprint_CEM` 所示。
+
+.. _fig_fingerprint_CEM:
+
+.. figure:: images/10.10_conferable_adv.png
+   :width: 630px
+
+   可授予对抗样本示意图 :cite:`lukas2019deep`
+
+
+
+对CAE方法来说，最重要的是找到能最大化替代模型和参考模型之间差异的可授予对抗样本，此过程可形式化表示如下：
+
+.. math:: \begin{aligned}\mathcal{L}({\boldsymbol{x}}, {\boldsymbol{x}}_0) &= \lambda_1 \mathcal{L}_{CE}(1, \max\limits_{t} [\sigma (Confer(f', f_R, {\boldsymbol{x}}, t))])\\&- \lambda_2 \mathcal{L}_{CE}(f({\boldsymbol{x}}), f({\boldsymbol{x}}_0)) + \lambda_3 \mathcal{L}_{CE}(f({\boldsymbol{x}}), f'({\boldsymbol{x}}))\end{aligned}
+   :label: eq_chapter7_cem_loss
+
+.. math:: \begin{aligned}&Confer(f', f_R, {\boldsymbol{x}}, t) = Transfer(f', {\boldsymbol{x}}, t) (1 - Transfer(f_R, {\boldsymbol{x}}, t))\\&Transfer(f', {\boldsymbol{x}}, t) = \Pr\limits_{m \in \mathcal{M}}[m({\boldsymbol{x}})=t]\end{aligned}
+   :label: eq_chapter7_cem
+
+在式 :eq:`eq_chapter7_cem`
+中，\ :math:`t`\ 为标签，\ :math:`Confer(f', f_R, {\boldsymbol{x}}, t)`\ 为\ *可授予分数*\ ，用于量化替代模型和参考模型之间的差异大小，\ :math:`Transfer(f', {\boldsymbol{x}}, t)`\ 为\ *可迁移分数*\ 由一组模型\ :math:`\mathcal{M}`\ 计算得来。在式
+:eq:`eq_chapter7_cem_loss`
+中，三个损失项的目的是：（1）最大化对抗样本的可授予性；（2）最大化对抗性；（3）最小化受害者模型和替代模型之间的输出差异，从而生成可授予对抗样本\ :math:`{\boldsymbol{x}} = {\boldsymbol{x}}_0 + \delta`\ 作为模型指纹。与之前的模型指纹方法相比，可授予对抗样本模型指纹可以有效的减少误判。
+
+.. _fig_deep_judge:
+
+.. figure:: images/10.11_deep_judge.png
+   :width: 900px
+
+   DeepJudge框架示意图 :cite:`chen2021copy`
+
+
+
+基于测试的方法
+^^^^^^^^^^^^^^
+
+模型版权验证问题可以被建模为\ *验证一个模型是否是另一个模型的复制（copy）的问题*\ 。基于此思想，研究者提出一个基于\ *模型测试*\ （model
+testing）的版权保护和取证框架“**深度法官**”（DeepJudge）
+:cite:`chen2021copy` 。如 :numref:`fig_deep_judge`
+所示，DeepJudge由三部分组成：（1）采用现有的对抗攻击方法生成对抗样本，并构建一组测试用例；（2）测量可疑模型和受害者模型在测试用例上的行为相似度；（3）根据多个测试指标的结果投票判断模型所有权。
+
+DeepJudge包含三类测试指标，即\ *属性指标*\ 、\ *神经元指标*\ 和\ *神经层指标*\ 。如
+:numref:`tab_DeepJudge`
+所示，根据不同的测试指标设置，DeepJudge同时支持白盒测试和黑盒测试。其中，白盒测试可以访问可疑模型的中间层结果和输出概率向量，而黑盒测试只能查询可疑模型以获得概率向量或预测标签。如果可疑模型是受害者模型的衍生，则可疑模型与受害者模型在某些测试指标上的会特别的接近，当大部分指标都认为两个模型接近时，可疑模型即为窃取模型。
+
+.. _tab_DeepJudge:
+
+.. figure:: images/4.5_DeepJudge.png
+   :width: 630px
+
+   DeepJudge测试指标集
+
+
+
+DeepJudge可以被理解为是一种\ *集成模型指纹*\ （ensemble model
+fingerprint）方法，即综合多种指纹特征（即测试指标）和指纹数据（即测试用例）来构造一个更加系统全面的证据链。已有模型指纹方法可与DeepJudge提出的六种指标进行结合得到更全面的模型指纹保护方法。这一思想对模型水印也适用，可以通过构造多种不同类型的水印来达到更准确的模型溯源。
+
+值得一提的是，目前的模型指纹方法，甚至包括模型水印方法，都存在两个严重的缺陷：（1）\ *鲁棒性差*\ 和（2）\ *衍生关系判定难*\ 。
+在鲁棒性方面，一些常见的攻击，比如对抗攻击、针对性攻击等，可以很轻易地破坏水印和指纹的提取与验证过程。这意味着模型版权保护需要走“*多管齐下*”的路径，不管是水印还是指纹，需要多样化组合使用，让攻击者很难同时攻破所有的验证。\ *判定衍生关系*\ 可能是人工智能模型知识产权保护所面临的最大挑战。在很多情况下我们可以很容易地验证两个模型是否同源，但是无法鉴定二者的衍生关系，也就无法确定模型的原始归属。基于模型水印的方法在这方面尤其脆弱，因为攻击者完全可以在窃取模型后安插一个新的水印，然后宣称自己的水印才是先植入的，所以自己才是模型的真正拥有者。指纹类的方法虽然对此类的攻击具有一定的鲁棒性，但它们无法确定两个模型之间的衍生关系。实际上，人工智能模型的学习过程本就是无序的，无法判断知识学习的先后顺序。不过，在实际的法律诉讼中，双方可以通过其他方面的证据（如模型训练记录）来侧面的解决这个涉及到“先后”的问题。
+
+本章小结
+--------
+
+本章介绍了对抗防御、投毒防御、后门防御、差分隐私、模型溯源五个方面的基础防御算法。其中，章节
+:numref:`sec_adv defense`
+介绍了针对对抗攻击的四种防御算法，包括攻击检测、对抗训练、对抗蒸馏和输入防御；章节
+:numref:`sec_poisoning defense`
+介绍了针对数据投毒攻击的防御方法，主要以检测和隔离为主，包括干净样本选择、深度划分聚合、反后门学习和有效毒药检测；章节
+:numref:`sec_backdoor defense`
+介绍了后门模型检测、后门样本检测、后门移除防御和联邦后门防御四个方面的防御方法；章节
+:numref:`sec_differential privacy`
+介绍了差分隐私和三类实现差分隐私的方式，其可以防御成员推理、模型抽取、数据抽取等隐私相关的攻击；章节
+:numref:`sec_model_sourcing`
+介绍了可以保护模型版权的溯源技术，包括模型水印和模型指纹两类。本章介绍的防御算法大都为小模型所设计，但其背后的防御思想都很经典，为构建服务于大模型的防御方法奠定了基础。
+
+习题
+----
+
+1. 列举三种对抗样本检测方法，并解释说明它们的原理。
+2. 写出对抗训练的优化公式并详细描述其双层优化的训练步骤。
+3. 简要分析输入空间防御方法的优缺点。
+4. 后门模型检测任务和后门样本检测任务的区别是什么，二者如何结合？
+5. 后门移除的主要核心思想是什么，主要目标是什么？
+6. 列举三种差分隐私的应用方式并简单说明差分隐私的工作原理？
+7. 列举三类模型溯源方法并简要说明它们的优缺点。
+
+.. [1]
+   针对性攻击也被成为适应性攻击，本书建议将这类攻击称为“针对性攻击”，因为它们是有针对性的为绕过某个防御方法所设计的。
+
+.. [2]
+   实际上，2015年年的多个工作已经完整的提出了各类min-max鲁棒优化框架，更详细的演变过程可参考作者所著的另一本教材《人工智能：数据与模型安全》。
+
+.. [3]
+   https://robustbench.github.io/
+
+.. [4]
+   拜占庭攻击是一种针对联邦学习的参数投毒攻击，攻击者可以上传任意的参数更新来破坏全局模型的收敛。

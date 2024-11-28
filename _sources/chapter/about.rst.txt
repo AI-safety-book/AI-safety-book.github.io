@@ -1,0 +1,13 @@
+
+关于此书
+========
+
+**大模型安全**
+--------------
+
+作者
+~~~~
+
+-  作者：姜育刚 马兴军
+-  主页：\ `复旦大学视觉与学习实验室 <https://fvl.fudan.edu.cn/home_cn/list.htm>`__
+-  错误反馈：\ `danxjma@gmail.com <danxjma@gmail.com>`__\ （感谢您的支持！）

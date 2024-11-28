@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    
+    <title>2. 生命周期 &#8212; 大模型安全 1.0.0 documentation</title>
+
+    <link rel="stylesheet" href="../_static/material-design-lite-1.3.0/material.purple-deep_orange.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/sphinx_materialdesign_theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/fontawesome/all.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/fonts.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/d2l.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/d2l.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. 攻击算法基础" href="chap-3.html" />
+    <link rel="prev" title="1. 人工智能安全概述" href="chap-1.html" /> 
+  </head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-drawer"><header class="mdl-layout__header mdl-layout__header--waterfall ">
+    <div class="mdl-layout__header-row">
+        
+        <nav class="mdl-navigation breadcrumb">
+            <a class="mdl-navigation__link is-active"><span class="section-number">2. </span>生命周期</a>
+        </nav>
+        <div class="mdl-layout-spacer"></div>
+        <nav class="mdl-navigation">
+        
+<form class="form-inline pull-sm-right" action="../search.html" method="get">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+        <label id="quick-search-icon" class="mdl-button mdl-js-button mdl-button--icon"  for="waterfall-exp">
+          <i class="material-icons">search</i>
+        </label>
+        <div class="mdl-textfield__expandable-holder">
+          <input class="mdl-textfield__input" type="text" name="q"  id="waterfall-exp" placeholder="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </div>
+      </div>
+      <div class="mdl-tooltip" data-mdl-for="quick-search-icon">
+      Quick search
+      </div>
+</form>
+        
+<a id="button-show-source"
+    class="mdl-button mdl-js-button mdl-button--icon"
+    href="../_sources/chapter/chap-2.rst.txt" rel="nofollow">
+  <i class="material-icons">code</i>
+</a>
+<div class="mdl-tooltip" data-mdl-for="button-show-source">
+Show Source
+</div>
+        </nav>
+    </div>
+    <div class="mdl-layout__header-row header-links">
+      <div class="mdl-layout-spacer"></div>
+      <nav class="mdl-navigation">
+          
+              <a  class="mdl-navigation__link" href="https://github.com/large-model-safety">
+                  <i class="fab fa-github"></i>
+                  Github
+              </a>
+      </nav>
+    </div>
+</header><header class="mdl-layout__drawer">
+    
+          <!-- Title -->
+      <span class="mdl-layout-title">
+          <a class="title" href="../index.html">
+              <img class="logo" src="../_static/logo_with_text.png" alt="大模型安全"/>
+          </a>
+      </span>
+    
+    
+      <div class="globaltoc">
+        <span class="mdl-layout-title toc">Table Of Contents</span>
+        
+        
+            
+            <nav class="mdl-navigation">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chap-1.html">1. 人工智能安全概述</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. 生命周期</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-3.html">3. 攻击算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-4.html">4. 防御算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-5.html">5. 视觉大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-6.html">6. 大语言模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-7.html">7. 多模态大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-8.html">8. 总结与展望</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">参考文献</a></li>
+</ul>
+
+            </nav>
+        
+        </div>
+    
+</header>
+        <main class="mdl-layout__content" tabIndex="0">
+
+	<script type="text/javascript" src="../_static/sphinx_materialdesign_theme.js "></script>
+    <header class="mdl-layout__drawer">
+    
+          <!-- Title -->
+      <span class="mdl-layout-title">
+          <a class="title" href="../index.html">
+              <img class="logo" src="../_static/logo_with_text.png" alt="大模型安全"/>
+          </a>
+      </span>
+    
+    
+      <div class="globaltoc">
+        <span class="mdl-layout-title toc">Table Of Contents</span>
+        
+        
+            
+            <nav class="mdl-navigation">
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chap-1.html">1. 人工智能安全概述</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. 生命周期</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-3.html">3. 攻击算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-4.html">4. 防御算法基础</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-5.html">5. 视觉大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-6.html">6. 大语言模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-7.html">7. 多模态大模型安全</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chap-8.html">8. 总结与展望</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">参考文献</a></li>
+</ul>
+
+            </nav>
+        
+        </div>
+    
+</header>
+
+    <div class="document">
+        <div class="page-content" role="main">
+        
+  <div class="section" id="chap-2">
+<span id="id1"></span><h1><span class="section-number">2. </span>生命周期<a class="headerlink" href="#chap-2" title="Permalink to this heading">¶</a></h1>
+<p>构建一个实际可用的人工智能模型包括四个主要阶段，如
+<a class="reference internal" href="#fig"><span class="std std-numref">图2.1</span></a>
+所示。首先，进行数据收集，准备所需的训练数据。接着，进行模型训练，让模型从数据中自动学习。然后，通过测试和改进，评估和优化模型性能。最后，将训练好的模型部署到实际环境中供用户使用。</p>
+<div class="figure align-default" id="id87">
+<span id="fig"></span><a class="reference internal image-reference" href="../_images/2_生命周期.png"><img alt="../_images/2_%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png" src="../_images/2_%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图2.1 </span><span class="caption-text">人工智能模型开发生命周期</span><a class="headerlink" href="#id87" title="Permalink to this image">¶</a></p>
+</div>
+<div class="section" id="sec-data-collection">
+<span id="id2"></span><h2><span class="section-number">2.1. </span>数据收集<a class="headerlink" href="#sec-data-collection" title="Permalink to this heading">¶</a></h2>
+<p>就像建造高楼需要坚实的基石，优质的数据是培养强大人工智能模型的关键。通过数据，人工智能学会了图像识别、语言理解甚至未来预测。选择和处理高质量数据是塑造卓越人工智能的关键。在本节中，我们将通过五个经典数据集，介绍数据的收集和处理方法。</p>
+<div class="section" id="id3">
+<h3><span class="section-number">2.1.1. </span>图像数据<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<div class="figure align-default" id="id88">
+<span id="fig-imagenet-logo"></span><a class="reference internal image-reference" href="../_images/2.1.1_Imagenet.jpeg"><img alt="../_images/2.1.1_Imagenet.jpeg" src="../_images/2.1.1_Imagenet.jpeg" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.1 </span><span class="caption-text">ImageNet数据集</span><a class="headerlink" href="#id88" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>ImageNet</strong> <span id="id4">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id10" title="Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K., &amp; Fei-Fei, L. (2009). Imagenet: a large-scale hierarchical image database. IEEE Conference on Computer Vision and Pattern Recognition.">Deng <em>et al.</em>, 2009</a>)</span>
+是一个庞大的计算机视觉数据集，包含超过一千万张图片和高质量人工标注，广泛用于目标识别和图像分类等任务（见
+<a class="reference internal" href="#fig-imagenet-logo"><span class="std std-numref">图2.1.1</span></a>
+）。构建ImageNet的第一步是从互联网上收集大量候选图像，这些图像的初步准确率约为10%。为了增加图像数量，ImageNet使用多个关键词搜索相关图像，例如搜索“whippet”（一种犬类）时，不仅包括“whippet
+dog”和“whippet
+greyhound”，还翻译关键词为中文、西班牙文、荷兰文和意大利文，从而扩展搜索范围。最终，为每种含义收集了超过一万张候选图片。</p>
+<p>获取候选图片后，需对其进行清洗。ImageNet利用AMT平台 <span id="id5">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id25" title="Sorokin, A., &amp; Forsyth, D. (2008). Utility data annotation with amazon mechanical turk. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Sorokin and Forsyth, 2008</a>)</span>
+发布人工标注任务，邀请大量AMT用户参与数据清洗。标注的目的是排除与目标含义不符的图像。例如，若“whippet”图片中不包含该犬类，则该图像被排除。ImageNet采用投票方式，将每张图片分配给多个人进行判断，只有在获得多数正面反馈时，该图片才被纳入数据集。</p>
+<div class="figure align-default" id="id89">
+<span id="fig-cityscapes"></span><a class="reference internal image-reference" href="../_images/2.1.1_Cologne.png"><img alt="../_images/2.1.1_Cologne.png" src="../_images/2.1.1_Cologne.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.2 </span><span class="caption-text">Cityscapes数据集中对德国科隆市的高质量密集像素级标注</span><a class="headerlink" href="#id89" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>Cityscapes</strong> <span id="id6">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id26" title="Cordts, M., Omran, M., Ramos, S., Rehfeld, T., Enzweiler, M., Benenson, R., … Schiele, B. (2016). The cityscapes dataset for semantic urban scene understanding. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Cordts <em>et al.</em>, 2016</a>)</span>
+是一个大规模的城市场景图像数据集，专门用于语义分割和目标检测。该数据集包含50个城市的复杂街景图像，为城市环境中的自动驾驶研究提供支持。通过在车辆上安装摄像头录制视频，Cityscapes共获取了数十万帧图像。其中，5000张来自27个城市的图像经过了精细的像素级标注（见
+<a class="reference internal" href="#fig-cityscapes"><span class="std std-numref">图2.1.2</span></a>
+），此外，来自23个城市的20000张图像进行了粗略标注。标注内容包括30类对象（如行人、车辆）的多边形框和语义标签。精细标注的图像还包含对象的深度排序信息。数据集中还附带了车辆航位、外部温度和GPS轨迹等信息。</p>
+<p>在图像处理过程中，Cityscapes进行了Debayer操作和内外部校准
+<span id="id7">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id27" title="Kruger, L. E., Wohler, C., Wurz-Wessel, A., &amp; Stein, F. (2004). In-factory calibration of multiocular camera systems. Optical Metrology in Production Engineering.">Kruger <em>et al.</em>, 2004</a>)</span>
+。Debayer操作通过对邻近像素的颜色信息进行插值，填补单通道彩色图像中的缺失颜色信息，从而生成完整的彩色图像。</p>
+</div>
+<div class="section" id="id8">
+<h3><span class="section-number">2.1.2. </span>文本数据<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<p><strong>Common Crawl</strong> <a class="footnote-reference brackets" href="#id83" id="id9">1</a>
+是一个开源网络抓取项目，提供了大量的网页数据，规模达到拍字节（Petabyte，PB）级，对当前人工智能发展至关重要。例如，在GPT-3的训练数据中，Common
+Crawl占据了60% <span id="id10">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id13" title="Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan, J. D., Dhariwal, P., … others. (2020). Language models are few-shot learners. Advances in Neural Information Processing Systems.">Brown <em>et al.</em>, 2020</a>)</span>
+。该项目利用网页爬虫技术定期从互联网获取原始网页数据（WARC）、元数据（WAT）以及文本提取（WET）。</p>
+<p>尽管Common
+Crawl数据集规模巨大，但数据较为杂乱，需进行清洗和预处理。GPT-3的预处理分为三个步骤：首先，训练分类器区分高质量和低质量文本，过滤掉低质量数据；其次，采用模糊去重技术删除重复部分，提升模型质量并防止过拟合；最后，加入其他高质量文本数据（如维基百科）以进一步提升数据集质量。</p>
+<div class="figure align-default" id="id90">
+<span id="fig-alpaca"></span><a class="reference internal image-reference" href="../_images/2.1.2_Alpaca.png"><img alt="../_images/2.1.2_Alpaca.png" src="../_images/2.1.2_Alpaca.png" style="width: 450px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.3 </span><span class="caption-text">Alpaca训练集的收集过程</span><a class="headerlink" href="#id90" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>Alpaca训练集</strong> Alpaca <span id="id11">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id20" title="Taori, R., Gulrajani, I., Zhang, T., Dubois, Y., Li, X., Guestrin, C., … Hashimoto, T. B. (2023). Alpaca: a strong, replicable instruction-following model. Stanford Center for Research on Foundation Models. https://crfm.stanford.edu/2023/03/13/alpaca.html, 3(6), 7.">Taori <em>et al.</em>, 2023</a>)</span>
+是一个对话语言模型，通过对LLaMA 7B <span id="id12">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id17" title="Touvron, H., Lavril, T., Izacard, G., Martinet, X., Lachaux, M.-A., Lacroix, T., … others. (2023). Llama: open and efficient foundation language models. arXiv preprint arXiv:2302.13971.">Touvron <em>et al.</em>, 2023</a>)</span>
+模型进行监督微调得到。其训练数据源于OpenAI的text-davinci-003模型生成的指令跟随式数据。构建训练集时，研究者首先手动创建了一个包含175条“指令-输出”对的种子任务集，每条对包含一个指令和相应的输出（见
+<a class="reference internal" href="#fig-alpaca"><span class="std std-numref">图2.1.3</span></a>
+）。例如，指令“列出一些新年计划”对应的输出为“减肥、多锻炼、健康饮食”。随后，研究者使用text-davinci-003模型基于该种子任务集生成了52000条“指令-输出”对，构成了Alpaca的训练集。</p>
+<p>然而，一些学者发现Alpaca的训练集中存在缺陷，如生成数据中出现幻觉、输出为空或不合法、指令不清晰、不合理，甚至包含生成图片的指令。为解决这些问题，Alpaca-cleaned项目 <a class="footnote-reference brackets" href="#id84" id="id13">2</a>
+对训练集进行了清理，得到了更干净、质量更高的数据集。</p>
+</div>
+<div class="section" id="id14">
+<h3><span class="section-number">2.1.3. </span>多模态数据<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<p><strong>LAION</strong> <span id="id15">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id28" title="Schuhmann, C., Beaumont, R., Vencu, R., Gordon, C. W., Wightman, R., Cherti, M., … Jitsev, J. (2022). LAION-5b: an open large-scale dataset for training next generation image-text models. Advances in Neural Information Processing Systems.">Schuhmann <em>et al.</em>, 2022</a>)</span>
+是一个大规模的多模态图文数据集，包含约58.5亿个“图像-文本”对。该数据集的构建基于前文提到的Common
+Crawl数据集。具体而言，LAION利用Common Crawl的元数据文件，通过解析HTML
+IMG标签，查找带有alt-text的图像，并将这些图像与对应的alt-text配对，形成图文对。alt-text是指图像无法显示时提供的替代文本。接着，LAION使用CLD3
+<span id="id16">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id29" title="Ooms, J. (2024). cld3: Google's Compact Language Detector 3. R package version 1.6.0. URL: https://docs.ropensci.org/cld3/ https://github.com/ropensci/cld3 https://ropensci.r-universe.dev/cld3">Ooms, 2024</a>)</span>
+进行文本语言检测，并对图文对进行分类，以区分文本语言为英语、其他语言或未知语言。</p>
+<p>LAION的数据预处理分为两个步骤。首先，对Common
+Crawl的元数据进行筛选，剔除图像过小、替代文本过短，以及可能是恶意、大型或冗余的图像，以确保数据集的质量。其次，使用ViT-B/32
+CLIP <span id="id17">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id22" title="Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., … others. (2021). Learning transferable visual models from natural language supervision. International Conference on Machine Learning.">Radford <em>et al.</em>, 2021</a>)</span>
+模型计算图像和文本的余弦相似度，删除相似度过低的图文对，以保留具有较强语义关联的图文对。经过这些处理，数据集中保留了约58.5亿个样本，删除了约90%的原始图文对。
+<a class="reference internal" href="#fig-laion"><span class="std std-numref">图2.1.4</span></a> 展示了一个LAION数据集的例子。</p>
+<div class="figure align-default" id="id91">
+<span id="fig-laion"></span><a class="reference internal image-reference" href="../_images/2.1.3_LAION（横）.png"><img alt="../_images/2.1.3_LAION%EF%BC%88%E6%A8%AA%EF%BC%89.png" src="../_images/2.1.3_LAION%EF%BC%88%E6%A8%AA%EF%BC%89.png" style="width: 450px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.4 </span><span class="caption-text">LAION-5B数据集中的一个英文图文对样例</span><a class="headerlink" href="#id91" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>Conceptual Captions</strong> 谷歌公司的Conceptual Captions 3M（简称CC3M）
+<span id="id18">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id57" title="Sharma, P., Ding, N., Goodman, S., &amp; Soricut, R. (2018). Conceptual captions: a cleaned, hypernymed, image alt-text dataset for automatic image captioning. Annual Meeting of the Association for Computational Linguistics.">Sharma <em>et al.</em>, 2018</a>)</span>
+是一个包含330万个“图像-文本”对的多模态数据集。著名开源多模态大模型LLaVA
+<span id="id19">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id51" title="Liu, H., Li, C., Wu, Q., &amp; Lee, Y. J. (2023). Visual instruction tuning. Advances in Neural Information Processing Systems.">Liu <em>et al.</em>, 2023</a>)</span>
+即是在经过过滤的CC3M子集CC-595K上进行预训练的。CC3M首先通过在互联网上搜索图像及其关联的alt-text文本，构建候选“图像-文本”对。接着，通过自动化流程对这些候选对进行提取、过滤和转换，以确保文本的干净程度、信息量、流畅性和可学习性。该流程包括以下四个步骤：</p>
+<ol class="arabic simple">
+<li><p><strong>图像过滤</strong>：
+这一步对图像进行初步筛选，仅保留长宽均大于400像素且长宽比不超过2的JPEG图像，并剔除包含不良内容的图像，删除约65%的候选图像。</p></li>
+<li><p><strong>文本过滤</strong>： 在这一步，CC3M利用Google Cloud Natural Language
+API分析alt-text内容，剔除结构不良、重复词汇多、首字母未大写或大写词汇过多、包含不常见词汇、极端评价、不良信息以及包含固定前缀或后缀的文本数据，最终留下约3%的文本。</p></li>
+<li><p><strong>图文过滤</strong>：
+除了对图像和文本单独过滤外，还检查图文对的匹配度。利用Google Cloud
+Vision
+API对每张图像分配5到20个标签，判断文本内容是否与这些标签匹配，这一步筛选掉了60%的数据。</p></li>
+<li><p><strong>文本转换</strong>：
+在前三个步骤中，已过滤掉99%的候选数据。最后，通过Google Knowledge
+Graph Search API和Google Cloud Natural Language
+API将难以学习的专有名词转换为更通用的超义词，例如，将“ Harrison
+Ford”替换为“演员”。然后，按解析后的实体（如“演员”）聚类，仅保留类内样本数量超过100的“图像-文本”对，确保数据集的代表性。</p></li>
+</ol>
+<p><a class="reference internal" href="#fig-cc"><span class="std std-numref">图2.1.5</span></a>
+展示了一个经过CC3M筛选的“图像-文本”对示例：左侧是筛选后的图像，右上角的alt-text为原始图片描述，右下角的Conceptual
+Captions文本为处理后的文本。</p>
+<div class="figure align-default" id="id92">
+<span id="fig-cc"></span><a class="reference internal image-reference" href="../_images/2.1.3_CC.png"><img alt="../_images/2.1.3_CC.png" src="../_images/2.1.3_CC.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.5 </span><span class="caption-text">CC3M数据集中的样本示例</span><a class="headerlink" href="#id92" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>LLaVA微调训练集</strong>
+多模态大模型LLaVA使用CC-595K数据集进行预训练。预训练后，LLaVA在其他大模型生成的数据上进行了微调。具体而言，LLaVA首先利用ChatGPT或GPT-4在COCO数据集
+<span id="id20">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id58" title="Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., … Zitnick, C. L. (2014). Microsoft coco: common objects in context. European Conference on Computer Vision.">Lin <em>et al.</em>, 2014</a>)</span>
+的基础上生成了指令跟随数据集LLaVA-Instruct-158K <span id="id21">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id51" title="Liu, H., Li, C., Wu, Q., &amp; Lee, Y. J. (2023). Visual instruction tuning. Advances in Neural Information Processing Systems.">Liu <em>et al.</em>, 2023</a>)</span>
+。为保持指令和回答的多样性与深入推理，LLaVA将每张图片描述为两段文字：一段描述图片中的场景，另一段描述物体的概念和边界框位置。这些描述作为提示词输入ChatGPT或GPT-4中。例如，
+<a class="reference internal" href="#fig-llava-instruct-158k"><span class="std std-numref">图2.1.6</span></a>
+中的图片场景描述为：“一群人站在一辆黑色SUV外面，带着各种行李，试图将所有行李装进车辆中。”
+对物体的描述为：“人：[0.681, 0.242, 0.774, 0.694]，背包：[0.384, 0.696,
+0.485, 0.914]，行李箱：…” 。</p>
+<div class="figure align-default" id="id93">
+<span id="fig-llava-instruct-158k"></span><a class="reference internal image-reference" href="../_images/2.1.3_LLaVA-Instruct-158K.png"><img alt="../_images/2.1.3_LLaVA-Instruct-158K.png" src="../_images/2.1.3_LLaVA-Instruct-158K.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.1.6 </span><span class="caption-text">LLaVA-Instruct-158K数据集图片示例</span><a class="headerlink" href="#id93" title="Permalink to this image">¶</a></p>
+</div>
+<p>LLaVA设计了三种输出模式：</p>
+<ol class="arabic simple">
+<li><p><strong>对话类型</strong>：大语言模型提出问题并回答，涵盖物体类型、数量、行为、位置和相对位置等。例如：“提问：图片中的汽车是什么类型的？回答：图片中有一辆黑色SUV。”</p></li>
+<li><p><strong>详细描述类型</strong>：对图片进行详细描述。例如：“图片显示的是一个地下停车场，一辆黑色SUV停在那里，场景中有三个人正在将行李装进SUV中……”。</p></li>
+<li><p><strong>复杂推理类型</strong>：类似对话类型的问答，但要求更深入的推理。例如：“提问：这些人面临什么困难？回答：他们在将各种行李装进SUV中面临挑战……”。</p></li>
+</ol>
+<p>LLaVA仅手工设计了少量示例，其他输出由大语言模型自动生成。最终，LLaVA收集了约158,000个“图像-文本”指令跟随数据样本，包括58,000个对话、23,000个详细描述和77,000个复杂推理样例。</p>
+</div>
+</div>
+<div class="section" id="sec-model-training-and-ft">
+<span id="id22"></span><h2><span class="section-number">2.2. </span>模型训练与微调<a class="headerlink" href="#sec-model-training-and-ft" title="Permalink to this heading">¶</a></h2>
+<p>在人工智能模型的生命周期中，模型训练和微调是构建高效智能系统的核心环节。人工智能模型不仅需要坚实的数据基础，还需经过精心的训练和微调才能稳定发挥作用。经过细致训练和调整的模型才能在特定任务中实现最佳性能。本节将详细探讨如何通过科学的训练方法和巧妙的微调技术，将人工智能模型打造为应对各种复杂问题的强大工具。</p>
+<div class="section" id="id23">
+<h3><span class="section-number">2.2.1. </span>标准训练<a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h3>
+<p>模型训练旨在通过特定算法在大量数据上优化模型，使其具备完成特定任务的能力。在这一过程中，模型参数会被调整，以学习复杂的表征并提高泛化能力。</p>
+<p>以<strong>有监督学习</strong>为例，假设模型将从样本空间
+<span class="math notranslate nohighlight">\({\mathcal{X}}\)</span>中获取所有可能的样本。我们希望训练一个模型<span class="math notranslate nohighlight">\(f\)</span>（如线性模型或神经网络），将样本<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>准确映射到其真实标签<span class="math notranslate nohighlight">\(y\)</span>。这一过程被称为<strong>期望风险最小化</strong>，目标是：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-0">
+<span class="eqno">(2.2.1)<a class="headerlink" href="#equation-chapter-chap-2-0" title="Permalink to this equation">¶</a></span>\[\min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \sim p({\boldsymbol{x}}, y)}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y)\right]\]</div>
+<p>其中,
+<span class="math notranslate nohighlight">\(p({\boldsymbol{x}}, y)\)</span>是数据的真实分布，<span class="math notranslate nohighlight">\(\theta\)</span>是模型<span class="math notranslate nohighlight">\(f\)</span>的参数，<span class="math notranslate nohighlight">\({\mathcal{L}}(\cdot, \cdot)\)</span>
+是损失函数，例如平方损失：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-1">
+<span class="eqno">(2.2.2)<a class="headerlink" href="#equation-chapter-chap-2-1" title="Permalink to this equation">¶</a></span>\[{\mathcal{L}}(f({\boldsymbol{x}}), y) = \frac{1}{2}(f({\boldsymbol{x}}) - y)^2\]</div>
+<p>由于真实数据分布通常未知，我们使用<strong>经验风险最小化</strong>，在数据集
+<span class="math notranslate nohighlight">\(D\)</span> 上进行优化：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-2">
+<span class="eqno">(2.2.3)<a class="headerlink" href="#equation-chapter-chap-2-2" title="Permalink to this equation">¶</a></span>\[\min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \in D}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y)\right]\]</div>
+<p>当数据集
+<span class="math notranslate nohighlight">\(D\)</span>趋近于样本空间<span class="math notranslate nohighlight">\({\mathcal{X}}\)</span>时，经验风险最小化的结果接近于期望风险最小化。然而，实际数据集<span class="math notranslate nohighlight">\(D\)</span>
+可能仅为样本空间的一个小子集，存在过拟合风险。为此，我们在最小化经验风险时加入正则化项，即<strong>结构风险最小化</strong>：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-3">
+<span class="eqno">(2.2.4)<a class="headerlink" href="#equation-chapter-chap-2-3" title="Permalink to this equation">¶</a></span>\[\min_{\theta} \mathbb{E}_{({\boldsymbol{x}}, y) \in D}\left[{\mathcal{L}}(f({\boldsymbol{x}}), y) + \lambda J(f)\right]\]</div>
+<p>其中
+<span class="math notranslate nohighlight">\(J(f)\)</span>表示模型复杂度，通常使用模型参数的<span class="math notranslate nohighlight">\(L_2\)</span>范数表示，<span class="math notranslate nohighlight">\(\lambda\)</span>
+是正则化系数，用于平衡损失项和正则化项。</p>
+<p>选择优化算法时，我们通常使用<strong>梯度下降法</strong>。由于目标函数可能不是凸的，我们利用梯度信息迭代地寻找极小值点：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-4">
+<span class="eqno">(2.2.5)<a class="headerlink" href="#equation-chapter-chap-2-4" title="Permalink to this equation">¶</a></span>\[\theta := \theta - \alpha \frac{\partial \mathbb{E}_{({\boldsymbol{x}}, y) \in D}[{\mathcal{L}}(f({\boldsymbol{x}}), y)]}{\partial \theta}\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(\alpha\)</span> 是步长，决定了每步更新的幅度。</p>
+<p>每次遍历所有训练样本称为一个<em>周期</em>或<em>轮次</em>（epoch）。经过若干周期后，模型的经验风险会收敛到一个极小值，但可能是局部最小值或鞍点。为解决这些问题，<strong>随机梯度下降</strong>（SGD）和<strong>小批量梯度下降</strong>（Mini-batch
+Gradient Descent）等方法应运而生。SGD
+在每次迭代中仅使用一个样本，而小批量梯度下降则使用数据集中的一个小子集。此外，还提出了多种改进算法，如
+AdaGrad、RMSProp、Adam 和 AdamW，以提高模型的收敛速度并避免局部最优解。</p>
+<p>对于<strong>无监督学习</strong>任务，数据中不包含标签信息
+<span class="math notranslate nohighlight">\(y\)</span>。这些任务要求算法在无标注的数据上自主学习数据的内在知识，包括特征降维、异常检测、概率密度估计、聚类和表征学习等。无监督学习过程如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-5">
+<span class="eqno">(2.2.6)<a class="headerlink" href="#equation-chapter-chap-2-5" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}\text{学习}: &amp; \quad {\mathcal{A}}(D) \rightarrow f \\\text{使用}: &amp; \quad f(X) \rightarrow r\end{aligned}\end{split}\]</div>
+<p>其中，
+<span class="math notranslate nohighlight">\({\mathcal{A}}\)</span>是学习算法，<span class="math notranslate nohighlight">\(D\)</span>是数据集，<span class="math notranslate nohighlight">\(f\)</span>是学习得到的模型，<span class="math notranslate nohighlight">\(X\)</span>是输入数据，<span class="math notranslate nohighlight">\(r\)</span>
+是分析结果。</p>
+<p>接下来，我们将介绍经典的图像模型和文本模型结构及其训练方法。</p>
+<div class="figure align-default" id="id94">
+<span id="fig-cnn"></span><a class="reference internal image-reference" href="../_images/2.2.1_CNN.png"><img alt="../_images/2.2.1_CNN.png" src="../_images/2.2.1_CNN.png" style="width: 499px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.1 </span><span class="caption-text">卷积神经网络结构示意图</span><a class="headerlink" href="#id94" title="Permalink to this image">¶</a></p>
+</div>
+<div class="section" id="id24">
+<h4><span class="section-number">2.2.1.1. </span>图像模型<a class="headerlink" href="#id24" title="Permalink to this heading">¶</a></h4>
+<p>图像模型通过分析图片中的像素信息来识别、分类和理解图像内容，是计算机视觉任务的核心模型。</p>
+<p><strong>卷积神经网络</strong>（Convolutional Neural Network,
+CNN）是一种经典的图像模型，如 <a class="reference internal" href="#fig-cnn"><span class="std std-numref">图2.2.1</span></a>
+所示。卷积神经网络使用<em>卷积层</em>提取图像特征，帮助模型识别图像中的模式和结构。通过<em>池化层</em>对特征图进行下采样，减少数据量同时保留关键信息，从而提高模型的计算效率和鲁棒性。</p>
+<p>在<em>卷积层</em>中，使用一个小型矩阵作为卷积核，通过滑动计算生成特征图。
+<a class="reference internal" href="#id25"><span class="std std-numref">图2.2.2</span></a> 展示了一个卷积操作的步骤。计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-6">
+<span class="eqno">(2.2.7)<a class="headerlink" href="#equation-chapter-chap-2-6" title="Permalink to this equation">¶</a></span>\[0×(-1) + 3×0 + 3×1 + 3×(-1) + 5×0 + 2×1 + 6×(-1) + 8×0 + 8×1 = 4\]</div>
+<p>其他图像部分经过相同的卷积操作后，即可得到整张图像的卷积输出。</p>
+<div class="figure align-default" id="id95">
+<span id="id25"></span><a class="reference internal image-reference" href="../_images/2.2.1_卷积示意图.png"><img alt="../_images/2.2.1_%E5%8D%B7%E7%A7%AF%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.1_%E5%8D%B7%E7%A7%AF%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.2 </span><span class="caption-text">卷积操作示意图</span><a class="headerlink" href="#id95" title="Permalink to this image">¶</a></p>
+</div>
+<p><em>池化层</em>如 <a class="reference internal" href="#id26"><span class="std std-numref">图2.2.3</span></a>
+所示。经典的池化操作有两种：最大池化和平均池化。最大池化在每个池化窗口中选择最大值作为输出，而平均池化计算窗口内元素的平均值作为输出。</p>
+<div class="figure align-default" id="id96">
+<span id="sec-2-2-1-2"></span><span id="id26"></span><a class="reference internal image-reference" href="../_images/2.2.1_池化示意图.png"><img alt="../_images/2.2.1_%E6%B1%A0%E5%8C%96%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.1_%E6%B1%A0%E5%8C%96%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 523px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.3 </span><span class="caption-text">池化操作示意图</span><a class="headerlink" href="#id96" title="Permalink to this image">¶</a></p>
+</div>
+<p>在卷积神经网络的训练过程中，可训练的参数包括卷积核的权重和偏置，以及全连接层的权重和偏置。这些参数通过<strong>反向传播</strong>（backpropagation）算法进行学习。每一轮的参数更新过程如下：</p>
+<ol class="arabic">
+<li><p>对训练数据进行前向传播，计算第 <span class="math notranslate nohighlight">\(l\)</span> 层的输出：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-7">
+<span class="eqno">(2.2.8)<a class="headerlink" href="#equation-chapter-chap-2-7" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{array}{l}{\boldsymbol{Z}}^{[l]} = {\boldsymbol{W}}^{[l]} * {\boldsymbol{A}}^{[l-1]} + {\boldsymbol{B}}^{[l]}, \\{\boldsymbol{A}}^{[l]} = \sigma({\boldsymbol{Z}}^{[l]})\end{array}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{W}}^{[l]}\)</span>是第<span class="math notranslate nohighlight">\(l\)</span>层的权重（卷积核），<span class="math notranslate nohighlight">\({\boldsymbol{A}}^{[l-1]}\)</span>是上一层的激活输出，<span class="math notranslate nohighlight">\({\boldsymbol{B}}^{[l]}\)</span>是偏置，<span class="math notranslate nohighlight">\(\sigma(\cdot)\)</span>
+是激活函数。</p>
+</li>
+<li><p>使用模型的最终输出
+<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{y}}}\)</span>与实际标签<span class="math notranslate nohighlight">\({\boldsymbol{y}}\)</span>计算损失<span class="math notranslate nohighlight">\({\mathcal{L}}(\hat{{\boldsymbol{y}}}, {\boldsymbol{y}})\)</span>。</p></li>
+<li><p>通过反向传播算法计算损失对每个参数的梯度
+<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}^{[l]}}\)</span>和<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{B}}^{[l]}}\)</span>。</p></li>
+<li><p>更新参数：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-8">
+<span class="eqno">(2.2.9)<a class="headerlink" href="#equation-chapter-chap-2-8" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{array}{l}{\boldsymbol{W}}^{[l]} := {\boldsymbol{W}}^{[l]} - \alpha \frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}^{[l]}}, \\{\boldsymbol{B}}^{[l]} := {\boldsymbol{B}}^{[l]} - \alpha \frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{B}}^{[l]}}\end{array}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\alpha\)</span> 是学习率。</p>
+</li>
+</ol>
+</div>
+<div class="section" id="id27">
+<h4><span class="section-number">2.2.1.2. </span>文本模型<a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h4>
+<p>文本模型专注于处理和理解文本数据，通过学习文本中的语义和结构，使计算机能够更好地理解和应用自然语言。常见的应用任务包括文本分类、情感分析和命名实体识别。</p>
+<p><strong>循环神经网络</strong>（Recurrent Neural Network,
+RNN）是经典的文本模型之一。RNN具有记忆能力，能够捕捉文本中的上下文关系，在语言建模、机器翻译和文本生成等任务中表现优异。</p>
+<p><a class="reference internal" href="#fig-rnn"><span class="std std-numref">图2.2.4</span></a> 展示了简单循环神经网络 <span id="id28">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id34" title="Elman, J. L. (1990). Finding structure in time. Cognitive Science, 14, 179–211.">Elman, 1990</a>)</span>
+沿时间维度展开的示意图。这里，<span class="math notranslate nohighlight">\({\boldsymbol{x}}_1, {\boldsymbol{x}}_2, {\boldsymbol{x}}_3\)</span>是输入序列，<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{y}}}_1, \hat{{\boldsymbol{y}}}_2, \hat{{\boldsymbol{y}}}_3\)</span>是输出序列，<span class="math notranslate nohighlight">\({\boldsymbol{h}}_t\)</span>是时刻<span class="math notranslate nohighlight">\(t\)</span>的隐状态，它依赖于前一时刻的隐状态<span class="math notranslate nohighlight">\({\boldsymbol{h}}_{t-1}\)</span>和当前输入<span class="math notranslate nohighlight">\({\boldsymbol{x}}_t\)</span>。隐状态的计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-9">
+<span class="eqno">(2.2.10)<a class="headerlink" href="#equation-chapter-chap-2-9" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{h}}_t = \sigma({\boldsymbol{z}}_t) = \sigma({\boldsymbol{U}} {\boldsymbol{x}}_t + {\boldsymbol{W}} {\boldsymbol{h}}_{t-1})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{U}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>是权重矩阵，<span class="math notranslate nohighlight">\(\sigma(\cdot)\)</span>
+是非线性激活函数。循环神经网络的输出计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-10">
+<span class="eqno">(2.2.11)<a class="headerlink" href="#equation-chapter-chap-2-10" title="Permalink to this equation">¶</a></span>\[\hat{{\boldsymbol{y}}}_t = {\boldsymbol{V}} {\boldsymbol{h}}_t\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{V}}\)</span> 是权重矩阵。</p>
+<div class="figure align-default" id="id97">
+<span id="fig-rnn"></span><a class="reference internal image-reference" href="../_images/2.2.1_RNN网络结构.png"><img alt="../_images/2.2.1_RNN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png" src="../_images/2.2.1_RNN%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84.png" style="width: 540px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.4 </span><span class="caption-text">简单循环神经网络结构示意图</span><a class="headerlink" href="#id97" title="Permalink to this image">¶</a></p>
+</div>
+<p>与卷积神经网络类似，循环神经网络也可以通过梯度下降进行训练。假设模型的输入序列为
+<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{1: T}\)</span>，输出序列为<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{y}}}_{1: T}\)</span>。对于时刻<span class="math notranslate nohighlight">\(t\)</span>的输出<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{y}}}_t\)</span>和对应的监督信息<span class="math notranslate nohighlight">\({\boldsymbol{y}}_t\)</span>，定义时刻<span class="math notranslate nohighlight">\(t\)</span>的损失函数为<span class="math notranslate nohighlight">\({\mathcal{L}}_t(\hat{{\boldsymbol{y}}}_t, {\boldsymbol{y}}_t) = {\mathcal{L}}_t({\boldsymbol{V}} {\boldsymbol{h}}_t, {\boldsymbol{y}}_t)\)</span>，整个序列的损失函数为<span class="math notranslate nohighlight">\({\mathcal{L}} = \sum_{t=1}^T {\mathcal{L}}_t\)</span>。该损失函数关于参数的梯度包括<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{U}}}\)</span>、<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{W}}}\)</span>和<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}}{\partial {\boldsymbol{V}}}\)</span>。</p>
+<p>循环神经网络的梯度计算主要有两种算法：<strong>实时循环学习算法</strong>（Real
+Time Recurrent Learning, RTRL） <span id="id29">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id35" title="Williams, R. J., &amp; Zipser, D. (2013). Gradient-based learning algorithms for recurrent networks and their computational complexity. Backpropagation (pp. 433–486). Psychology Press.">Williams and Zipser, 2013</a>)</span> 和
+<strong>随时间反向传播算法</strong>（Backpropagation Through Time, BPTT）
+<span id="id30">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id36" title="Williams, R. J., &amp; Peng, J. (1990). An efficient gradient-based algorithm for on-line training of recurrent network trajectories. Neural Computation, 2, 490–501.">Williams and Peng, 1990</a>)</span> 。</p>
+<p><strong>实时循环学习算法</strong>的核心思想是在前向计算过程中即时计算隐状态对参数的偏导数，并通过链式法则实时更新损失函数对参数的梯度。假设第
+<span class="math notranslate nohighlight">\(t+1\)</span>时刻的隐状态为<span class="math notranslate nohighlight">\({\boldsymbol{h}}_{t+1} = \sigma({\boldsymbol{U}} {\boldsymbol{x}}_{t+1} + {\boldsymbol{W}} {\boldsymbol{h}}_t)\)</span>。以参数矩阵<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>中的一个参数<span class="math notranslate nohighlight">\(w_{i, j}\)</span>为例，第<span class="math notranslate nohighlight">\(t+1\)</span>时刻的损失函数<span class="math notranslate nohighlight">\({\mathcal{L}}_{t+1}\)</span>对<span class="math notranslate nohighlight">\(w_{i, j}\)</span>
+的偏导数计算如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-11">
+<span class="eqno">(2.2.12)<a class="headerlink" href="#equation-chapter-chap-2-11" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}\frac{\partial {\mathcal{L}}_{t+1}}{\partial w_{i, j}} &amp; = \frac{\partial {\mathcal{L}}_{t+1}}{\partial {\boldsymbol{h}}_{t+1}} \frac{\partial {\boldsymbol{h}}_{t+1}}{\partial w_{i, j}}                                                                           \\&amp; = \frac{\partial {\mathcal{L}}_{t+1}}{\partial {\boldsymbol{h}}_{t+1}} ({\boldsymbol{I}}_i([{\boldsymbol{h}}_t]_j) + \frac{\partial {\boldsymbol{h}}_t}{\partial w_{i, j}} {\boldsymbol{W}}^{\top}) \frac{\partial {\boldsymbol{h}}_{t+1}}{\partial {\boldsymbol{z}}_{t+1}}\end{aligned}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{I}}_i(x)\)</span>是除第<span class="math notranslate nohighlight">\(i\)</span>行外其余值为 0
+的行向量。实时循环学习算法从初始时刻开始，计算隐状态<span class="math notranslate nohighlight">\({\boldsymbol{h}}\)</span>
+时也计算隐状态对参数的偏导数，从而按照时间顺序计算损失函数对参数的偏导数。</p>
+<p><strong>随时间反向传播算法</strong>通过在时间上展开循环神经网络，将其视为一个前馈神经网络，然后利用反向传播算法计算各个时刻参数的梯度。以参数矩阵
+<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>中的一个参数<span class="math notranslate nohighlight">\(w_{i, j}\)</span> 为例：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-12">
+<span class="eqno">(2.2.13)<a class="headerlink" href="#equation-chapter-chap-2-12" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}\frac{\partial {\mathcal{L}}_t}{\partial w_{i, j}} &amp; = \sum_{k=1}^t \frac{\partial {\boldsymbol{z}}_k}{\partial w_{i, j}} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k} \\&amp; = \sum_{k=1}^t {\boldsymbol{I}}_i([{\boldsymbol{h}}_{k-1}]_j) \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k}\end{aligned}\end{split}\]</div>
+<p>其中，</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-13">
+<span class="eqno">(2.2.14)<a class="headerlink" href="#equation-chapter-chap-2-13" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}\frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k} &amp; = \frac{\partial {\boldsymbol{h}}_k}{\partial {\boldsymbol{z}}_k} \frac{\partial {\boldsymbol{z}}_{k+1}}{\partial {\boldsymbol{h}}_k} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_{k+1}} \\&amp; = \operatorname{diag}(\sigma^{\prime}({\boldsymbol{z}}_k)) {\boldsymbol{W}}^{\top} \frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_{k+1}}\end{aligned}\end{split}\]</div>
+<p>将
+<span class="math notranslate nohighlight">\(\frac{\partial {\mathcal{L}}_t}{\partial {\boldsymbol{z}}_k}\)</span>记作<span class="math notranslate nohighlight">\(\delta_{t, k}\)</span>，即为<em>误差项</em>，则有：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-14">
+<span class="eqno">(2.2.15)<a class="headerlink" href="#equation-chapter-chap-2-14" title="Permalink to this equation">¶</a></span>\[\delta_{t, k} = \operatorname{diag}(\sigma^{\prime}({\boldsymbol{z}}_k)) {\boldsymbol{W}}^{\top} \delta_{t, k+1}\]</div>
+<p>因此：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-15">
+<span class="eqno">(2.2.16)<a class="headerlink" href="#equation-chapter-chap-2-15" title="Permalink to this equation">¶</a></span>\[\frac{\partial {\mathcal{L}}_t}{\partial w_{i, j}} = \sum_{k=1}^t [\delta_{t, k}]_i [{\boldsymbol{h}}_{k-1}]_j\]</div>
+<p>随时间反向传播算法将问题转化为标准的前馈神经网络以简化计算，但需要保存中间时刻的梯度，导致较大的存储开销。</p>
+<div class="figure align-default" id="id98">
+<span id="fig-transformer"></span><a class="reference internal image-reference" href="../_images/2.2.1_Transformer示意图.png"><img alt="../_images/2.2.1_Transformer%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.1_Transformer%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 335px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.5 </span><span class="caption-text">Transformer结构示意图</span><a class="headerlink" href="#id98" title="Permalink to this image">¶</a></p>
+</div>
+<p>除了经典的循环神经网络，<strong>Transformer</strong> <span id="id31">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id8" title="Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., … Polosukhin, I. (2017). Attention is all you need. Advances in Neural Information Processing Systems.">Vaswani <em>et al.</em>, 2017</a>)</span>
+是一种开创性的文本模型结构，并已被扩展到视觉领域（如ViT
+<span id="id32">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id37" title="Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., … others. (2021). An image is worth 16x16 words: transformers for image recognition at scale. International Conference on Learning Representations.">Dosovitskiy <em>et al.</em>, 2021</a>)</span> ），成为现代大模型（如GPT-4
+<span id="id33">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id16" title="Achiam, J., Adler, S., Agarwal, S., Ahmad, L., Akkaya, I., Aleman, F. L., … others. (2023). Gpt-4 technical report. arXiv preprint arXiv:2303.08774.">Achiam <em>et al.</em>, 2023</a>)</span>
+）的基础。Transformer摒弃了循环神经网络中的循环机制，改用<em>自注意力机制</em>来学习输入和输出之间的依赖关系，并支持更大程度的并行化。</p>
+<p>如 <a class="reference internal" href="#fig-transformer"><span class="std std-numref">图2.2.5</span></a> 所示，Transformer
+由编码器和解码器两部分组成。文本数据首先通过编码器进行编码，然后通过解码器进行解码并输出。经典的Transformer架构包含六个编码器和六个解码器。每个编码器包括一个<em>多头注意力层</em>和一个前馈神经网络层，接收上一个编码器的输出作为输入；每个解码器包含两个多头注意力层和一个前馈神经网络层，接收上一个解码器的输出和整个编码器的输出作为输入。</p>
+<p>在将文本数据输入模型之前，需要进行以下预处理：</p>
+<ul>
+<li><p><strong>词元化</strong>：将文本分割成词元。例如，文本“The cat sat on the
+mat”词元化后变为
+[“The”，“cat”，“sat”，“on”，“the”，“mat”，“.”]。词元化并不总是一一对应，常用词组如“do
+not”可能被视为一个词元，而复杂词汇如“Antidisestablishmentarianism”可能被拆分为多个词元
+[“Anti”，“dis”，“establish”，“ment”，“arian”，“ism”]。</p></li>
+<li><p><strong>词向量映射</strong>：将每个词元映射到词向量空间。类似于地理坐标系，词向量空间中的距离反映了词元的语义相似度。由于语言的复杂性，词向量的维度通常很大，例如基础Transformer模型的词向量维度为512。</p></li>
+<li><p><strong>位置编码</strong>：除了词义外，词元在上下文中的位置也很重要。Transformer通过位置编码来考虑词元的位置。位置编码使用正弦和余弦函数计算：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-16">
+<span class="eqno">(2.2.17)<a class="headerlink" href="#equation-chapter-chap-2-16" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}PE_{(\operatorname{pos}, 2i)}   &amp; = \sin (\operatorname{pos} / 10000^{2i/d_{model}}), \\PE_{(\operatorname{pos}, 2i+1)} &amp; = \cos (\operatorname{pos} / 10000^{2i/d_{model}})\end{aligned}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\operatorname{pos}\)</span>表示词元的位置；<span class="math notranslate nohighlight">\(2i\)</span>和<span class="math notranslate nohighlight">\(2i+1\)</span>表示位置向量中的元素；<span class="math notranslate nohighlight">\(10000\)</span>是经验值；<span class="math notranslate nohighlight">\(d_{model}\)</span>
+是位置向量的维度，与词向量维度相等。</p>
+</li>
+</ul>
+<p>计算出词元的词向量和位置向量后，将它们相加，形成输入矩阵。这是Transformer模型的输入。Transformer的核心是<strong>自注意力机制</strong>。自注意力机制使用三个向量：<em>查询向量</em>
+<span class="math notranslate nohighlight">\({\boldsymbol{Q}}\)</span>、<em>键向量</em><span class="math notranslate nohighlight">\({\boldsymbol{K}}\)</span>和
+<em>值向量</em><span class="math notranslate nohighlight">\({\boldsymbol{V}}\)</span>，这三者均由输入乘以对应的权重矩阵<span class="math notranslate nohighlight">\({\boldsymbol{W}}_{\boldsymbol{Q}}\)</span>、<span class="math notranslate nohighlight">\({\boldsymbol{W}}_{\boldsymbol{K}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{W}}_{\boldsymbol{V}}\)</span>
+得到。这些权重矩阵是可学习的。自注意力的输出计算如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-17">
+<span class="eqno">(2.2.18)<a class="headerlink" href="#equation-chapter-chap-2-17" title="Permalink to this equation">¶</a></span>\[\operatorname{Attention}({\boldsymbol{Q}}, {\boldsymbol{K}}, {\boldsymbol{V}}) = \operatorname{softmax} \left( \frac{{\boldsymbol{Q}} {\boldsymbol{K}}^{\top}}{\sqrt{d_k}} \right) {\boldsymbol{V}}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(d_k\)</span>是<span class="math notranslate nohighlight">\({\boldsymbol{K}}\)</span>
+向量的维度。自注意力机制将上下文信息添加到原输入矩阵中。</p>
+<p><strong>多头注意力</strong>是使用多组不同权重矩阵计算的
+<span class="math notranslate nohighlight">\({\boldsymbol{Q}}\)</span>、<span class="math notranslate nohighlight">\({\boldsymbol{K}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{V}}\)</span>向量，分别得到它们的输出矩阵后拼接，再通过一个线性层加权求和，得到最终的多头注意力层输出。解码器的第一个多头注意力层使用掩码操作，在预测第<span class="math notranslate nohighlight">\(i\)</span>个词时，遮住<span class="math notranslate nohighlight">\(i+1\)</span>
+之后的词信息。自注意力层之后还有一个全连接前馈神经网络层：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-18">
+<span class="eqno">(2.2.19)<a class="headerlink" href="#equation-chapter-chap-2-18" title="Permalink to this equation">¶</a></span>\[\operatorname{FFN}({\boldsymbol{x}}) = \max(0, {\boldsymbol{x}} {\boldsymbol{W}}_1 + {\boldsymbol{b}}_1) {\boldsymbol{W}}_2 + {\boldsymbol{b}}_2\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{W}}_1\)</span>、<span class="math notranslate nohighlight">\({\boldsymbol{b}}_1\)</span>、<span class="math notranslate nohighlight">\({\boldsymbol{W}}_2\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{b}}_2\)</span>
+为可学习的参数。Transformer使用梯度下降优化，并采用AdamW优化器进行参数更新。</p>
+</div>
+</div>
+<div class="section" id="sec-2-2-2">
+<span id="id34"></span><h3><span class="section-number">2.2.2. </span>大规模预训练<a class="headerlink" href="#sec-2-2-2" title="Permalink to this heading">¶</a></h3>
+<p>近年来，随着计算能力和数据量的显著提升，大规模预训练已经成为推动视觉、语言以及多模态大模型快速发展的关键技术。通过大规模预训练，模型能够学习到丰富的特征表示，从而在下游任务中展现出强大的泛化能力。下面将详细介绍服务于视觉大模型、大语言模型以及多模态大模型的大规模预训练方法。</p>
+<div class="section" id="id35">
+<h4><span class="section-number">2.2.2.1. </span>视觉大模型预训练<a class="headerlink" href="#id35" title="Permalink to this heading">¶</a></h4>
+<div class="figure align-default" id="id99">
+<span id="fig-2-2-2-1-vit"></span><a class="reference internal image-reference" href="../_images/2.2.2.1-ViT.png"><img alt="../_images/2.2.2.1-ViT.png" src="../_images/2.2.2.1-ViT.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.6 </span><span class="caption-text">ViT结构示意图</span><a class="headerlink" href="#id99" title="Permalink to this image">¶</a></p>
+</div>
+<p>视觉大模型的预训练在图像和视频处理任务中发挥了重要作用。以下是对主流视觉大模型——视觉Transformer（ViT）的基本结构的简要介绍，以及两种常用的视觉大模型预训练方法。</p>
+<p><strong>视觉Transformer（ViT）</strong> <span id="id36">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id37" title="Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., … others. (2021). An image is worth 16x16 words: transformers for image recognition at scale. International Conference on Learning Representations.">Dosovitskiy <em>et al.</em>, 2021</a>)</span>
+模型借鉴了文本Transformer架构，是Transformer在视觉领域的重要扩展。ViT的核心思想是将图像分割为多个图像块（patch），将这些小块视为序列中的元素，并使用Transformer中的自注意力机制处理这些小块，实现对图像的全局感知。与传统卷积神经网络相比，ViT在捕捉图像中的长距离依赖关系方面具有更好的泛化能力和灵活性。</p>
+<p>ViT的结构如 <a class="reference internal" href="#fig-2-2-2-1-vit"><span class="std std-numref">图2.2.6</span></a> 所示，有三个主要特点：</p>
+<ul class="simple">
+<li><p><strong>图像块切分</strong>：ViT将图像分割为多个大小为16x16的正方形图像块，每个图像块通过全连接层映射为固定维度的向量序列，所有图像块的向量序列组成了Transformer的输入。</p></li>
+<li><p><strong>类别词元</strong>：借鉴自然语言处理中的[CLS]
+token，ViT引入了一个特殊的类别词元，并将其添加到输入序列的开头。这个类别词元的表示用于最终的分类任务。</p></li>
+<li><p><strong>位置编码</strong>：由于Transformer架构本身无法捕捉序列中的位置信息，ViT为每个图像块添加位置编码。位置编码值加到经过全连接层处理的词元序列中，以帮助模型理解图像块的空间顺序。</p></li>
+</ul>
+<p>ViT的出现具有重要意义，它不仅推动了计算机视觉领域的进步，还为多模态融合提供了新的视角。通过使用相同的Transformer结构和不同模态的分词器（Tokenizer），我们可以将图像、文本、音频等多种数据类型融合，构建更强大、更灵活的多模态大模型。这标志着我们首次有望通过一个统一的强大模型完成所有模态的学习，迈出了通用人工智能的重要一步。</p>
+<p>ViT模型的预训练通常包括两个阶段：</p>
+<ul class="simple">
+<li><p><strong>大规模预训练</strong>：在大规模图像数据集（如JFT-300M、ImageNet-21K等）上进行预训练，以学习通用视觉特征。</p></li>
+<li><p><strong>微调阶段</strong>：在特定的下游任务（如图像分类、目标检测、语义分割等）上进行微调，以适应具体的应用场景。</p></li>
+</ul>
+<p>在预训练阶段，许多视觉大模型通过自监督学习算法在无标注图像数据集上进行训练。以下是两种代表性的自监督学习算法：</p>
+<ul class="simple">
+<li><p><strong>SimCLR</strong>：基于对比学习的算法。</p></li>
+<li><p><strong>MAE</strong>：基于图像重建的算法。</p></li>
+</ul>
+<div class="figure align-default" id="id100">
+<span id="fig-2-2-2-1-simclr"></span><a class="reference internal image-reference" href="../_images/2.2.2.1-SimCLR.png"><img alt="../_images/2.2.2.1-SimCLR.png" src="../_images/2.2.2.1-SimCLR.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.7 </span><span class="caption-text">SimCLR算法示意图</span><a class="headerlink" href="#id100" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>SimCLR</strong> <span id="id37">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id56" title="Chen, T., Kornblith, S., Norouzi, M., &amp; Hinton, G. (2020). A simple framework for contrastive learning of visual representations. International Conference on Machine Learning.">Chen <em>et al.</em>, 2020</a>)</span>
+是一种经典的自监督对比学习算法，广泛用于视觉表征学习。如
+<a class="reference internal" href="#fig-2-2-2-1-simclr"><span class="std std-numref">图2.2.7</span></a>
+所示，SimCLR的核心思想是通过最大化同一图像不同视图之间的相似性，同时最小化不同图像之间的相似性来学习特征表示。SimCLR通过组合多种数据增强技术、引入非线性投影头、使用更大的批量以及更多的训练步数，显著提升了模型的表征学习能力。</p>
+<p>具体来说，SimCLR首先通过随机裁剪、颜色失真和高斯模糊等数据增强技术将图像<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>转换为不同的视图<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_i\)</span>和<span class="math notranslate nohighlight">\(\hat{{\boldsymbol{x}}}_j\)</span>，形成<em>正样本对</em>。与其他图像形成的对则构成<em>负样本对</em>。SimCLR使用一个深度学习编码器（如ResNet）提取不同视图图像的表征向量，并通过一个基于多层感知机（MLP）的投影头将这些向量映射到对比损失空间，最终在该空间中定义对比损失函数。对比损失函数通过余弦相似度（或欧氏距离）定义样本对之间的表征距离，指导模型在拉近正样本间距离的同时拉远负样本间的距离。</p>
+<p>在损失函数方面，SimCLR使用带有归一化温度缩放的交叉熵损失。对于正样本对
+<span class="math notranslate nohighlight">\(({\boldsymbol{z}}_i, {\boldsymbol{z}}_j)\)</span>，其损失定义为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-19">
+<span class="eqno">(2.2.20)<a class="headerlink" href="#equation-chapter-chap-2-19" title="Permalink to this equation">¶</a></span>\[\mathcal{L}({\boldsymbol{z}}_i, {\boldsymbol{z}}_j) = -\log \frac{e^{sim({\boldsymbol{z}}_i, {\boldsymbol{z}}_j) / \tau}}{\sum_{k=1}^{2N} [k \neq i] e^{sim({\boldsymbol{z}}_i, {\boldsymbol{z}}_k) / \tau}}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(sim({\boldsymbol{u}}, {\boldsymbol{v}}) = \frac{{\boldsymbol{u}}^T {\boldsymbol{v}}}{\|{\boldsymbol{u}}\| \|{\boldsymbol{v}}\|}\)</span>表示向量<span class="math notranslate nohighlight">\({\boldsymbol{u}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{v}}\)</span>的相似度（例如余弦相似度），<span class="math notranslate nohighlight">\(\tau\)</span>是温度参数，用于调整损失函数的平滑程度。此损失函数鼓励模型将增强视图的表示<span class="math notranslate nohighlight">\(({\boldsymbol{z}}_i, {\boldsymbol{z}}_j)\)</span>在特征空间中拉近，同时将其与同批次中的其他样本<span class="math notranslate nohighlight">\(({\boldsymbol{z}}_k)_{k \neq i}\)</span>
+推远。</p>
+<div class="figure align-default" id="id101">
+<span id="fig-2-2-2-1-mae"></span><a class="reference internal image-reference" href="../_images/2.2.2.1-mae.png"><img alt="../_images/2.2.2.1-mae.png" src="../_images/2.2.2.1-mae.png" style="width: 707px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.8 </span><span class="caption-text">MAE训练示意图</span><a class="headerlink" href="#id101" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>MAE</strong>：与 SimCLR 不同，MAE（Masked Autoencoder ）
+<span id="id38">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id55" title="He, K., Chen, X., Xie, S., Li, Y., Dollár, P., &amp; Girshick, R. (2022). Masked autoencoders are scalable vision learners. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">He <em>et al.</em>, 2022</a>)</span>
+是一种基于重构学习的自监督学习算法，证明了对比学习并非唯一的自监督学习范式。图像重构（经典的无监督学习任务）也可以让模型在没有人工标注的情况下学习有用的特征。MAE
+的主要创新点在于其非对称的“编码器-解码器”架构，以及在高掩码率下进行表征学习的能力。</p>
+<p>如 <a class="reference internal" href="#fig-2-2-2-1-mae"><span class="std std-numref">图2.2.8</span></a> 所示，MAE
+首先将图像分割成固定大小的图像块（如 16x16 像素块），并随机遮挡其中的
+75%。这种高比例的随机掩码策略有效去除冗余信息，使任务更具挑战性，并迫使模型学习全局特征。</p>
+<p>MAE 采用了非对称的编码器-解码器架构，其中<em>编码器</em>基于 ViT
+结构，但只处理未被遮挡的像素块。编码器通过线性投影和位置嵌入将未遮挡的图像块转换为特征向量，并通过一系列
+Transformer
+块进行处理。由于只处理一小部分图像块，编码器的计算量和内存需求显著降低。</p>
+<p><em>解码器</em>输入的数据包括编码后的可见图像块和被遮挡图像块的掩码令牌。每个掩码令牌是一个共享的、可学习的向量，表示需要预测的被遮挡图像块。解码器通过添加位置嵌入并应用一系列
+Transformer
+块，对这些数据进行处理，从而重构原始图像。解码器的输出是一个像素值向量，表示每个图像块。最后一层是线性投影，其输出通道数与图像块中的像素值数量相同。MAE
+的损失函数为均方误差（MSE）损失，仅在被遮挡的图像块上计算。</p>
+</div>
+<div class="section" id="id39">
+<h4><span class="section-number">2.2.2.2. </span>大语言模型预训练<a class="headerlink" href="#id39" title="Permalink to this heading">¶</a></h4>
+<div class="figure align-default" id="id102">
+<span id="fig-2-2-2-2-elmo"></span><a class="reference internal image-reference" href="../_images/2.2.2.2节ELMo示意图.png"><img alt="../_images/2.2.2.2%E8%8A%82ELMo%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.2%E8%8A%82ELMo%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 653px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.9 </span><span class="caption-text">ELMo方法示意图 <span id="id40">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id59" title="张奇、桂韬、黄萱菁. (2023). 自然语言处理导论. 上海: 电子工业出版社.">张奇、桂韬、黄萱菁, 2023</a>)</span></span><a class="headerlink" href="#id102" title="Permalink to this image">¶</a></p>
+</div>
+<p>在计算机视觉领域，通常使用如 ImageNet
+等大规模数据集对模型进行预训练，以便从海量图像中学习各种视觉特征，从而提高下游任务的泛化能力。受到这种做法的启发，自然语言处理领域也开始采用类似的范式，并逐渐成为主流。以
+ELMo <span id="id41">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id54" title="Peters, M. E., Neumann, M., Iyyer, M., Gardner, M., Clark, C., Lee, K., &amp; Zettlemoyer, L. (2018). Deep contextualized word representations. Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies.">Peters <em>et al.</em>, 2018</a>)</span>
+为代表的词向量模型首次探索了语言模型的预训练；随后，基于 Transformer
+架构的 GPT <span id="id42">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id12" title="Radford, A., Narasimhan, K., Salimans, T., Sutskever, I., &amp; others. (2018). Improving language understanding by generative pre-training.">Radford <em>et al.</em>, 2018</a>)</span> 和 BERT
+<span id="id43">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id11" title="Devlin, J., Chang, M.-W., Lee, K., &amp; Toutanova, K. (2018). Bert: pre-training of deep bidirectional transformers for language understanding. arXiv preprint arXiv:1810.04805.">Devlin <em>et al.</em>, 2018</a>)</span>
+预训练模型取得了显著成功，开启了自然语言处理领域的“预训练-微调”新时代。本节将介绍这三种预训练模型。</p>
+<p><strong>ELMo模型</strong> <span id="id44">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id54" title="Peters, M. E., Neumann, M., Iyyer, M., Gardner, M., Clark, C., Lee, K., &amp; Zettlemoyer, L. (2018). Deep contextualized word representations. Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies.">Peters <em>et al.</em>, 2018</a>)</span>
+是一种深度上下文词向量表示方法，通过双向语言模型（biLM）学习词语表示，并结合
+biLM 不同层的输出，以捕捉更丰富的语义和语法信息。ELMo的结构如
+<a class="reference internal" href="#fig-2-2-2-2-elmo"><span class="std std-numref">图2.2.9</span></a>
+所示，包括三个主要部分：输入层、隐藏层和输出层。</p>
+<p><strong>输入层</strong>
+使用字符级卷积神经网络对词语进行编码，从而有效处理词表外的词语。每个词被视为字符序列，每个字符经过卷积神经网络转换为向量，得到词的字符向量表示。随后，池化层对卷积输出进行池化，生成每个词的词级表示。此外，ELMo使用高速公路网络（highway
+network）进一步转换卷积神经网络的输出，以避免梯度消失或爆炸。ELMo的两个独立编码器分别进行前向和后向语言模型建模，在预训练时，利用前向和反向长短期记忆网络（LSTM）输出预测下一个词。</p>
+<p><strong>隐藏层</strong>
+由多层LSTM组成，用于学习词语的上下文相关表示。不同层的LSTM捕获不同粒度的语言信息，低层捕捉语法信息，高层捕捉语义信息。</p>
+<p>在下游任务中，ELMo根据任务要求对 biLM
+不同层的输出进行线性组合，得到最终的词向量表示。线性组合的权重由任务决定，并在训练过程中学习得到。</p>
+<p>ELMo通过结合 biLM
+不同层的输出，能够捕捉丰富的上下文信息，包括语法和语义。其词向量表示可以有效应用于各种自然语言处理任务，显著提高性能，并在训练数据较少的情况下也能取得良好效果。这种模型为自然语言处理任务提供了一种强大且灵活的词向量表示方法，显著提升了任务性能。</p>
+<div class="figure align-default" id="id103">
+<span id="fig-2-2-2-2-gpt"></span><a class="reference internal image-reference" href="../_images/2.2.2.2节GPT示意图.png"><img alt="../_images/2.2.2.2%E8%8A%82GPT%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.2%E8%8A%82GPT%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.10 </span><span class="caption-text">GPT示意图（左图：模型结构；右图：各下游任务训练示意图）</span><a class="headerlink" href="#id103" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>GPT模型</strong>：OpenAI的GPT模型 <span id="id45">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id12" title="Radford, A., Narasimhan, K., Salimans, T., Sutskever, I., &amp; others. (2018). Improving language understanding by generative pre-training.">Radford <em>et al.</em>, 2018</a>)</span>
+探索了使用Transformer结构进行生成式预训练的路径。与传统的Transformer编码器-解码器结构不同，GPT只使用了解码器部分，如
+<a class="reference internal" href="#fig-2-2-2-2-gpt"><span class="std std-numref">图2.2.10</span></a>
+所示。解码器由多层堆叠而成，每层包括以下子层：</p>
+<ul class="simple">
+<li><p><strong>掩码自注意力层</strong>：自注意力机制捕捉输入序列中的长距离依赖关系。掩码确保模型在预测某个词时只能访问该词之前的信息，符合语言模型的特性。</p></li>
+<li><p><strong>位置编码</strong>：为了解决自注意力机制缺乏顺序概念的问题，位置编码用于表示词语在句子中的顺序。</p></li>
+<li><p><strong>全连接层</strong>：进一步提取自注意力层输出的特征。</p></li>
+<li><p><strong>层归一化</strong>：加速模型训练并提高稳定性。</p></li>
+<li><p><strong>词嵌入层</strong>：将输入词语转换为对应的向量表示。</p></li>
+</ul>
+<p>GPT的预训练过程是使用Transformer解码器对大规模文本进行语言建模。在BookCorpus数据集（包含约11,000本未出版书籍的文本，涵盖多种类型）上进行训练，目标是最大化在给定上下文的情况下预测下一个词的概率：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-20">
+<span class="eqno">(2.2.21)<a class="headerlink" href="#equation-chapter-chap-2-20" title="Permalink to this equation">¶</a></span>\[\mathcal{L}^{PT}({\boldsymbol{w}})=-\sum_{i=1}^{n} \operatorname{log} P({\boldsymbol{w}}_i | {\boldsymbol{w}}_0...{\boldsymbol{w}}_{i-1};\theta)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta\)</span>表示模型参数。简单来说，GPT的预训练通过将大量文本数据输入到Transformer解码器中，让模型学习如何根据上下文预测下一个单词。实验表明，这一过程使模型学到了丰富的语言知识，包括语法、语义和常识。预训练完成后，GPT会根据具体任务进行微调，例如在文本分类任务中，通常会在解码器的最后一层添加一个分类器。</p>
+<div class="figure align-default" id="id104">
+<span id="fig-2-2-2-2-bert"></span><a class="reference internal image-reference" href="../_images/2.2.2.2节BERT示意图.png"><img alt="../_images/2.2.2.2%E8%8A%82BERT%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.2%E8%8A%82BERT%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.11 </span><span class="caption-text">BERT模型示意图</span><a class="headerlink" href="#id104" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>BERT模型</strong> <span id="id46">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id11" title="Devlin, J., Chang, M.-W., Lee, K., &amp; Toutanova, K. (2018). Bert: pre-training of deep bidirectional transformers for language understanding. arXiv preprint arXiv:1810.04805.">Devlin <em>et al.</em>, 2018</a>)</span>
+是另一个具有代表性的预训练大语言模型。与仅使用单向语言模型（从左到右或从右到左）的方法不同，BERT采用掩码语言模型进行深度双向表示的预训练。这使得BERT在所有层都能同时考虑左右上下文，从而获得更丰富的语义表示。如
+<a class="reference internal" href="#fig-2-2-2-2-bert"><span class="std std-numref">图2.2.11</span></a>
+所示，BERT由多层Transformer编码器组成，主要分为输入层、编码层和输出层。在预训练过程中，BERT的最后包含两个输出层：MLM（掩码语言建模）和NSP（下一句预测），分别对应两种预训练任务。</p>
+<p>BERT的预训练使用了BooksCorpus和英文维基百科这两个大型文本语料库。语料库中的单词通过WordPiece分词算法拆分成更小的语义单元，以提高模型对未登录词（不在词汇库中的词或短语）的处理能力。每个训练样本由两个句子组成，这两个句子通过特殊的[SEP]标记符分隔。句子对的开头添加一个特殊的[CLS]标记符，用于表示整个句子对的语义。为了区分句子对中的两个句子，BERT为每个句子分配一个唯一的段嵌入，同时为每个词分配一个位置嵌入以表示词序信息。</p>
+<p>BERT的预训练包括两个任务：MLM和NSP。MLM任务随机掩盖句子对中15%的词，并用[MASK]标记替换这些词，模型需要根据上下文预测被掩盖的词。NSP任务要求模型判断第二个句子是否为第一个句子的下一个句子。在损失函数方面，MLM任务使用交叉熵损失，NSP任务使用二元交叉熵损失。最终训练目标是最大化MLM和NSP任务的联合概率。预训练完成后，BERT可以用于各种下游自然语言处理任务，如文本分类、问答、序列标注等。</p>
+</div>
+<div class="section" id="id47">
+<h4><span class="section-number">2.2.2.3. </span>多模态大模型预训练<a class="headerlink" href="#id47" title="Permalink to this heading">¶</a></h4>
+<p>多模态预训练通常利用多种模态的数据（如图像、文本、语音、视频等）进行联合学习。当前主流的多模态大模型主要是视觉语言模型，这些模型的预训练通常基于大量的“图像-文本”数据对，通过特定的优化目标来使模型理解并对齐图像和文本信息。以下介绍三种经典视觉语言模型的预训练方法：CLIP、Stable
+Diffusion 和 LLaVA。</p>
+<div class="figure align-default" id="id105">
+<span id="fig-2-2-2-3-clip"></span><a class="reference internal image-reference" href="../_images/2.2.2.3_CLIP示意图.png"><img alt="../_images/2.2.2.3_CLIP%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.3_CLIP%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 810px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.12 </span><span class="caption-text">CLIP训练框架示意图</span><a class="headerlink" href="#id105" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>CLIP</strong>（Contrastive Language–Image Pre-Training）
+<span id="id48">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id22" title="Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., … others. (2021). Learning transferable visual models from natural language supervision. International Conference on Machine Learning.">Radford <em>et al.</em>, 2021</a>)</span>  <a class="footnote-reference brackets" href="#id85" id="id49">3</a>
+由OpenAI提出，是一种通过对比学习实现“图像-文本”联合训练的多模态预训练框架。与传统的对比学习方法不同，CLIP的训练数据是图像-文本对，即图像和其对应的文本描述。CLIP的核心思想是通过最大化匹配图文对的表征相似性，同时最小化不匹配图文对的表征相似性，从而实现跨模态表征学习。</p>
+<p>CLIP不需要预测每张图片对应的文本，而是判断图片与给定文本是否匹配，这大大提高了训练效率。具体而言，CLIP使用从互联网上爬取的4亿个图文对进行预训练，同时训练一个<em>图像编码器</em>和一个<em>文本编码器</em>，使两个编码器输出的图像和文本特征在同一特征空间中对齐。</p>
+<p>如 <a class="reference internal" href="#fig-2-2-2-3-clip"><span class="std std-numref">图2.2.12</span></a>
+所示，CLIP主要包括两个部分：一个图像编码器和一个文本编码器。其中，图像编码器可以选择ResNet或ViT，而文本编码器使用Transformer架构。在预训练过程中，假设每批次包含<span class="math notranslate nohighlight">\(N\)</span>个图文对，图像和文本数据首先分别输入图像编码器和文本编码器进行编码。编码后的特征通过线性投影层映射到统一的表征空间，得到图像特征向量<span class="math notranslate nohighlight">\([I_1, I_2, \ldots, I_N]\)</span>和文本特征向量<span class="math notranslate nohighlight">\([T_1, T_2, \ldots, T_N]\)</span>。对任意<span class="math notranslate nohighlight">\(i, j \in \{1,2, \ldots, N\}\)</span>，如果<span class="math notranslate nohighlight">\(i=j\)</span>，则<span class="math notranslate nohighlight">\(T_i\)</span>和<span class="math notranslate nohighlight">\(I_i\)</span>是正样本对，否则<span class="math notranslate nohighlight">\(T_i\)</span>和<span class="math notranslate nohighlight">\(I_j\)</span>是负样本对。CLIP将具有对应关系的<span class="math notranslate nohighlight">\(N\)</span>个图文组合视为<em>正样本</em>，其余<span class="math notranslate nohighlight">\(N^2-N\)</span>个组合视为<em>负样本</em>。通过内积操作计算所有<span class="math notranslate nohighlight">\(T_i\)</span>和<span class="math notranslate nohighlight">\(I_j\)</span>的余弦相似度，并最大化正样本间的相似度，同时最小化负样本间的相似度，从而训练文本和图像编码器。</p>
+<p>CLIP的特别之处在于其强大的零样本迁移能力。它可以在没有特定任务数据集微调的情况下，利用自然语言描述识别新的视觉概念。预训练的CLIP模型在多个下游任务（包括图像分类、图像生成、图像检索等）上表现出色，经过微调后效果更加显著。</p>
+<div class="figure align-default" id="id106">
+<span id="fig-2-2-2-3-sd"></span><a class="reference internal image-reference" href="../_images/2.2.2.3_SD示意图.png"><img alt="../_images/2.2.2.3_SD%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.3_SD%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.13 </span><span class="caption-text">Stable Diffusion模型结构示意图</span><a class="headerlink" href="#id106" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>Stable Diffusion</strong> <span id="id50">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id15" title="Rombach, R., Blattmann, A., Lorenz, D., Esser, P., &amp; Ommer, B. (2022). High-resolution image synthesis with latent diffusion models. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">Rombach <em>et al.</em>, 2022</a>)</span>
+是一个先进的文图生成模型，也是<strong>隐空间扩散模型</strong>（Latent Diffusion
+Model,
+LDM）。其核心思想是在低维隐空间中进行扩散，显著降低计算复杂度，同时保持生成图像的高质量。如
+<a class="reference internal" href="#fig-2-2-2-3-sd"><span class="std std-numref">图2.2.13</span></a> 所示，Stable Diffusion主要包括以下三个部分：</p>
+<ul class="simple">
+<li><p><strong>自编码器</strong>：由编码器和解码器组成。编码器将输入图像编码为低维隐空间表示，而解码器在扩散过程结束后将这些表示解码回高分辨率图像。</p></li>
+<li><p><strong>CLIP文本编码器</strong>：将输入的文本提示（如“骑马的宇航员”）编码为特征向量。Stable
+Diffusion使用预训练的CLIP文本编码器将文本转化为隐空间中的特征表示，确保文本提示与生成图像的一致性。</p></li>
+<li><p><strong>UNet</strong>：在隐空间中迭代去噪，通过多个步骤生成逼真的图像表示。UNet架构包含编码器和解码器部分，使用ResNet块进行下采样和上采样，并通过交叉注意力层引入文本信息。UNet专门用于噪声预测和图像生成，而非传统的图像分割。</p></li>
+</ul>
+<p>具体而言，Stable
+Diffusion的<em>自编码器</em>是基于“编码器-解码器”架构的图像压缩模型。对于大小为
+<span class="math notranslate nohighlight">\(H \times W \times 3\)</span>的输入图像，编码器将其转换为大小为<span class="math notranslate nohighlight">\(h \times w \times c\)</span>的隐空间表示，其中<span class="math notranslate nohighlight">\(f = \frac{H}{h} = \frac{W}{w}\)</span>为下采样率，c为特征通道数。在训练自编码器时，除了使用<span class="math notranslate nohighlight">\(L_1\)</span>
+重建损失外，Stable
+Diffusion还引入了感知损失和基于图像块的对抗训练方法，以确保图像重建的局部真实性。同时，训练中采用KL-reg和VQ-reg正则化手段，以防隐空间表示的标准差过大。</p>
+<p>Stable
+Diffusion使用预训练的<em>CLIP文本编码器</em>进行文本特征提取，编码后的文本特征通过交叉注意力机制输入到UNet中。在训练过程中，CLIP文本编码器的参数保持固定。</p>
+<p>Stable
+Diffusion的UNet结构包括交叉注意力下采样模块和交叉注意力上采样模块，每个模块包含残差层、自注意力层、前向传播层和交叉注意力层。模型通过预测噪声进行训练，使用均方差损失函数和多阶段训练模式来逐步优化模型。</p>
+<div class="figure align-default" id="id107">
+<span id="fig-2-2-2-3-llava"></span><a class="reference internal image-reference" href="../_images/2.2.2.3_llava示意图.png"><img alt="../_images/2.2.2.3_llava%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.2.3_llava%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.14 </span><span class="caption-text">LLaVA模型结构示意图</span><a class="headerlink" href="#id107" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>LLaVA</strong>（Large Language and Vision Assistant）
+<span id="id51">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id51" title="Liu, H., Li, C., Wu, Q., &amp; Lee, Y. J. (2023). Visual instruction tuning. Advances in Neural Information Processing Systems.">Liu <em>et al.</em>, 2023</a>)</span>
+是一个主流的多模态大模型，旨在通过视觉和语言指令实现多种任务的通用理解，支持文本和图像两种输入。LLaVA的核心创新在于其构建方法：使用GPT-4生成多模态指令遵循数据，并在这些数据上对模型进行微调，以实现通用的视觉与语言理解能力。</p>
+<p>LLaVA的结构如 <a class="reference internal" href="#fig-2-2-2-3-llava"><span class="std std-numref">图2.2.14</span></a> 所示，主要包括三个部分：</p>
+<ul class="simple">
+<li><p><strong>视觉编码器</strong>：使用预训练的CLIP视觉编码器ViT-L/14将输入图像<span class="math notranslate nohighlight">\(\mathbf{X}_\mathrm{v}\)</span>编码为特征向量。</p></li>
+<li><p><strong>投影映射层</strong>：将图像编码特征通过线性映射层<span class="math notranslate nohighlight">\(\mathbf{W}\)</span>投射到词向量表征空间。</p></li>
+<li><p><strong>大语言模型</strong>：使用Vicuna <span id="id52">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id52" title="Chiang, W.-L., Li, Z., Lin, Z., Sheng, Y., Wu, Z., Zhang, H., … others. (2023). Vicuna: an open-source chatbot impressing gpt-4 with 90%* chatgpt quality. See https://vicuna. lmsys. org (accessed 14 April 2023).">Chiang <em>et al.</em>, 2023</a>)</span>
+模型对文本和图像特征进行理解和学习。</p></li>
+</ul>
+<p>对于每张图像
+<span class="math notranslate nohighlight">\(\mathbf{X}_\mathrm{v}\)</span>，LLaVA生成多轮对话数据<span class="math notranslate nohighlight">\((\mathbf{X}_\mathrm{q}^1, \mathbf{X}_A^1, \cdots, \mathbf{X}_\mathrm{q}^T, \mathbf{X}_A^T)\)</span>，其中<span class="math notranslate nohighlight">\(T\)</span>是对话轮数。这些数据被组织成序列，所有答案被视为模型的输出响应。第<span class="math notranslate nohighlight">\(t\)</span>轮的指令<span class="math notranslate nohighlight">\(\mathbf{X}_\text{instruct}^t\)</span>
+定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-21">
+<span class="eqno">(2.2.22)<a class="headerlink" href="#equation-chapter-chap-2-21" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathbf{X}_{\text{instruct}}^t = \begin{cases}\text{随机选择} [\mathbf{X}_\mathrm{q}^1, \mathbf{X}_\mathrm{v}] \text{或} [\mathbf{X}_\mathrm{v}, \mathbf{X}_\mathrm{q}^1], &amp; \text{第一轮 } t = 1  \\\mathbf{X}_\mathrm{q}^t,                                                                                                &amp; \text{其余轮次 } t &gt; 1\end{cases}\end{split}\]</div>
+<p>对于长度为
+<span class="math notranslate nohighlight">\(L\)</span>的序列，LLaVA通过以下公式计算目标答案<span class="math notranslate nohighlight">\(\mathbf{X}_A\)</span>
+的概率：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-22">
+<span class="eqno">(2.2.23)<a class="headerlink" href="#equation-chapter-chap-2-22" title="Permalink to this equation">¶</a></span>\[p(\mathbf{X}_A \mid \mathbf{X}_\mathrm{v}, \mathbf{X}_\text{instruct}) = \prod_{i=1}^{L} p_{\theta}(x_{i} \mid \mathbf{X}_\mathrm{v}, \mathbf{X}_\text{instruct,&lt;i}, \mathbf{X}_\mathrm{a,&lt;i})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\theta\)</span>是可训练的模型参数，<span class="math notranslate nohighlight">\(X_{\text{instruct}, &lt;i}\)</span>和<span class="math notranslate nohighlight">\(X_{a, &lt;i}\)</span>分别是在当前预测标记<span class="math notranslate nohighlight">\(x_i\)</span>
+之前的所有回合中的指令和答案标记。</p>
+<p>LLaVA的训练分为两个阶段：第一阶段通过特征对齐的预训练来对齐视觉与文本特征；第二阶段通过指令微调来适应各种视觉问答任务。具体而言，在第一阶段，LLaVA从CC3M数据集中筛选出595K个高质量“图像-文本”对，然后将这些数据转换为单轮对话形式的指令遵循数据集进行训练。此阶段中，视觉编码器和大语言模型的权重被冻结，只有线性投影映射层的参数可训练，以对齐视觉特征与语言模型的词向量表征空间。在第二阶段的微调中，视觉编码器参数保持不变，线性映射层和大语言模型参数会更新。LLaVA在此阶段使用两个数据集进行微调：Multimodal
+Chatbot和Science QA <span id="id53">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id53" title="Lu, P., Mishra, S., Xia, T., Qiu, L., Chang, K.-W., Zhu, S.-C., … Kalyan, A. (2022). Learn to explain: multimodal reasoning via thought chains for science question answering. Advances in Neural Information Processing Systems.">Lu <em>et al.</em>, 2022</a>)</span> 。Multimodal
+Chatbot包含158K条语言-图像指令遵循数据，涵盖对话、细节描述和复杂理解三种生成方式。Science
+QA是第一个大规模的多模态科学问答数据集，形式类似于前者。</p>
+</div>
+</div>
+<div class="section" id="id54">
+<h3><span class="section-number">2.2.3. </span>下游微调<a class="headerlink" href="#id54" title="Permalink to this heading">¶</a></h3>
+<p>在实际模型训练中，可能会遇到数据获取困难和训练资源不足的问题。为解决这些问题，可以使用<em>迁移学习</em>，即在预训练模型上进行微调，使其适应特定数据集。迁移学习是一种机器学习方法，其目的是将从一个任务（源任务）中获得的知识应用于另一个相关任务（目标任务），从而提升在目标任务上的性能。通过迁移学习，模型在源任务中学到的表征或知识可以迁移到目标任务上，从而获得更好的学习效果。由于预训练模型已经在大量数据上进行过训练，因此微调时只需在少量数据上更新少量权重。接下来，将介绍视觉、语言和多模态模型常用的微调方法。</p>
+<div class="section" id="id55">
+<h4><span class="section-number">2.2.3.1. </span>视觉模型微调<a class="headerlink" href="#id55" title="Permalink to this heading">¶</a></h4>
+<div class="figure align-default" id="id108">
+<span id="fig-vpt"></span><a class="reference internal image-reference" href="../_images/2.2.3_VPT.png"><img alt="../_images/2.2.3_VPT.png" src="../_images/2.2.3_VPT.png" style="width: 900px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.15 </span><span class="caption-text">（左）：将图像切分为图像块并嵌入为向量序列（中）：深度视觉提示词微调；（右）：浅层视觉提示词微调。</span><a class="headerlink" href="#id108" title="Permalink to this image">¶</a></p>
+</div>
+<p>在视觉领域，图像分类是最经典的任务之一，有许多高质量的预训练模型可供使用，如在ImageNet数据集上预训练的ResNet
+<span id="id56">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id38" title="He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. IEEE/CVF Conference on Computer Vision and Pattern Recognition.">He <em>et al.</em>, 2016</a>)</span>
+和ViT。针对特定下游任务，可以选择适合的视觉模型结构，下载其ImageNet预训练参数作为初始化，然后进行必要的结构修改和更新。以预训练ResNet为例，微调步骤如下：</p>
+<ol class="arabic simple">
+<li><p>加载ImageNet预训练的ResNet模型参数。</p></li>
+<li><p>修改输出层以适应下游任务的类别数量。</p></li>
+<li><p>冻结ResNet浅层的权重。</p></li>
+<li><p>定义损失函数和优化器。</p></li>
+<li><p>在下游数据集上微调模型的输出层和其他未冻结的参数。</p></li>
+</ol>
+<p>此外，微调时选择较小的学习率可以防止模型过度拟合。一般来说，微调的参数量越大，过拟合风险越高；如果参数调整不足，可能会导致目标任务的泛化能力变差。因此，合理调整模型和设置参数更新数量是迁移学习中的关键问题。</p>
+<p>针对视觉大模型，一种高效的参数微调方法是<strong>视觉提示微调</strong>（Visual
+Prompt Tuning，VPT） <span id="id57">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id61" title="Jia, M., Tang, L., Chen, B.-C., Cardie, C., Belongie, S., Hariharan, B., &amp; Lim, S.-N. (2022). Visual prompt tuning. European Conference on Computer Vision.">Jia <em>et al.</em>, 2022</a>)</span>
+。该方法只需微调少量参数即可使预训练ViT快速适应下游任务。具体来说，VPT保持预训练模型的主干结构不变，仅引入少量可训练的<em>视觉提示词</em>（visual
+prompt）参数。以微调ViT模型为例，可训练的提示词参数被插入到Transformer编码器的输入序列中，与最后的线性分类头一起进行微调。这种方法仅需更新少于1%的模型参数，大幅降低了计算和存储成本。</p>
+<p>根据视觉提示词插入的位置不同，VPT方法分为<em>深度微调</em>和<em>浅层微调</em>。具体步骤如下：</p>
+<ol class="arabic">
+<li><p>冻结预训练ViT模型的图像嵌入层、类别词元（[CLS]）和所有Transformer编码器层。</p></li>
+<li><p>将输入图像分割为<span class="math notranslate nohighlight">\(m\)</span>个图像块<span class="math notranslate nohighlight">\(I_{j}\)</span>，然后将这些图像块嵌入到<span class="math notranslate nohighlight">\(d\)</span>维向量空间中：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-23">
+<span class="eqno">(2.2.24)<a class="headerlink" href="#equation-chapter-chap-2-23" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{e}}_{0}^{j} = \operatorname{Embed}(I_{j}) \quad {\boldsymbol{e}}_{0}^{j} \in \mathbb{R}^{d}, \; j=1,2,\ldots,m\]</div>
+</li>
+<li><p>将ViT模型类别词元的嵌入向量<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{0}\)</span>、待微调的提示词参数集合<span class="math notranslate nohighlight">\({\mathcal{P}}_{0}\)</span>，以及图像嵌入向量集合<span class="math notranslate nohighlight">\({\mathcal{E}}_{0}\)</span>拼接，得到<span class="math notranslate nohighlight">\([{\boldsymbol{x}}_{0}, {\mathcal{P}}_{0}, {\mathcal{E}}_{0}]\)</span>，并输入到第一层Transformer编码器<span class="math notranslate nohighlight">\(L_{1}\)</span>。</p></li>
+<li><p>得到第一层Transformer编码器的输出。对于深度微调，输出为<span class="math notranslate nohighlight">\([{\boldsymbol{x}}_{1}, \underline{\phantom{{\boldsymbol{x}}_{1}}}, {\mathcal{E}}_{1}]\)</span>，其中空格处拼接新的待微调提示词集合<span class="math notranslate nohighlight">\({\mathcal{P}}_{1}\)</span>，再输入到第二层Transformer编码器中；对于浅层微调，输出为<span class="math notranslate nohighlight">\([{\boldsymbol{x}}_{1}, {\boldsymbol{Z}}_{1}, {\mathcal{E}}_{1}]\)</span>，其中<span class="math notranslate nohighlight">\({\boldsymbol{Z}}_{1} \in \mathbb{R}^{p \times d}\)</span>是第一层Transformer编码器计算得出的特征，不进行微调调整。</p></li>
+<li><p>对于有<span class="math notranslate nohighlight">\(N\)</span>个Transformer编码器层的ViT模型，得到的每一层输出为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-24">
+<span class="eqno">(2.2.25)<a class="headerlink" href="#equation-chapter-chap-2-24" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{split}\text{深度微调} : [{\boldsymbol{x}}_{i}, \underline{\phantom{{\boldsymbol{x}}_{1}}}, {\mathcal{E}}_{i}] &amp; = L_{i}([{\boldsymbol{x}}_{i-1}, {\mathcal{P}}_{i-1}, {\mathcal{E}}_{i-1}]) \quad i=2,3,\ldots,N \\\text{浅层微调} : [{\boldsymbol{x}}_{i}, {\boldsymbol{Z}}_{i}, {\mathcal{E}}_{i}]                       &amp; = L_{i}([{\boldsymbol{x}}_{i-1}, {\boldsymbol{Z}}_{i-1}, {\mathcal{E}}_{i-1}]) \quad i=2,3,\ldots,N\end{split}\end{split}\]</div>
+</li>
+<li><p>将第<span class="math notranslate nohighlight">\(N\)</span>个Transformer编码器输出的类别词元嵌入向量<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{N}\)</span>输入到分类头中，得到最终分类结果：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-25">
+<span class="eqno">(2.2.26)<a class="headerlink" href="#equation-chapter-chap-2-25" title="Permalink to this equation">¶</a></span>\[y = \operatorname{Head}({\boldsymbol{x}}_{N})\]</div>
+</li>
+<li><p>定义损失函数和优化器，根据模型输出和监督信息，对深度微调的<span class="math notranslate nohighlight">\({\mathcal{P}}_{i}\)</span>（<span class="math notranslate nohighlight">\(i=0,1,\ldots,N\)</span>）或浅层微调的<span class="math notranslate nohighlight">\({\mathcal{P}}_{0}\)</span>以及分类头进行微调。</p></li>
+</ol>
+<p>VPT在多个下游视觉识别任务中表现出色，尤其是在数据量较少的情况下。相比传统微调方法，VPT不仅能有效利用预训练模型的能力，还能显著减少计算资源的需求，使其成为微调大规模预训练视觉模型的有效方法。</p>
+<div class="figure align-default" id="id109">
+<span id="fig-lora"></span><a class="reference internal image-reference" href="../_images/2.2.3_LORA.png"><img alt="../_images/2.2.3_LORA.png" src="../_images/2.2.3_LORA.png" style="width: 450px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.16 </span><span class="caption-text">LoRA示意图</span><a class="headerlink" href="#id109" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="id58">
+<h4><span class="section-number">2.2.3.2. </span>语言模型微调<a class="headerlink" href="#id58" title="Permalink to this heading">¶</a></h4>
+<p>随着2022年ChatGPT模型的推出，大语言模型成为关注焦点，并在多个领域中展现了广泛的应用。在将大语言模型应用于特定领域时，微调成为不可或缺的步骤。尽管微调降低了训练成本，但由于大语言模型的庞大参数量，传统微调方法仍然成本高昂。因此，研究者们开始探索更加高效的微调方法，即<strong>参数高效微调</strong>（Parameter-efficient
+Fine-tuning，PEFT）方法。其中，<strong>LoRA</strong>（Low-Rank Adaptation）
+<span id="id59">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id39" title="Hu, E. J., yelong shen, Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., … Chen, W. (2022). LoRA: low-rank adaptation of large language models. International Conference on Learning Representations.">Hu <em>et al.</em>, 2022</a>)</span> 是经典的高效微调方法之一。</p>
+<p>LoRA的核心思想是冻结预训练模型的参数，新增低秩层，以实现更少参数的高效微调。LoRA认为，大语言模型的参数中包含大量冗余信息，因此通过添加和训练一个低秩层来实现高效微调，同时保持微调质量。如
+<a class="reference internal" href="#fig-lora"><span class="std std-numref">图2.2.16</span></a>
+所示，LoRA将预训练模型的权重矩阵视为<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>，并引入一个与<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>大小相同的额外权重矩阵<span class="math notranslate nohighlight">\(\Delta {\boldsymbol{W}}\)</span>。<span class="math notranslate nohighlight">\(\Delta {\boldsymbol{W}}\)</span>被表示为两个低秩矩阵<span class="math notranslate nohighlight">\({\boldsymbol{B}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{A}}\)</span>的乘积，其中<span class="math notranslate nohighlight">\({\boldsymbol{A}}\)</span>用于降维，<span class="math notranslate nohighlight">\({\boldsymbol{B}}\)</span>用于升维。在微调过程中，仅学习<span class="math notranslate nohighlight">\({\boldsymbol{A}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{B}}\)</span>的权重参数。</p>
+<p>LoRA的微调步骤如下：</p>
+<ol class="arabic simple">
+<li><p>冻结预训练模型的权重矩阵<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>。</p></li>
+<li><p>用高斯分布初始化<span class="math notranslate nohighlight">\({\boldsymbol{A}}\)</span>：<span class="math notranslate nohighlight">\({\boldsymbol{A}} \sim \mathcal{N}(0, \Sigma)\)</span>；用零矩阵初始化<span class="math notranslate nohighlight">\({\boldsymbol{B}}\)</span>：<span class="math notranslate nohighlight">\({\boldsymbol{B}} = 0\)</span>。</p></li>
+<li><p>计算<span class="math notranslate nohighlight">\(\Delta {\boldsymbol{W}} = {\boldsymbol{B}} {\boldsymbol{A}}\)</span>。</p></li>
+<li><p>将微调数据输入到原权重矩阵<span class="math notranslate nohighlight">\({\boldsymbol{W}}\)</span>和待调整权重矩阵<span class="math notranslate nohighlight">\(\Delta {\boldsymbol{W}}\)</span>中，计算<span class="math notranslate nohighlight">\({\boldsymbol{W}} {\boldsymbol{x}}\)</span>与<span class="math notranslate nohighlight">\(\Delta {\boldsymbol{W}} {\boldsymbol{x}}\)</span>的和，得到<span class="math notranslate nohighlight">\({\boldsymbol{h}} = {\boldsymbol{W}} {\boldsymbol{x}} + \Delta {\boldsymbol{W}} {\boldsymbol{x}}\)</span>。</p></li>
+<li><p>根据模型输出和真实标签计算损失。</p></li>
+<li><p>通过反向传播更新<span class="math notranslate nohighlight">\({\boldsymbol{A}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{B}}\)</span>中的权重参数。</p></li>
+</ol>
+<div class="figure align-default" id="id110">
+<span id="fig-tip-adapter"></span><a class="reference internal image-reference" href="../_images/2.2.3_Tip-Adapter示意图.png"><img alt="../_images/2.2.3_Tip-Adapter%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.2.3_Tip-Adapter%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 801px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.17 </span><span class="caption-text">Tip-Adapter微调方法示意图</span><a class="headerlink" href="#id110" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="id60">
+<h4><span class="section-number">2.2.3.3. </span>多模态模型微调<a class="headerlink" href="#id60" title="Permalink to this heading">¶</a></h4>
+<p>与大语言模型类似，多模态模型也需要高效的微调，但由于涉及多个模态，微调时需要兼顾模态对齐，因此可能更为复杂。在某些情况下，多模态模型可以在不进行参数微调的情况下适配下游任务，此时可通过文本信息匹配模型已学习的视觉概念来实现适配。</p>
+<p><strong>Tip-Adapter</strong> <span id="id61">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id40" title="Zhang, R., Zhang, W., Fang, R., Gao, P., Li, K., Dai, J., … Li, H. (2022). Tip-adapter: training-free adaption of clip for few-shot classification. European Conference on Computer Vision.">Zhang <em>et al.</em>, 2022</a>)</span>
+是一种创新的多模态大模型微调方法。具体而言，Tip-Adapter是一种针对 CLIP
+模型的微调方法，它充分利用 CLIP
+在图像特征提取上的能力，通过少样本图像分类任务实现了高性能，而无需额外学习参数。</p>
+<p>Tip-Adapter的微调过程如 <a class="reference internal" href="#fig-tip-adapter"><span class="std std-numref">图2.2.17</span></a> 所示。对于一个包含
+<span class="math notranslate nohighlight">\(N\)</span>个类别的图像数据集，每个类别有<span class="math notranslate nohighlight">\(K\)</span>张图片，类别标签为<span class="math notranslate nohighlight">\(y_N\)</span>，图片为<span class="math notranslate nohighlight">\(I_{K}\)</span>。首先，将这些训练图片输入到预训练
+CLIP 模型的图像编码器中，得到其视觉特征：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-26">
+<span class="eqno">(2.2.27)<a class="headerlink" href="#equation-chapter-chap-2-26" title="Permalink to this equation">¶</a></span>\[F_{train} = \text{VisualEncoder}(I_{K})\]</div>
+<p>并将这些图片的类别标签转换为独热编码形式：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-27">
+<span class="eqno">(2.2.28)<a class="headerlink" href="#equation-chapter-chap-2-27" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{y}}_{train} = \text{OneHot}(y_N)\]</div>
+<p>接下来，使用视觉特征
+<span class="math notranslate nohighlight">\(F_{train}\)</span>作为键，独热编码<span class="math notranslate nohighlight">\({\boldsymbol{y}}_{train}\)</span>作为值，构建一个缓存模型。在推理阶段，待分类图片<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{test}\)</span>先被输入到
+CLIP
+的图像编码器中，得到<span class="math notranslate nohighlight">\(L_2\)</span>归一化特征<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test}\)</span>。然后，将<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test}\)</span>作为查询，在缓存模型中进行检索。查询<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test}\)</span>和键<span class="math notranslate nohighlight">\(F_{train}\)</span>
+之间的相关性计算为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-28">
+<span class="eqno">(2.2.29)<a class="headerlink" href="#equation-chapter-chap-2-28" title="Permalink to this equation">¶</a></span>\[A = \exp(-\beta(1 - {\boldsymbol{z}}_{test} F_{train}^{\top}))\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\beta\)</span>是控制尖锐度的超参数，<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test} F_{train}^{\top}\)</span>表示<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test}\)</span>和<span class="math notranslate nohighlight">\(F_{train}^{\top}\)</span>
+之间的相似度或交叉注意力，指数函数确保相关性为正数。</p>
+<p>在缓存模型中，预测结果通过
+<span class="math notranslate nohighlight">\(A\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{y}}_{train}\)</span>相乘得到。同时，CLIP
+模型的预测结果由<span class="math notranslate nohighlight">\({\boldsymbol{z}}_{test} {\boldsymbol{W}}_C^{\top}\)</span>给出，其中<span class="math notranslate nohighlight">\({\boldsymbol{W}}_C\)</span>是预训练的文本编码器生成的
+CLIP
+分类器的权重。将这两种预测通过残差连接，并通过超参数<span class="math notranslate nohighlight">\(\alpha\)</span>
+进行加权，得到最终的预测分数：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-29">
+<span class="eqno">(2.2.30)<a class="headerlink" href="#equation-chapter-chap-2-29" title="Permalink to this equation">¶</a></span>\[\text{logits} = \alpha A {\boldsymbol{y}}_{train} + {\boldsymbol{z}}_{test} {\boldsymbol{W}}_C^{\top}\]</div>
+<p>简而言之，Tip-Adapter 结合了 CLIP
+提取的测试图片最相关的概念与计算的测试图片与少样本训练图片（及标签）之间的相关性，从而实现少样本分类。其核心思想在于对齐和检索，而非模型微调。</p>
+</div>
+</div>
+<div class="section" id="id62">
+<h3><span class="section-number">2.2.4. </span>联邦学习<a class="headerlink" href="#id62" title="Permalink to this heading">¶</a></h3>
+<p>传统机器学习通常需要将数据集中到一个中心节点进行训练，这存在数据和隐私泄露的风险。为了解决这一问题，联邦学习应运而生。联邦学习的核心理念是通过共享参数（而非数据）实现隐私保护下的多方协作训练。这种方法打破了数据孤岛，使不同机构或设备之间可以在无需共享敏感数据的情况下联合训练一个强大的模型。谷歌在2016年首次将联邦学习应用于智能手机，用于提升手机输入法中的下一单词预测功能，成为联邦学习的成功应用典范。</p>
+<p>联邦学习的优化目标是最小化各参与方的平均损失，表示为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-30">
+<span class="eqno">(2.2.31)<a class="headerlink" href="#equation-chapter-chap-2-30" title="Permalink to this equation">¶</a></span>\[\min_{{\boldsymbol{w}}} \frac{1}{N} \sum_{i=1}^{N} \mathbb{E}_{(X,Y)} \mathcal{L}(f_{{\boldsymbol{w}}}(X_i),Y_i)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(N\)</span>为参与方数量，<span class="math notranslate nohighlight">\(X_i\)</span>和<span class="math notranslate nohighlight">\(Y_i\)</span>分别表示第<span class="math notranslate nohighlight">\(i\)</span>个参与方的本地训练样本集和标签集，<span class="math notranslate nohighlight">\(\mathcal{L}\)</span>为损失函数，这里假设各参与方使用相同的模型<span class="math notranslate nohighlight">\(f_{{\boldsymbol{w}}}\)</span> <a class="footnote-reference brackets" href="#id86" id="id63">4</a>
+。</p>
+<p>联邦学习可以分为三种主要类型：<strong>横向联邦学习</strong>、<strong>纵向联邦学习</strong>
+和 <strong>迁移联邦学习</strong>。假设数据样本的 ID 空间为
+<span class="math notranslate nohighlight">\(I\)</span>，样本特征空间为<span class="math notranslate nohighlight">\(X\)</span>，样本标签空间为<span class="math notranslate nohighlight">\(Y\)</span>，则一组训练数据集可以表示为<span class="math notranslate nohighlight">\((I, X, Y)\)</span>。参与方<span class="math notranslate nohighlight">\(i\)</span>的本地数据集表示为<span class="math notranslate nohighlight">\(D_i = (I_i, {\boldsymbol{x}}_i, Y_i)\)</span>。为了更好地理解这些类型，我们使用表格数据作为示例。</p>
+<div class="figure align-default" id="id111">
+<span id="fig-hfl"></span><a class="reference internal image-reference" href="../_images/5.3_hfl.png"><img alt="../_images/5.3_hfl.png" src="../_images/5.3_hfl.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.18 </span><span class="caption-text">横向联邦学习</span><a class="headerlink" href="#id111" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>横向联邦学习</strong>（Horizontal Federated Learning,
+HFL）对全局数据进行横向切分，每个客户端拥有其中一部分，如
+<a class="reference internal" href="#fig-hfl"><span class="std std-numref">图2.2.18</span></a> 所示。HFL 适用于样本特征重叠较多但样本 ID
+重叠较少的情况。通过合并具有相同特征但不同样本的参与方数据，可以增加训练样本数量。</p>
+<div class="figure align-default" id="id112">
+<span id="fig-vfl"></span><a class="reference internal image-reference" href="../_images/5.4_vfl.png"><img alt="../_images/5.4_vfl.png" src="../_images/5.4_vfl.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.19 </span><span class="caption-text">纵向联邦学习</span><a class="headerlink" href="#id112" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>纵向联邦学习</strong>（Vertical Federated Learning,
+VFL）对全局数据进行纵向切分，如 <a class="reference internal" href="#fig-vfl"><span class="std std-numref">图2.2.19</span></a> 所示。VFL 适用于样本
+ID 重叠较多但样本特征重叠较少的情况。通过合并具有相同样本 ID
+但不同特征的参与方数据，可以增加数据的特征维度，从而提高模型的表现。</p>
+<div class="figure align-default" id="id113">
+<span id="fig-tfl"></span><a class="reference internal image-reference" href="../_images/5.5_tfl.png"><img alt="../_images/5.5_tfl.png" src="../_images/5.5_tfl.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.20 </span><span class="caption-text">迁移联邦学习</span><a class="headerlink" href="#id113" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>迁移联邦学习</strong>（Transfer Federated Learning,
+TFL）则处理各参与方之间既没有共同的客户（数据样本
+ID），也没有或很少有重叠特征的情况。例如，不同城市的银行和电商之间的业务特征和用户群体几乎没有交集，如
+<a class="reference internal" href="#fig-tfl"><span class="std std-numref">图2.2.20</span></a> 所示。</p>
+<p><strong>横向联邦学习</strong> 的代表算法是 <strong>联邦平均</strong>（FedAvg）
+<span id="id64">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id41" title="McMahan, B., Moore, E., Ramage, D., Hampson, S., &amp; y Arcas, B. A. (2017). Communication-efficient learning of deep networks from decentralized data. Artificial Intelligence and Statistics.">McMahan <em>et al.</em>, 2017</a>)</span>
+。这种方法采用“<strong>参与方-服务器</strong>”结构，其中服务器通常由可信的第三方机构或数据量最大的参与方担任。在联邦平均算法中，流程如下：</p>
+<ol class="arabic simple">
+<li><p>服务器端初始化全局模型并将其广播给选定的参与方。</p></li>
+<li><p>参与方在收到全局模型后，使用本地数据计算模型梯度，并将这些梯度信息发送回服务器。</p></li>
+<li><p>服务器聚合所有参与方的梯度，更新全局模型。</p></li>
+</ol>
+<p>该过程重复进行，直到模型收敛。为降低通信成本，FedAvg
+允许参与方在本地数据上进行多次迭代计算，然后再将梯度信息或模型参数发送到服务器进行平均和更新。具体步骤如算法
+<a class="reference internal" href="#algorithm-fedavg"><span class="std std-numref">图2.2.21</span></a> 所示：</p>
+<div class="figure align-default" id="id114">
+<span id="algorithm-fedavg"></span><a class="reference internal image-reference" href="../_images/2.2_FedAvg.png"><img alt="../_images/2.2_FedAvg.png" src="../_images/2.2_FedAvg.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.21 </span><span class="caption-text">联邦平均（FedAvg）</span><a class="headerlink" href="#id114" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>纵向联邦学习</strong> 的代表算法是 <strong>安全线性回归</strong>（Secure Linear
+Regression, SLR） <span id="id65">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id42" title="Yang, Q., Liu, Y., Chen, T., &amp; Tong, Y. (2019). Federated machine learning: concept and applications. ACM Transactions on Intelligent Systems and Technology, 10, 1–19.">Yang <em>et al.</em>, 2019</a>)</span> 。SLR
+是线性回归的联邦化版本，利用同态加密技术来确保参与方之间的信息安全。</p>
+<p>假设有两个参与方 A 和 B，其中只有 B 拥有数据标签。A 的数据为
+<span class="math notranslate nohighlight">\(\{{\boldsymbol{x}}_i^{\text{A}}\}_{i=1}^{n_{\text{A}}}\)</span>，B
+的数据为<span class="math notranslate nohighlight">\(\{{\boldsymbol{x}}_i^{\text{B}}, y_i\}_{i=1}^{n_{\text{B}}}\)</span>，其中<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i^{\text{A}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{x}}_i^{\text{B}}\)</span>为数据特征，<span class="math notranslate nohighlight">\(y_i\)</span>为标签。令<span class="math notranslate nohighlight">\({\boldsymbol{w}}_{\text{A}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{w}}_{\text{B}}\)</span>
+为 A 和 B 的模型参数，则安全线性回归的优化目标为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-31">
+<span class="eqno">(2.2.32)<a class="headerlink" href="#equation-chapter-chap-2-31" title="Permalink to this equation">¶</a></span>\[\min_{{\boldsymbol{w}}_{\text{A}}, {\boldsymbol{w}}_{\text{B}}} \sum_i \left\|{\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}} + {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}} - y_i\right\|^2 + \frac{\lambda}{2} \left(\left\|{\boldsymbol{w}}_{\text{A}}\right\|^2 + \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2\right)\]</div>
+<p>为简化表示，令
+<span class="math notranslate nohighlight">\({\boldsymbol{u}}_i^{\text{A}} = {\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}}\)</span>，<span class="math notranslate nohighlight">\({\boldsymbol{u}}_i^{\text{B}} = {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}}\)</span>。使用加法同态加密表示加密后的目标函数为：</p>
+<div class="math notranslate nohighlight" id="equation-eq-he">
+<span class="eqno">(2.2.33)<a class="headerlink" href="#equation-eq-he" title="Permalink to this equation">¶</a></span>\[[[\mathcal{L}]] = [[\sum_i \left\|{\boldsymbol{w}}_{\text{A}}{\boldsymbol{x}}_i^{\text{A}} + {\boldsymbol{w}}_{\text{B}}{\boldsymbol{x}}_i^{\text{B}} - y_i\right\|^2 + \frac{\lambda}{2} \left(\left\|{\boldsymbol{w}}_{\text{A}}\right\|^2 + \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2\right)]]\]</div>
+<p>利用同态加密的性质，令
+<span class="math notranslate nohighlight">\([[\mathcal{L}_{\text{A}}]] = [[\sum_i \left({\boldsymbol{u}}_i^{\text{A}}\right)^2 + \frac{\lambda}{2} \left\|{\boldsymbol{w}}_{\text{A}}\right\|^2]]\)</span>，<span class="math notranslate nohighlight">\([[\mathcal{L}_{\text{B}}]] = [[\sum_i \left({\boldsymbol{u}}_i^{\text{B}} - y_i\right)^2 + \frac{\lambda}{2} \left\|{\boldsymbol{w}}_{\text{B}}\right\|^2]]\)</span>，<span class="math notranslate nohighlight">\([[{\boldsymbol{s}}_{\text{AB}}]] = 2 \sum_i [[{\boldsymbol{u}}_i^{\text{A}} \left({\boldsymbol{u}}_i^{\text{B}} - y_i\right)]]\)</span>。则公式
+<a class="reference internal" href="#equation-eq-he">(2.2.33)</a> 可以表示为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-32">
+<span class="eqno">(2.2.34)<a class="headerlink" href="#equation-chapter-chap-2-32" title="Permalink to this equation">¶</a></span>\[[[\mathcal{L}]] = [[\mathcal{L}_{\text{A}}]] + [[\mathcal{L}_{\text{B}}]] + [[{\boldsymbol{s}}_{\text{AB}}]]\]</div>
+<p>在使用梯度下降算法优化模型时，A 和 B 的梯度分别为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-33">
+<span class="eqno">(2.2.35)<a class="headerlink" href="#equation-chapter-chap-2-33" title="Permalink to this equation">¶</a></span>\[[[\frac{\partial \mathcal{L}}{\partial {\boldsymbol{w}}_{\text{A}}}]] = 2 \sum_i [[d_i]] {\boldsymbol{x}}_i^{\text{A}} + [[\lambda {\boldsymbol{w}}_{\text{A}}]]\]</div>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-34">
+<span class="eqno">(2.2.36)<a class="headerlink" href="#equation-chapter-chap-2-34" title="Permalink to this equation">¶</a></span>\[[[\frac{\partial \mathcal{L}}{\partial {\boldsymbol{w}}_{\text{B}}}]] = 2 \sum_i [[d_i]] {\boldsymbol{x}}_i^{\text{B}} + [[\lambda {\boldsymbol{w}}_{\text{B}}]]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\([[d_i]] = [[{\boldsymbol{u}}_i^{\text{A}}]] + [[{\boldsymbol{u}}_i^{\text{B}} - y_i]]\)</span>。为了准确计算梯度，A
+和 B
+需要对方的信息。因此，通常需要一个安全可信的第三方来协助加密和解密，通常选择公信力较高的机构，如政府或学术组织。完整的训练步骤和推理阶段的具体操作分别见
+<a class="reference internal" href="#tab-selr-train"><span class="std std-numref">图2.2.22</span></a> 和 <a class="reference internal" href="#tab-selr-test"><span class="std std-numref">图2.2.23</span></a> 。</p>
+<div class="figure align-default" id="id115">
+<span id="tab-selr-train"></span><a class="reference internal image-reference" href="../_images/2.2_selr_train.png"><img alt="../_images/2.2_selr_train.png" src="../_images/2.2_selr_train.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.22 </span><span class="caption-text">安全线性回归算法的训练步骤</span><a class="headerlink" href="#id115" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-default" id="id116">
+<span id="tab-selr-test"></span><a class="reference internal image-reference" href="../_images/2.2_selr_test.png"><img alt="../_images/2.2_selr_test.png" src="../_images/2.2_selr_test.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图2.2.23 </span><span class="caption-text">安全线性回归算法的训练步骤</span><a class="headerlink" href="#id116" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="sec-model-deployment">
+<span id="id66"></span><h2><span class="section-number">2.3. </span>模型评估与部署<a class="headerlink" href="#sec-model-deployment" title="Permalink to this heading">¶</a></h2>
+<p>评估与部署是确保人工智能模型在实际应用中稳定高效运行的关键步骤。在评估阶段，我们使用多种指标来衡量模型的准确性、鲁棒性和效率，以确保其能够应对真实世界中的复杂和噪声场景。部署阶段则是将评估通过的模型集成到实际应用环境中，为用户提供服务。本节将探讨如何通过科学的评估方法和有效的部署策略，确保人工智能模型在真实环境中发挥最佳性能。</p>
+<div class="section" id="id67">
+<h3><span class="section-number">2.3.1. </span>模型评估<a class="headerlink" href="#id67" title="Permalink to this heading">¶</a></h3>
+<p>模型训练完成后，需要对其进行评估。模型评估的主要作用有四个方面：首先，它可以防止过拟合，即模型在训练数据上表现良好但在未见过的数据上表现不佳。其次，评估有助于调整模型的超参数，如学习率和批量大小，以提升性能和泛化能力。第三，评估可以帮助选择表现最佳的模型，以便在多个候选模型中确定最优模型进行部署。最后，通过最终测试评估，我们可以验证模型是否达到预期性能，并判断其是否准备好投入实际应用。</p>
+<div class="section" id="id68">
+<h4><span class="section-number">2.3.1.1. </span>评估指标<a class="headerlink" href="#id68" title="Permalink to this heading">¶</a></h4>
+<p>在评估模型之前，我们首先需要明确什么样的模型是好的。这取决于具体的任务和应用场景。例如，在图像分类任务中，一个好的模型应该具有高准确率和强泛化能力；而在文本生成任务中，一个好的模型应生成流畅且语义准确的文本。因此，评估指标需要根据任务特点选择。</p>
+<p>此外，使用多种评估方法和指标可以提供更全面的参考。例如，对于图像分类任务，除了准确率，还可以通过混淆矩阵了解模型在不同类别上的表现；对于文本生成任务，除了文本质量，可以使用
+BLEU
+分数评估生成文本与参考文本的相似度。选择合适的评估方法并综合多个角度进行评估，可以更全面地了解模型的能力，从而为模型的优化和改进提供有效指导。</p>
+<p><strong>分类模型</strong>：分类任务常用的评估指标是<strong>准确率</strong>，指的是正确分类的测试样本数占总样本数的比例。准确率越高，意味着正确分类的样本数越多，当精度为1（100%）时，意味着所有样本都正确分类。对于一个包含<span class="math notranslate nohighlight">\(N\)</span>个测试样本的数据集，准确率的定义是：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-35">
+<span class="eqno">(2.3.1)<a class="headerlink" href="#equation-chapter-chap-2-35" title="Permalink to this equation">¶</a></span>\[\operatorname{acc}=\frac{1}{N} \sum_{i=1}^N \mathbb{1}[\hat{y}_i=y_i]\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(\hat{y}_i\)</span>为模型对第<span class="math notranslate nohighlight">\(i\)</span>个测试样本的预测类别，<span class="math notranslate nohighlight">\(y_i\)</span>是真实类别。虽然准确率能直观地体现模型分类结果的好坏，但其无法应对不均衡数据集或者类别间差异较大的情况。比如，在医学影像识别中，某种罕见疾病的样本极少，假设占总样本数的<span class="math notranslate nohighlight">\(1 \%\)</span>，若模型将所有测试样本都预测为健康，就能获得
+99%的准确率。这个结果看上去很漂亮，但显然这样的模型不是我们想要的。</p>
+<p>在面对数据不均衡或类别间差异较大的情况时，可以使用<strong>精确率</strong>（precision）和<strong>召回率</strong>（recall）来更全面地评估模型。<strong>精确率</strong>是指模型正确预测为某一类别的样本数占所有预测为该类别的样本数的比例；<strong>召回率</strong>是指模型正确预测为某一类别的样本数占所有实际为该类别的样本数的比例。计算时，可以通过<em>混淆矩阵</em>来帮助分析。</p>
+<p>以医学影像识别为例，这是一个二分类问题，类别包括健康和疾病。假设有1000张图像，其中10张为疾病样本，模型仅正确识别了1张，其余均预测为健康。则混淆矩阵如下：</p>
+<div class="figure align-default" id="id117">
+<span id="id69"></span><a class="reference internal image-reference" href="../_images/2.3_混淆矩阵.png"><img alt="../_images/2.3_%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5.png" src="../_images/2.3_%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5.png" style="width: 500px;" /></a>
+<p class="caption"><span class="caption-number">图2.3.1 </span><span class="caption-text">混淆矩阵举例</span><a class="headerlink" href="#id117" title="Permalink to this image">¶</a></p>
+</div>
+<p>矩阵中的数字表示样本数。例如，第一行第一列的990表示实际为健康且预测为健康的样本数。根据混淆矩阵，计算如下：</p>
+<ul>
+<li><p>健康类别的精确率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-36">
+<span class="eqno">(2.3.2)<a class="headerlink" href="#equation-chapter-chap-2-36" title="Permalink to this equation">¶</a></span>\[P_{\text{健康}} = \frac{990}{990 + 9} \approx 99\%\]</div>
+</li>
+<li><p>健康类别的召回率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-37">
+<span class="eqno">(2.3.3)<a class="headerlink" href="#equation-chapter-chap-2-37" title="Permalink to this equation">¶</a></span>\[R_{\text{健康}} = \frac{990}{990 + 0} = 100\%\]</div>
+</li>
+<li><p>疾病类别的精确率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-38">
+<span class="eqno">(2.3.4)<a class="headerlink" href="#equation-chapter-chap-2-38" title="Permalink to this equation">¶</a></span>\[P_{\text{疾病}} = \frac{1}{1 + 0} = 100\%\]</div>
+</li>
+<li><p>疾病类别的召回率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-39">
+<span class="eqno">(2.3.5)<a class="headerlink" href="#equation-chapter-chap-2-39" title="Permalink to this equation">¶</a></span>\[R_{\text{疾病}} = \frac{1}{1 + 9} = 10\%\]</div>
+</li>
+</ul>
+<p>虽然健康类别的精确率和召回率都很高，但疾病类别的召回率非常低，这可能会导致许多患者被误诊为健康，从而错过最佳治疗时机，因此这个模型并不理想。通常，精确率较高时，召回率较低，反之亦然。在选择模型时，需要结合具体任务选择合适的判别标准，或者使用
+<span class="math notranslate nohighlight">\(\boldsymbol{F_1}\)</span><strong>度量</strong>等综合性指标进行评估。<span class="math notranslate nohighlight">\(F_1\)</span>
+度量为精确率和召回率的调和平均：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-40">
+<span class="eqno">(2.3.6)<a class="headerlink" href="#equation-chapter-chap-2-40" title="Permalink to this equation">¶</a></span>\[F_1 = \frac{2P R}{P + R}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(P\)</span>和<span class="math notranslate nohighlight">\(R\)</span>分别表示精确率和召回率。</p>
+<p><strong>语言模型</strong>：语言任务的多样性导致语言模型的评估指标和数据集也各不相同。例如，大语言模型
+GPT-3 采用了多种评估标准，包括：</p>
+<ul class="simple">
+<li><p><strong>困惑度</strong>：衡量模型对语言建模能力的指标。</p></li>
+<li><p><strong>LAMBADA</strong>：评估模型对长距离上下文理解能力的数据集。</p></li>
+<li><p><strong>TriviaQA</strong>：评估模型知识的数据集。</p></li>
+<li><p><strong>BLEU</strong>：评估翻译能力的指标。</p></li>
+<li><p><strong>PIQA</strong> 和 <strong>ARC</strong>：评估科学推理性能的数据集。</p></li>
+<li><p><strong>CoQA</strong>：评估阅读理解能力的数据集。</p></li>
+</ul>
+<p>以下是对部分评估标准的简要介绍：</p>
+<p><strong>困惑度</strong>
+反映了语言模型对测试文本的预测能力。困惑度越低，模型的预测越准确。对于一个测试文本序列
+<span class="math notranslate nohighlight">\(W = w_1, w_2, \ldots, w_N\)</span>，模型生成这个序列的概率为<span class="math notranslate nohighlight">\(P(W) = P(w_1, w_2, \ldots, w_N)\)</span>。困惑度计算公式为<span class="math notranslate nohighlight">\(\sqrt[N]{\frac{1}{P(w_1, w_2, \ldots, w_N)}}\)</span>，其中<span class="math notranslate nohighlight">\(N\)</span>
+为序列长度。困惑度越低，表示模型对序列的拟合能力越强。</p>
+<p><strong>LAMBADA</strong> <span id="id70">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id43" title="Paperno, D., Kruszewski, G., Lazaridou, A., Pham, Q. N., Bernardi, R., Pezzelle, S., … Fernández, R. (2016). The LAMBADA dataset: Word prediction requiring a broad discourse context.">Paperno <em>et al.</em>, 2016</a>)</span>
+是评估语言模型理解长距离依赖关系的测试集。LAMBADA
+包含文本段落和目标句子。人类能够根据整个段落猜测目标句子的最后一个单词，但仅凭目标句子难以猜出。LAMBADA
+要求语言模型在给定的上下文中预测目标句子的末尾单词，正确预测的数量越多，说明模型处理长文本和跨句子依赖关系的能力越强。</p>
+<p><strong>BLEU</strong> <span id="id71">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id44" title="Papineni, K., Roukos, S., Ward, T., &amp; Zhu, W.-J. (2002). Bleu: a method for automatic evaluation of machine translation. Annual Meeting of the Association for Computational Linguistics.">Papineni <em>et al.</em>, 2002</a>)</span>
+用于评估翻译质量，其核心思想是比较机器翻译结果与人工翻译结果的相似度。BLEU
+将翻译句子拆分为单词或词组集合，并计算机器译文与人工译文中匹配词组的比例。以
+1-gram 至 4-gram 为例，BLEU
+通过计算这些词组的匹配精度并加权相加，最终得到 BLEU
+分数，同时考虑了机器译文与人工译文长度的差异。</p>
+<div class="figure align-default" id="id118">
+<span id="id72"></span><a class="reference internal image-reference" href="../_images/2.3.1_交并比示意图.png"><img alt="../_images/2.3.1_%E4%BA%A4%E5%B9%B6%E6%AF%94%E7%A4%BA%E6%84%8F%E5%9B%BE.png" src="../_images/2.3.1_%E4%BA%A4%E5%B9%B6%E6%AF%94%E7%A4%BA%E6%84%8F%E5%9B%BE.png" style="width: 720px;" /></a>
+<p class="caption"><span class="caption-number">图2.3.2 </span><span class="caption-text">交并比示意图</span><a class="headerlink" href="#id118" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>目标检测模型</strong>：目标检测任务旨在从图像或视频中检测并定位感兴趣的目标物体。目标检测模型不仅识别图像中的目标类别，还提供其位置、边界框或像素级分割信息。模型输入为图像或视频数据，输出包括目标物体的类别标签和位置信息，通常以边界框的形式表示。评估目标检测模型的能力常用指标包括：</p>
+<ul class="simple">
+<li><p><strong>交并比</strong>（Intersection over Union，IoU）</p></li>
+<li><p><strong>平均交并比</strong>（mean IoU，mIoU）</p></li>
+<li><p><strong>像素准确率</strong>（Pixel Accuracy，PA）</p></li>
+<li><p><strong>类别像素准确率</strong>（Class Pixel Accuracy，cPA）</p></li>
+<li><p><strong>类别平均像素准确率</strong>（mean Pixel Accuracy，mPA）</p></li>
+</ul>
+<p><strong>交并比</strong>（IoU）衡量预测边界框与真实边界框的重叠度。假设
+<a class="reference internal" href="#id72"><span class="std std-numref">图2.3.2</span></a> 中的两个矩形分别表示预测边界框
+<span class="math notranslate nohighlight">\(A\)</span>和真实边界框<span class="math notranslate nohighlight">\(B\)</span>，则交并比为它们交集面积与并集面积的比值：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-41">
+<span class="eqno">(2.3.7)<a class="headerlink" href="#equation-chapter-chap-2-41" title="Permalink to this equation">¶</a></span>\[IoU = \frac{A \cap B}{A \cup B}\]</div>
+<p><strong>平均交并比</strong>（mIoU）是所有样本的交并比的平均值：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-42">
+<span class="eqno">(2.3.8)<a class="headerlink" href="#equation-chapter-chap-2-42" title="Permalink to this equation">¶</a></span>\[mIoU = \frac{1}{N} \sum_{i=1}^N IoU_i\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(N\)</span>是样本数量，<span class="math notranslate nohighlight">\(IoU_i\)</span>是第<span class="math notranslate nohighlight">\(i\)</span>
+个样本的交并比。</p>
+<div class="figure align-default" id="id119">
+<span id="id73"></span><a class="reference internal image-reference" href="../_images/2.3.1_像素准确率举例.png"><img alt="../_images/2.3.1_%E5%83%8F%E7%B4%A0%E5%87%86%E7%A1%AE%E7%8E%87%E4%B8%BE%E4%BE%8B.png" src="../_images/2.3.1_%E5%83%8F%E7%B4%A0%E5%87%86%E7%A1%AE%E7%8E%87%E4%B8%BE%E4%BE%8B.png" style="width: 630px;" /></a>
+<p class="caption"><span class="caption-number">图2.3.3 </span><span class="caption-text">像素准确率举例</span><a class="headerlink" href="#id119" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>像素准确率</strong>（Pixel
+Accuracy，PA）是指预测正确的像素数占总像素数的比例。例如，假设图像大小为
+<span class="math notranslate nohighlight">\(5 \times 5\)</span>，预测类别有两类：0 代表背景，1
+代表目标物体。预测结果（右）和真实结果（左）如
+<a class="reference internal" href="#id73"><span class="std std-numref">图2.3.3</span></a> 所示。在这个例子中，21 个像素分类正确，4
+个像素分类错误，因此像素准确率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-43">
+<span class="eqno">(2.3.9)<a class="headerlink" href="#equation-chapter-chap-2-43" title="Permalink to this equation">¶</a></span>\[PA = \frac{\text{正确分类像素数}}{\text{总像素数}} = \frac{21}{25} = 84.00\%\]</div>
+<p><strong>类别像素准确率</strong>（Class Pixel
+Accuracy，cPA）是指每个类别的正确分类像素数占预测为该类别的像素数的比例。以该例子为例，预测为背景（类别0）的像素有
+17 个，其中正确分类的有 16 个，因此背景类别的类别像素准确率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-44">
+<span class="eqno">(2.3.10)<a class="headerlink" href="#equation-chapter-chap-2-44" title="Permalink to this equation">¶</a></span>\[cPA_0 = \frac{\text{正确分类像素数}}{\text{预测为该类别的像素数}} = \frac{16}{17} \approx 94.12\%\]</div>
+<p>对于类别 1，有 8 个像素被预测为该类别，其中 5 个预测正确，因此类别 1
+的类别像素准确率为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-45">
+<span class="eqno">(2.3.11)<a class="headerlink" href="#equation-chapter-chap-2-45" title="Permalink to this equation">¶</a></span>\[cPA_1 = \frac{\text{正确分类像素数}}{\text{预测为该类别的像素数}} = \frac{5}{8} \approx 62.50\%\]</div>
+<p><strong>类别平均像素准确率</strong>（mean Pixel
+Accuracy，mPA）是所有类别像素准确率的平均值：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-46">
+<span class="eqno">(2.3.12)<a class="headerlink" href="#equation-chapter-chap-2-46" title="Permalink to this equation">¶</a></span>\[mPA = \frac{1}{K} \sum_{k=1}^K cPA_k\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(K\)</span>是类别数量，<span class="math notranslate nohighlight">\(cPA_k\)</span>是第<span class="math notranslate nohighlight">\(k\)</span>
+类的类别像素准确率。</p>
+<p><strong>图像生成模型</strong>：这类模型主要关注生成图像的真实度、多样性、细节和清晰度等指标。早期研究通常依赖人工评估来衡量生成结果的质量，但随着生成模型的发展，生成高质量图像变得越来越容易，人工评估的挑战也随之增加。因此，现在研究者倾向于使用可量化的指标来自动评估生成质量，常用的指标包括
+<em>Inception 分数</em> 和 <em>FID 分数</em> 等。</p>
+<p><strong>Inception 分数</strong>（Inception Score,
+IS）用于评估模型生成图像的质量和多样性。评估过程首先生成一系列图像，然后将这些图像输入到图像分类模型（如预训练的
+Inception-v3 模型）中。分类模型的输出是一个类别概率向量。Inception
+分数计算公式如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-47">
+<span class="eqno">(2.3.13)<a class="headerlink" href="#equation-chapter-chap-2-47" title="Permalink to this equation">¶</a></span>\[IS(G) = \exp \left(\mathbb{E}_{{\boldsymbol{x}} \sim p_g} KL(p({\boldsymbol{y}} \mid {\boldsymbol{x}}) \| p({\boldsymbol{y}}))\right)\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(G\)</span>是待评估模型，<span class="math notranslate nohighlight">\({\boldsymbol{x}} \sim p_g\)</span>表示<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>是由模型生成的图像，<span class="math notranslate nohighlight">\(KL(\cdot \| \cdot)\)</span>
+是 KL 散度，度量两个概率分布的差异。KL 散度定义如下：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-48">
+<span class="eqno">(2.3.14)<a class="headerlink" href="#equation-chapter-chap-2-48" title="Permalink to this equation">¶</a></span>\[KL(p \| q) = \sum_i^N p({\boldsymbol{x}}_i) \log \left(\frac{p({\boldsymbol{x}}_i)}{q({\boldsymbol{x}}_i)}\right)\]</div>
+<p>Inception 分数的计算还可以分解为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-49">
+<span class="eqno">(2.3.15)<a class="headerlink" href="#equation-chapter-chap-2-49" title="Permalink to this equation">¶</a></span>\[\log(IS(G)) = \mathbb{E}_{{\boldsymbol{x}} \sim p_g} KL(p({\boldsymbol{y}} \mid {\boldsymbol{x}}) \| p({\boldsymbol{y}})) = I({\boldsymbol{y}} ; {\boldsymbol{x}}) = H({\boldsymbol{y}}) - H({\boldsymbol{y}} \mid {\boldsymbol{x}})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(H(\cdot)\)</span>代表熵。图像生成模型生成的图像越多样，分类模型的输出越均衡，<span class="math notranslate nohighlight">\(H({\boldsymbol{y}})\)</span>越大；图像质量越高，分类模型的输出置信度越高，<span class="math notranslate nohighlight">\(H({\boldsymbol{y}} \mid {\boldsymbol{x}})\)</span>
+越小。因此，Inception 分数越高，表示模型生成的图像质量越好。</p>
+<p><strong>FID 分数</strong>（Fréchet Inception Distance, FID）是对 Inception
+分数的改进，它综合考虑了生成图像和真实图像的统计特征。在计算 FID
+分数时，生成图像和真实图像都通过分类模型的最后一个池化层提取特征向量。FID
+分数的计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-50">
+<span class="eqno">(2.3.16)<a class="headerlink" href="#equation-chapter-chap-2-50" title="Permalink to this equation">¶</a></span>\[d^2(({\boldsymbol{m}}, {\boldsymbol{C}}), ({\boldsymbol{m}}_w, {\boldsymbol{C}}_w)) = \|{\boldsymbol{m}} - {\boldsymbol{m}}_w\|_2^2 + Tr({\boldsymbol{C}} + {\boldsymbol{C}}_w - 2({\boldsymbol{C}} {\boldsymbol{C}}_w)^{1/2})\]</div>
+<p>其中，<span class="math notranslate nohighlight">\({\boldsymbol{m}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{m}}_w\)</span>分别是生成图像和真实图像特征向量的均值，<span class="math notranslate nohighlight">\({\boldsymbol{C}}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{C}}_w\)</span>分别是它们的协方差矩阵，<span class="math notranslate nohighlight">\(Tr(\cdot)\)</span>
+是矩阵的迹。该公式的两项分别衡量均值向量和协方差矩阵的相似性。FID
+分数越低，表示生成图像的分布越接近真实图像的分布，模型质量越好。</p>
+</div>
+<div class="section" id="id74">
+<h4><span class="section-number">2.3.1.2. </span>评估方法<a class="headerlink" href="#id74" title="Permalink to this heading">¶</a></h4>
+<p>将模型类比为学生，模型的学习过程就像学生上学：训练相当于刷题，评估则像考试。考试中，老师会给出未曾练习过的新题目，以确保学生真正理解了知识，而非仅仅记住了答案。同样，对于模型的评估，我们需要将数据分为训练集和测试集。训练集用于模型训练，测试集用于评估模型的性能。为了确保评估结果的准确性，我们必须避免使用训练数据进行评估。以下介绍几种测试集的分割方法。</p>
+<p><strong>留出法</strong>
+是一种简单且常用的评估方法。其基本思想是将数据集的一部分“留出来”作为测试集，剩余部分用于训练模型。这种方法可以通过测试集来评估模型在实际环境中的表现。数据集在训练前需随机划分为训练集和测试集，并确保两者不重叠。模型只使用训练集进行训练，训练完成后在测试集上进行评估。通常，测试集占整个数据集的20%到40%以确保评估的可信度。</p>
+<p>留出法的优点在于其简单易懂且易于实现，但也存在一些局限性。对于数据集较小或不均衡时，留出法可能引入额外的偏差。例如，如果数据集中正例和反例各500个，测试集中可能出现正例200个、反例100个的偏差，这会影响评估结果。为解决这一问题，可以采用分层采样方法，以保持测试集中各类别的比例与整体数据集一致。此外，由于数据集划分的随机性，模型评估结果可能不够稳定，通常需要多次划分、训练和评估，然后取平均值作为最终结果。</p>
+<p><strong>交叉验证法</strong>
+是一种常用的模型评估方法，它将数据集平均分成<span class="math notranslate nohighlight">\(k\)</span>个不相交的子集。与留出法类似，为避免引入额外偏差，交叉验证法也需要使用分层采样进行数据分割。在交叉验证过程中，首先从<span class="math notranslate nohighlight">\(k\)</span>个子集中选择一个作为测试集，其余<span class="math notranslate nohighlight">\(k-1\)</span>个子集作为训练集。这种分割组合将被用于一次训练和测试。这个过程重复<span class="math notranslate nohighlight">\(k\)</span>次，每次选择不同的子集作为测试集，直至每个子集都被用作测试集。最终，将这<span class="math notranslate nohighlight">\(k\)</span>次测试结果取平均值，得到交叉验证法的最终评估结果。
+<a class="reference internal" href="#id75"><span class="std std-numref">图2.3.4</span></a>
+展示了<span class="math notranslate nohighlight">\(k=5\)</span>时交叉验证法的数据分割和测试过程。</p>
+<div class="figure align-default" id="id120">
+<span id="id75"></span><a class="reference internal image-reference" href="../_images/2.3.2_交叉验证法.png"><img alt="../_images/2.3.2_%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%B3%95.png" src="../_images/2.3.2_%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E6%B3%95.png" style="width: 855px;" /></a>
+<p class="caption"><span class="caption-number">图2.3.4 </span><span class="caption-text">交叉验证法</span><a class="headerlink" href="#id120" title="Permalink to this image">¶</a></p>
+</div>
+<p><strong>自助法</strong>（Bootstrapping）是一种用于数据集较小情况下的评估方法。假设数据集中有
+<span class="math notranslate nohighlight">\(N\)</span>个样本，自助法的步骤是从这些样本中随机选择一个样本，将其添加到训练集中后再放回，然后重复此过程<span class="math notranslate nohighlight">\(N\)</span>次。这种方法生成的训练集包含<span class="math notranslate nohighlight">\(N\)</span>个样本，其中可能有重复的样本，而原数据集中一些样本可能未被选入训练集。一个样本未被选入训练集的概率为<span class="math notranslate nohighlight">\((1 - \frac{1}{N})^N\)</span>，当<span class="math notranslate nohighlight">\(N\)</span>趋近于无穷大时，该概率接近<span class="math notranslate nohighlight">\(\frac{1}{e}\)</span>，即约
+36.8%。因此，大约 36.8%
+的样本将作为测试样本。实际操作中，通常会进行多次采样并计算平均值作为最终结果。</p>
+<p>这种方法可以有效划分测试集，并保持训练样本的数量稳定。然而，由于可能会出现重复的训练样本，可能会改变数据分布，因此在数据集较大时通常不采用自助法。</p>
+</div>
+<div class="section" id="id76">
+<h4><span class="section-number">2.3.1.3. </span>超参数调整<a class="headerlink" href="#id76" title="Permalink to this heading">¶</a></h4>
+<p>超参数（hyperparameters）是机器学习算法中需要人为设定和调整的参数。例如，神经网络的学习率、批量大小和隐藏层节点数都是超参数。调整超参数直接影响模型性能和泛化能力，有助于优化训练过程并提高对新数据的表现。为了找到最佳的超参数组合，通常需要在数据集中划分出一个与训练集和测试集不同的验证集。在验证集上进行初步评估，从而调整和优化超参数。</p>
+<p>超参数调整实质上是一个优化问题，超参数作为变量需要优化，而优化目标是选定的评估标准。与模型参数的梯度下降法不同，超参数优化不能直接求导，因此需要采用其他优化方法。</p>
+<p><strong>网格搜索</strong>
+方法将超参数取值范围内的所有可能取值离散化，并枚举所有可能的组合，然后逐个验证这些组合以选出最佳的超参数。假设有
+<span class="math notranslate nohighlight">\(N\)</span>个待调整的超参数，每个超参数有<span class="math notranslate nohighlight">\(m_1, m_2, \ldots, m_N\)</span>个可能的取值，则网格搜索将验证<span class="math notranslate nohighlight">\(m_1 \cdot m_2 \cdot \ldots \cdot m_N\)</span>
+种组合。尽管这种方法简单直接，但计算所有可能组合的过程耗时且效率较低。</p>
+<p><strong>进化算法</strong>
+是一种启发式超参数优化方法，通过模拟生物进化过程来逐步改进优化目标。其步骤包括：</p>
+<ol class="arabic simple">
+<li><p>初始化超参数并确定其可能的取值范围，将连续值离散化。</p></li>
+<li><p>随机生成若干超参数组合，并评估每个组合下模型的性能。</p></li>
+<li><p>选择性能较好的几个组合，舍弃其余组合，模拟生物的优胜劣汰过程。</p></li>
+<li><p>从优秀的组合中选择两个，进行交叉生成新的超参数组合。重复此过程，优秀的组合被选择的概率更高。</p></li>
+<li><p>随机修改部分超参数值，以期获得更好的评估结果。</p></li>
+</ol>
+<p>与网格搜索相比，进化算法不仅计算部分组合的评价指标，还预测更优解的潜在区域，从而提高搜索效率。</p>
+<p><strong>规模法则</strong>：在大模型时代，当计算资源不足以验证多个超参数组合时，可以借助“规模法则”（scaling
+law）来优化超参数。规模法则描述了大语言模型的泛化能力与模型规模、数据量和计算能力之间的幂律关系。具体而言，随着模型参数、数据集大小和计算量的增加，模型性能会提升。规模法则允许我们在小规模的情况下进行超参数验证和调整，然后将模型、数据和计算规模同时放大
+100 倍甚至 1000
+倍进行最终训练。尽管规模法则的根本原因尚不完全清楚，但它已成为指导大模型超参数优化的关键原则。</p>
+</div>
+</div>
+<div class="section" id="id77">
+<h3><span class="section-number">2.3.2. </span>模型部署<a class="headerlink" href="#id77" title="Permalink to this heading">¶</a></h3>
+<p>在前三个阶段中，我们首先收集数据并将其划分为训练集、验证集和测试集。接着，我们在训练集上训练模型，在验证集上调整模型，并最终在测试集上评估模型，以获得性能评价。当模型达到预期效果后，就可以进行部署。模型部署是将训练好的模型应用到实际生产环境中的过程，包括将模型集成到软件应用程序、移动应用、网站或其他系统中，并确保其稳定、可靠地运行，以解决实际问题并创造价值。</p>
+<div class="section" id="id78">
+<h4><span class="section-number">2.3.2.1. </span>部署环境选择<a class="headerlink" href="#id78" title="Permalink to this heading">¶</a></h4>
+<p>选择合适的部署环境至关重要，因为不同的环境适用于不同的应用场景和需求。目前可选的部署环境包括服务器、云平台、Web服务框架和边缘计算等。</p>
+<p><strong>服务器</strong>：适用于对计算资源要求较高的场景，如大语言模型和多模态大模型。这些服务器通常配置强大的CPU和GPU，能够处理大规模的数据并支持复杂的模型推理。</p>
+<p><strong>云平台</strong>：提供灵活的计算资源租用服务，用户可以按需动态调整资源并按使用量付费。云平台具有高度的可扩展性和灵活性，适用于需求波动较大的场景。常见的云平台包括Amazon
+Web Services（AWS）、Microsoft Azure和Google Cloud Platform（GCP）。</p>
+<p><strong>Web服务框架</strong>：为开发者提供了快速部署和管理机器学习模型的方式，支持将模型集成到Web应用程序中并提供在线服务。常见的Web服务框架有Flask、Django和FastAPI等。</p>
+<p><strong>边缘计算</strong>：将计算资源和数据存储放置在离用户更近的地方，如边缘节点或设备上，降低延迟并提高响应速度。适用于对实时性要求高的场景，如智能手机、物联网设备和自动驾驶汽车。</p>
+</div>
+<div class="section" id="id79">
+<h4><span class="section-number">2.3.2.2. </span>模型压缩与转换<a class="headerlink" href="#id79" title="Permalink to this heading">¶</a></h4>
+<p>选择部署环境后，需要对模型进行压缩和格式转换，以提高推理效率和性能。虽然模型在测试中表现良好，但实际使用时还需考虑不同环境下的性能和响应速度。</p>
+<p><strong>模型压缩</strong>：旨在降低模型体积和计算资源消耗，以提升推理效率和用户体验。常见方法包括量化、剪枝和蒸馏。量化通过减少参数位数来降低存储和计算成本（如将32位浮点数转换为8位整数）；剪枝去除冗余连接以减少模型复杂度；蒸馏利用教师模型训练较小的学生模型，达到减小模型体积和提高推理速度的目的。</p>
+<p><strong>模型格式转换</strong>：训练框架（如TensorFlow、PyTorch）通常关注易用性和效率，而推理阶段则注重优化和加速。模型格式转换将训练好的模型从开发框架转换为推理框架所需的格式。例如，ONNX（Open
+Neural Network
+Exchange）是一种常用的工具，用于将不同框架中的模型转换为通用的中间表示格式，再转换为目标框架格式，以便在不同设备和环境中部署。</p>
+<p>在选择部署环境、完成模型压缩和格式转换后，将模型部署到选定环境，并进行必要的安全、性能和压力测试，最终对用户开放使用。</p>
+</div>
+<div class="section" id="id80">
+<h4><span class="section-number">2.3.2.3. </span>模型推理<a class="headerlink" href="#id80" title="Permalink to this heading">¶</a></h4>
+<p>在使用模型进行推理之前，需要对数据进行一系列准备工作，以确保模型在部署环境中能够顺利运行并输出准确结果。这些准备工作包括数据格式转换、预处理和标准化等，以确保数据的一致性和可用性。数据格式转换涉及将数据转换为模型可以接受的格式，例如将图像数据转换为张量格式，或将文本数据编码为适当的格式。数据标准化和清洗类似于数据集采集时的操作。例如，对于图像数据，可能需要将其从一种颜色空间（如RGB）转换到另一种（如灰度或YUV），以满足模型的输入要求。在完成这些准备工作后，数据就可以输入模型进行推理了。</p>
+<p><strong>推理性能评价</strong>：模型部署阶段的性能评价不仅关注准确率等指标，还包括服务效率和用户体验方面的指标，如响应时间、吞吐量、内存占用和CPU/GPU利用率。</p>
+<p><strong>响应时间</strong>：模型从接收输入到输出结果所需的时间。较短的响应时间表示模型能够更快地处理用户请求，提升用户体验。响应时间通常以毫秒为单位，计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-51">
+<span class="eqno">(2.3.17)<a class="headerlink" href="#equation-chapter-chap-2-51" title="Permalink to this equation">¶</a></span>\[\text{平均响应时间} = \frac{\sum_{i=1}^{n} (T_{\text{结束}, i} - T_{\text{开始}, i})}{n}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(T_{\text{开始}, i}\)</span>是第<span class="math notranslate nohighlight">\(i\)</span>个请求的开始时间，<span class="math notranslate nohighlight">\(T_{\text{结束}, i}\)</span>是第<span class="math notranslate nohighlight">\(i\)</span>个请求的结束时间，<span class="math notranslate nohighlight">\(n\)</span>
+是总请求数。</p>
+<p><strong>吞吐量</strong>：单位时间内模型能够处理的请求数量。吞吐量通常以每秒请求数（RPS）为单位，计算公式为：</p>
+<div class="math notranslate nohighlight" id="equation-chapter-chap-2-52">
+<span class="eqno">(2.3.18)<a class="headerlink" href="#equation-chapter-chap-2-52" title="Permalink to this equation">¶</a></span>\[\text{吞吐量} = \frac{n}{T}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(n\)</span>是单位时间内完成的请求数，<span class="math notranslate nohighlight">\(T\)</span>
+是单位时间的长度。高吞吐量意味着模型能够有效应对高并发请求，提高系统整体性能。</p>
+<p><strong>内存占用</strong>：模型在部署环境中所需的内存资源。较低的内存占用可以降低系统成本，提升系统稳定性和可扩展性。</p>
+<p><strong>CPU/GPU 利用率</strong>：模型对 CPU 或 GPU
+资源的使用情况。高效利用硬件资源可以提高系统性能和效率，降低成本。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id81">
+<h2><span class="section-number">2.4. </span>本章小结<a class="headerlink" href="#id81" title="Permalink to this heading">¶</a></h2>
+<p>本章概述了人工智能模型的生命周期，包括数据收集、模型训练和微调，以及最终的评估与部署。
+高质量的数据是构建强大AI模型的基石。章节 <a class="reference internal" href="#sec-data-collection"><span class="std std-numref">2.1</span></a>
+分析了多个经典数据集，如ImageNet、Common
+Crawl和LAION，展示了如何收集和处理图像、文本及多模态数据。 接下来，章节
+<a class="reference internal" href="#sec-model-training-and-ft"><span class="std std-numref">2.2</span></a>
+详细介绍了几种经典神经网络模型，包括卷积神经网络、循环神经网络、Transformer和ViT，以及它们的预训练和微调方法。视觉模型方面介绍了ViT模型的预训练方法SimCLR和MAE；大语言模型方面介绍了ELMo、GPT和BERT；多模态大模型方面介绍了CLIP、Stable
+Diffusion和LLaVA的预训练方法。本章节还讨论了保护用户隐私的联邦学习训练范式。
+最后，章节 <a class="reference internal" href="#sec-model-deployment"><span class="std std-numref">2.3</span></a>
+介绍了模型评估与部署的基本方法和流程。通过设计评估指标（如准确率、精确率、召回率、F1分数、<span class="math notranslate nohighlight">\(IoU\)</span>等）、评估方法（如留出法、交叉验证法等），以及超参数调整方法（如网格搜索、尺度定律等），我们可以确保模型在训练阶段达到最佳性能。在模型部署阶段，我们探讨了选择合适的部署环境、模型压缩和格式转换等必要准备，以确保模型在实际应用环境中能够稳定高效运行。</p>
+</div>
+<div class="section" id="id82">
+<h2><span class="section-number">2.5. </span>习题<a class="headerlink" href="#id82" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>选择一个感兴趣的应用领域（如医疗、交通、媒体等），描述适合的数据类型，并解释这些数据对构建模型的重要性。</p></li>
+<li><p>在处理多模态数据时，为什么使用预训练的多模态大模型（如CLIP）比单独训练视觉和语言模型更有效？请给出至少两点理由。</p></li>
+<li><p>描述SimCLR和MAE预训练方法的基本思想，并列举至少两点它们的主要区别。</p></li>
+<li><p>简述CLIP模型在Stable Diffusion模型中的作用。</p></li>
+<li><p>简述大语言模型微调方法LoRA的原理和优点，并解释它是否适合用于视觉模型的微调。</p></li>
+<li><p>在模型部署过程中，为什么需要进行模型压缩和格式转换？</p></li>
+</ol>
+<dl class="footnote brackets">
+<dt class="label" id="id83"><span class="brackets"><a class="fn-backref" href="#id9">1</a></span></dt>
+<dd><p><a class="reference external" href="https://commoncrawl.org/">https://commoncrawl.org/</a></p>
+</dd>
+<dt class="label" id="id84"><span class="brackets"><a class="fn-backref" href="#id13">2</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/gururise/AlpacaDataCleaned">https://github.com/gururise/AlpacaDataCleaned</a></p>
+</dd>
+<dt class="label" id="id85"><span class="brackets"><a class="fn-backref" href="#id49">3</a></span></dt>
+<dd><p>CLIP通常指训练框架/方法，但有时也指OpenAI预训练的模型。</p>
+</dd>
+<dt class="label" id="id86"><span class="brackets"><a class="fn-backref" href="#id63">4</a></span></dt>
+<dd><p>为了与已有工作中的符号保持一致，这里使用 <span class="math notranslate nohighlight">\({\boldsymbol{w}}\)</span>
+来表示模型参数。</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+        </div>
+        <div class="side-doc-outline">
+            <div class="side-doc-outline--content"> 
+<div class="localtoc">
+    <p class="caption">
+      <span class="caption-text">Table Of Contents</span>
+    </p>
+    <ul>
+<li><a class="reference internal" href="#">2. 生命周期</a><ul>
+<li><a class="reference internal" href="#sec-data-collection">2.1. 数据收集</a><ul>
+<li><a class="reference internal" href="#id3">2.1.1. 图像数据</a></li>
+<li><a class="reference internal" href="#id8">2.1.2. 文本数据</a></li>
+<li><a class="reference internal" href="#id14">2.1.3. 多模态数据</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-model-training-and-ft">2.2. 模型训练与微调</a><ul>
+<li><a class="reference internal" href="#id23">2.2.1. 标准训练</a><ul>
+<li><a class="reference internal" href="#id24">2.2.1.1. 图像模型</a></li>
+<li><a class="reference internal" href="#id27">2.2.1.2. 文本模型</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-2-2-2">2.2.2. 大规模预训练</a><ul>
+<li><a class="reference internal" href="#id35">2.2.2.1. 视觉大模型预训练</a></li>
+<li><a class="reference internal" href="#id39">2.2.2.2. 大语言模型预训练</a></li>
+<li><a class="reference internal" href="#id47">2.2.2.3. 多模态大模型预训练</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id54">2.2.3. 下游微调</a><ul>
+<li><a class="reference internal" href="#id55">2.2.3.1. 视觉模型微调</a></li>
+<li><a class="reference internal" href="#id58">2.2.3.2. 语言模型微调</a></li>
+<li><a class="reference internal" href="#id60">2.2.3.3. 多模态模型微调</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id62">2.2.4. 联邦学习</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sec-model-deployment">2.3. 模型评估与部署</a><ul>
+<li><a class="reference internal" href="#id67">2.3.1. 模型评估</a><ul>
+<li><a class="reference internal" href="#id68">2.3.1.1. 评估指标</a></li>
+<li><a class="reference internal" href="#id74">2.3.1.2. 评估方法</a></li>
+<li><a class="reference internal" href="#id76">2.3.1.3. 超参数调整</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id77">2.3.2. 模型部署</a><ul>
+<li><a class="reference internal" href="#id78">2.3.2.1. 部署环境选择</a></li>
+<li><a class="reference internal" href="#id79">2.3.2.2. 模型压缩与转换</a></li>
+<li><a class="reference internal" href="#id80">2.3.2.3. 模型推理</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id81">2.4. 本章小结</a></li>
+<li><a class="reference internal" href="#id82">2.5. 习题</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+            </div>
+        </div>
+
+      <div class="clearer"></div>
+    </div><div class="pagenation">
+     <a id="button-prev" href="chap-1.html" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" role="botton" accesskey="P">
+         <i class="pagenation-arrow-L fas fa-arrow-left fa-lg"></i>
+         <div class="pagenation-text">
+            <span class="pagenation-direction">Previous</span>
+            <div>1. 人工智能安全概述</div>
+         </div>
+     </a>
+     <a id="button-next" href="chap-3.html" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" role="botton" accesskey="N">
+         <i class="pagenation-arrow-R fas fa-arrow-right fa-lg"></i>
+        <div class="pagenation-text">
+            <span class="pagenation-direction">Next</span>
+            <div>3. 攻击算法基础</div>
+        </div>
+     </a>
+  </div>
+        
+        </main>
+    </div>
+  </body>
+</html>
