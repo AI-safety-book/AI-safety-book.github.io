@@ -10,7 +10,7 @@
     
     <title>4. 防御算法基础 &#8212; 大模型安全 1.0.0 documentation</title>
 
-    <link rel="stylesheet" href="../_static/material-design-lite-1.3.0/material.purple-deep_orange.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/material-design-lite-1.3.0/material.blue-deep_orange.min.css" type="text/css" />
     <link rel="stylesheet" href="../_static/sphinx_materialdesign_theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/fontawesome/all.css" type="text/css" />
     <link rel="stylesheet" href="../_static/fonts.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/d2l.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <link rel="shortcut icon" href="../_static/logo.png"/>
+    <link rel="shortcut icon" href="../_static/logo.png?"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="5. 视觉大模型安全" href="chap-5.html" />
@@ -94,7 +94,7 @@ Show Source
             
             <nav class="mdl-navigation">
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<!-- <li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li> -->
 <li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
 <li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
 </ul>
@@ -137,7 +137,7 @@ Show Source
             
             <nav class="mdl-navigation">
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li>
+<!-- <li class="toctree-l1"><a class="reference internal" href="about.html">关于此书</a></li> -->
 <li class="toctree-l1"><a class="reference internal" href="%E5%89%8D%E8%A8%80.html">前言</a></li>
 <li class="toctree-l1"><a class="reference internal" href="%E5%B8%B8%E7%94%A8%E7%AC%A6%E5%8F%B7%E8%A1%A8.html">常用符号表</a></li>
 </ul>
@@ -397,7 +397,7 @@ divergence）的预测不一致性<span class="math notranslate nohighlight">\(J
 <span id="id46">(<a class="reference internal" href="%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html#id64" title="Goodfellow, I. J., Shlens, J., &amp; Szegedy, C. (2015). Explaining and harnessing adversarial examples. International Conference on Learning Representations.">Goodfellow <em>et al.</em>, 2015</a>)</span>
 在2014年提出，其同时在干净样本和FGSM对抗样本上训练模型。具体的优化目标如下：</p>
 <div class="math notranslate nohighlight" id="equation-eq-at-goodfellow">
-<span class="eqno">(4.1.11)<a class="headerlink" href="#equation-eq-at-goodfellow" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}&amp; \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \in D} \big[\alpha\mathcal{L}_{CE}(f({\boldsymbol{x}}), y) + (1-\alpha)\mathcal{L}_{CE}(f({\boldsymbol{x}}_{adv}), y) \big]  \\&amp; {\boldsymbol{x}}_{adv} = {\boldsymbol{x}} + \epsilon\cdot sign(\nabla_{{\boldsymbol{x}}} \mathcal{L}_{CE}(f({\boldsymbol{x}}), y))\end{aligned}\end{split}\]</div>
+<span class="eqno">(4.1.11)<a class="headerlink" href="#equation-eq-at-goodfellow" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{aligned}&amp; \min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \in D} \big[\alpha\mathcal{L}_{CE}(f({\boldsymbol{x}}), y) + (1-\alpha)\mathcal{L}_{CE}(f({\boldsymbol{x}}_{adv}), y) \big]  \\&amp; {\boldsymbol{x}}_{adv} = {\boldsymbol{x}} + \epsilon\cdot \text{sign}(\nabla_{{\boldsymbol{x}}} \mathcal{L}_{CE}(f({\boldsymbol{x}}), y))\end{aligned}\end{split}\]</div>
 <p>其中，<span class="math notranslate nohighlight">\(\mathcal{L}_{CE}\)</span>是交叉熵损失函数，<span class="math notranslate nohighlight">\({\boldsymbol{x}}_{adv}\)</span>是<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>的对抗样本，通过第二行的单步FGSM攻击生成；<span class="math notranslate nohighlight">\(\alpha\)</span>是调和两部分损失的权重系数（实验中设为0.5）。值得注意的是，Goodfellow等人并未使用中间层的对抗样本，因为他们发现中间层对抗样本并没有用。</p>
 <p>实际上，上式可以化简成min-max优化的标准形式 <a class="footnote-reference brackets" href="#id201" id="id47">2</a> ：</p>
 <div class="math notranslate nohighlight" id="equation-eq-min-max-goodfellow">
@@ -412,7 +412,7 @@ divergence）的预测不一致性<span class="math notranslate nohighlight">\(J
 <span class="eqno">(4.1.13)<a class="headerlink" href="#equation-eq-madry" title="Permalink to this equation">¶</a></span>\[\min_{\theta} \mathbb{E}_{({\boldsymbol{x}},y) \sim D} \max_{{\lVert {\boldsymbol{r}} \rVert} \leq \epsilon} \mathcal{L}(f({\boldsymbol{x}}+{\boldsymbol{r}}),y)\]</div>
 <p>其中，内部最大化问题的目标是生成更强的对抗样本，而外部最小化问题的目标是最小化模型在（内部最大化过程中生成的）对抗样本上的损失，求解上述鞍点问题的过程也就是对抗训练的过程。PGD对抗训练使用PGD攻击算法求解内部最大化问题，定义如下：</p>
 <div class="math notranslate nohighlight" id="equation-eq-std-bgd">
-<span class="eqno">(4.1.14)<a class="headerlink" href="#equation-eq-std-bgd" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{x}}_{adv}^{t+1} = \text{Proj}_{{\boldsymbol{x}}+{\mathcal{S}}}\big({\boldsymbol{x}}^t + \alpha\cdot sign(\nabla_{{\boldsymbol{x}}^t})\mathcal{L}(\theta,{\boldsymbol{x}}^t,y)\big)\]</div>
+<span class="eqno">(4.1.14)<a class="headerlink" href="#equation-eq-std-bgd" title="Permalink to this equation">¶</a></span>\[{\boldsymbol{x}}_{adv}^{t+1} = \text{Proj}_{{\boldsymbol{x}}+{\mathcal{S}}}\big({\boldsymbol{x}}^t + \alpha\cdot \text{sign}(\nabla_{{\boldsymbol{x}}^t})\mathcal{L}(\theta,{\boldsymbol{x}}^t,y)\big)\]</div>
 <p>其中，<span class="math notranslate nohighlight">\(\text{Proj}_{{\boldsymbol{x}}+{\mathcal{S}}}\)</span>是一个投影操作，将对抗样本约束在以<span class="math notranslate nohighlight">\({\boldsymbol{x}}\)</span>为中心的高维球<span class="math notranslate nohighlight">\({\boldsymbol{x}}+{\mathcal{S}}\)</span>之内；<span class="math notranslate nohighlight">\({\boldsymbol{x}}^{t}\)</span>和<span class="math notranslate nohighlight">\({\boldsymbol{x}}^{t+1}\)</span>分别是第<span class="math notranslate nohighlight">\(t\)</span>步（总步数为<span class="math notranslate nohighlight">\(T\)</span>）对抗攻击产生的对抗样本；<span class="math notranslate nohighlight">\(\alpha\)</span>是单步步长，其大小要求能探索到<span class="math notranslate nohighlight">\(\epsilon\)</span>-球以外的空间（即<span class="math notranslate nohighlight">\(\alpha T &gt; \epsilon\)</span>）。</p>
 <p>PGD对抗训练也经常被称为<em>标准对抗训练</em>（standard adversarial
 training）或者<em>Madry对抗训练</em>（Madry adversarial
@@ -1049,8 +1049,8 @@ task）。对于图像分类任务来说，在毒化数据集上的模型训练�
 isolation）和<em>后门反学习</em>（backdoor
 unlearning）两个阶段。两个阶段分别使用不同的损失函数，定义如下：</p>
 <div class="math notranslate nohighlight" id="equation-eq-abl">
-<span class="eqno">(4.3.28)<a class="headerlink" href="#equation-eq-abl" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathcal{L}_{ABL}^t=\begin{cases}\mathcal{L}_{LGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim D}[ sign(\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)-\gamma) \cdot \mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] &amp; 0 \leq t \leq T_{te} \\\mathcal{L}_{GGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_c}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)]-\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_b}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] &amp; T_{te} \leq t \leq T\end{cases}\end{split}\]</div>
-<p>其中，<span class="math notranslate nohighlight">\(t\in [0,T-1]\)</span>为当前的迭代次数，<span class="math notranslate nohighlight">\(sign(\cdot)\)</span>表示符号函数，<span class="math notranslate nohighlight">\(\mathcal{L}_{LGA}\)</span>为第一阶段损失函数，<span class="math notranslate nohighlight">\(\mathcal{L}_{GGA}\)</span>为第二阶段损失函数。上式包含两个关键的技术：<em>局部梯度上升</em>（Local
+<span class="eqno">(4.3.28)<a class="headerlink" href="#equation-eq-abl" title="Permalink to this equation">¶</a></span>\[\begin{split}\mathcal{L}_{ABL}^t=\begin{cases}\mathcal{L}_{LGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim D}[ \text{sign}(\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)-\gamma) \cdot \mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] &amp; 0 \leq t \leq T_{te} \\\mathcal{L}_{GGA}=\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_c}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)]-\mathbb{E}_{({\boldsymbol{x}},y)\sim \widehat{D_b}}[\mathcal{L}_{CE}(f({\boldsymbol{x}}),y)] &amp; T_{te} \leq t \leq T\end{cases}\end{split}\]</div>
+<p>其中，<span class="math notranslate nohighlight">\(t\in [0,T-1]\)</span>为当前的迭代次数，<span class="math notranslate nohighlight">\(\text{sign}(\cdot)\)</span>表示符号函数，<span class="math notranslate nohighlight">\(\mathcal{L}_{LGA}\)</span>为第一阶段损失函数，<span class="math notranslate nohighlight">\(\mathcal{L}_{GGA}\)</span>为第二阶段损失函数。上式包含两个关键的技术：<em>局部梯度上升</em>（Local
 Gradient Ascent，LGA）和<em>全局梯度上升</em>（Global Gradient
 Ascent，GGA)。</p>
 <p><strong>局部梯度上升</strong>（LGA）可以巧妙地应对后门攻击的第一个弱点，即后门数据学得更快（训练损失下降的极快）。LGA通过将训练样本的损失控制在一个阈值<span class="math notranslate nohighlight">\(\gamma\)</span>附近，从而让后门样本穿过这个阈值而普通样本无法穿过。具体来说，当样本的损失低于<span class="math notranslate nohighlight">\(\gamma\)</span>时，LGA会增加其损失到<span class="math notranslate nohighlight">\(\gamma\)</span>；否则，其损失值保持不变。同时，在该阶段会根据样本的损失值将训练集划分为两部分，损失值较低的被分到（潜在）后门数据集<span class="math notranslate nohighlight">\(\widehat{D_b}\)</span>，其余的被分到干净数据集<span class="math notranslate nohighlight">\(\widehat{D_c}\)</span>，划分（检测）比率<span class="math notranslate nohighlight">\(p=|\widehat{D_b}| / |D|\)</span>可以被设定于低于数据真正的中毒率（比如训练数据的1%）。</p>
