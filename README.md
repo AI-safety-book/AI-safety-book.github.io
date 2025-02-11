@@ -1,4 +1,4 @@
-# 大模型安全
+# 人工智能内生安全
 
 第一版：[large-model-safety.github.io](https://large-model-safety.github.io/)
 
