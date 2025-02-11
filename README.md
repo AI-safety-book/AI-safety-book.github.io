@@ -1,6 +1,6 @@
 # 人工智能内生安全
 
-第一版：[large-model-safety.github.io](https://large-model-safety.github.io/)
+第一版：[ai-safety-book.github.io/](https://ai-safety-book.github.io/)
 
 [《人工智能：数据与模型安全》](https://ai-data-model-safety.github.io/)的延续与深化
 
