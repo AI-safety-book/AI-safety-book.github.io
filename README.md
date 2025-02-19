@@ -10,4 +10,10 @@
 
 第一版纸质书正在紧张筹备中，敬请期待
 
+<br>
+<p align="center">
+  <img width="300"  src="./_static/myfrontpage/_images/front.png">
+</p>
+<br>
+
 [联系我们](mailto:xingjunma@fudan.edu.cn)
